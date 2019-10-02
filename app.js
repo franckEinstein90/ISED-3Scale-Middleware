@@ -12,6 +12,7 @@ const usersRouter = require('./routes/users');
 
 const app = express();
 
+ let filePath = path.join(__dirname, 'serverData.json') 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -22,6 +23,24 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+ /*************** Read Server Data *******************/
+ const fs = require('fs')
+let readServerDataFile= function(){
+    try{
+      let filePath = path.join(__dirname, 'serverData.json')
+      let rawData = fs.readFileSync(filePath, {encoding: 'utf-8'})
+      return JSON.parse(rawData)
+    }catch(err){
+      console.log(err)
+      throw(err)
+    }
+}
+
+const userInfo = require('./src/userInfo').userInfo
+userInfo.onReady(readServerDataFile())
+
+
+
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
@@ -29,6 +48,8 @@ app.use('/users', usersRouter);
 app.use(function(req, res, next) {
   next(createError(404));
 });
+
+
 
 // error handler
 app.use(function(err, req, res, next) {
