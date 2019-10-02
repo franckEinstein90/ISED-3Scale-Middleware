@@ -4,8 +4,11 @@ const unirest = require("unirest");
 
 const userInfo = (function(){
 
-	let tenants = new Map(); 	
+	let tenants, userURL;
+	tenants = new Map(); 
+	userURL  = function(){
 
+	}
 	return{
 
 	languages: {
