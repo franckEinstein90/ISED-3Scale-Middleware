@@ -1,10 +1,11 @@
-
 const createError = require('http-errors');
 const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const config = require('config');
+const fs = require('fs'); 
+const userInfo = require('./src/userInfo').userInfo
 
 
 const indexRouter = require('./routes/index');
@@ -23,22 +24,22 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
- /*************** Read Server Data *******************/
- const fs = require('fs')
 let readServerDataFile= function(){
     try{
-      let filePath = path.join(__dirname, 'serverData.json')
+      let filePath = path.relative("", './data/serverData.json')
       let rawData = fs.readFileSync(filePath, {encoding: 'utf-8'})
       return JSON.parse(rawData)
-    }catch(err){
-      console.log(err)
-      throw(err)
-    }
+    } catch(err){
+      	console.log(err)
+      	throw(err)
+	}
 }
 
-const userInfo = require('./src/userInfo').userInfo
-userInfo.onReady(readServerDataFile())
-
+try{
+    userInfo.onReady(readServerDataFile())
+} catch(err){
+    res.send("error")
+}
 
 
 app.use('/', indexRouter);
