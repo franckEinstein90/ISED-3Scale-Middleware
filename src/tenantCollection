@@ -1,0 +1,7 @@
+const tenantCollection = (function(){
+
+  return{
+  
+  
+  }
+})()
