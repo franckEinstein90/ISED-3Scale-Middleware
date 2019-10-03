@@ -1,7 +1,7 @@
 "use strict"; 
 
 const async = require('async');
-const tenants = require('./tenants').tenants; 
+const t = require('./tenants').tenants; 
 const tCollection = require('./tenantCollections').tenantCollections; 
 
 const userInfo = (function(){
@@ -9,7 +9,7 @@ const userInfo = (function(){
 	let tenants = new tCollection.Set()
 	
 	return{
-
+ 
 		languages: {
 			francais: 2,
 			english: 1
@@ -19,14 +19,15 @@ const userInfo = (function(){
 		onReady: function(dataJSON){
 			dataJSON.master.tenants.forEach(tenantInfo => {
 					if (tenantInfo.visible) {
-						tenantsCollection.push(new tenants.tenant(tenantInfo))
+						tenantsCollection.push(new t.Tenant(tenantInfo))
 					}
 			})
 		}, 
 		
 		getUserInfo: function(userEmail, language){
-			tenantsCollection.getAccountInfo(userEmail)	
+			tenants.getAccountInfo(userEmail)	
 		}
+        
 	}
 })()
 
