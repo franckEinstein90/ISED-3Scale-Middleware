@@ -1,38 +1,29 @@
 "use strict"; 
 
-const unirest = require("unirest");
 const async = require('async');
 const tenants = require('./tenants').tenants; 
 
 
 const userInfo = (function(){
 
-	let tenantsCollection
-
-	tenantsCollection = [] 
+	let tenantsCollection =new tenantCollection.Set()
 	
-
 	return{
 
 		languages: {
 			francais: 2,
 			english: 1
 		}, 
-
+		
+		//on ready is run once at application startup
 		onReady: function(dataJSON){
-			let finishedGettingID = function(){
-				console.log(tenantsCollection)
-			}
 			dataJSON.master.tenants.forEach(tenantInfo => {
 					if (tenantInfo.visible) tenantsCollection.push(new tenants.tenant(tenantInfo))
 			})
 		}, 
+		
 		getUserInfo: function(userEmail, language){
-			async.each(tenantsCollection, function(tenant, callback){
-				tenant.getAccountInfo(userEmail)
-			})
-			.then(x => console.log(x))
-	
+			tenantsCollection.getAccountInfo(userEmail)	
 		}
 	}
 })()
