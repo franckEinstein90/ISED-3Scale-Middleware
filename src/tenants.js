@@ -4,11 +4,9 @@ const accounts = require('./accounts').accounts
 
 const tenants = (function(){
 
-    let accountsCollection = new Map()
-
     return{ 
 
-        tenant: class { 
+        Tenant: class { 
             constructor(tenantJSONInfo){
                 this.name = tenantJSONInfo.name
                 this.adminDomain = tenantJSONInfo.admin_domain
@@ -17,7 +15,7 @@ const tenants = (function(){
                     en: tenantJSONInfo.description_en, 
                     fr: tenantJSONInfo.description_fr
                 }
-                this.accountsCollection = new Map() //indexed by email addresses
+                this.accounts = new Map() //indexed by email addresses
                 this.accountAdminAccountBaseURL = `https://${this.adminDomain}/admin/api/accounts/`
                 this.accessToken = tenantJSONInfo.access_token
             }
@@ -47,11 +45,11 @@ tenants.tenant.prototype.getAccountInfo = function(clientEmail){
            }
            if(parsedBody.status && parsedBody.status === "Not found") {return null}
            let newAccount = new accounts.Account(parsedBody)
-           if(that.accountsCollection.has(clientEmail)){
-               that.accountsCollection.get(clientEmail).push(new accounts.Account(parsedBody))
+           if(that.accounts.has(clientEmail)){
+               that.accounts.get(clientEmail).push(new accounts.Account(parsedBody))
            }
            else{
-                that.accountsCollection.set(clientEmail, [new accounts.Account(parsedBody)])
+                that.accounts.set(clientEmail, [new accounts.Account(parsedBody)])
                 return newAccount
            }
         }
