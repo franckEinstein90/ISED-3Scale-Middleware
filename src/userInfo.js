@@ -2,11 +2,11 @@
 
 const async = require('async');
 const tenants = require('./tenants').tenants; 
-
+const tCollection = require('./tenantCollections').tenantCollections; 
 
 const userInfo = (function(){
 
-	let tenantsCollection =new tenantCollection.Set()
+	let tenants = new tCollection.Set()
 	
 	return{
 
@@ -18,7 +18,9 @@ const userInfo = (function(){
 		//on ready is run once at application startup
 		onReady: function(dataJSON){
 			dataJSON.master.tenants.forEach(tenantInfo => {
-					if (tenantInfo.visible) tenantsCollection.push(new tenants.tenant(tenantInfo))
+					if (tenantInfo.visible) {
+						tenantsCollection.push(new tenants.tenant(tenantInfo))
+					}
 			})
 		}, 
 		
