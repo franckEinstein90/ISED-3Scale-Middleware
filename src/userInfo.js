@@ -7,9 +7,7 @@ const userInfo = (function() {
     let tenants, getTenantClientIDs;
 
     tenants = []
-    getTenantClientIDs = async function({
-        userEmail
-    }) {
+    getClientAccounts = async function({userEmail}) {
         let apiCallPromises = tenants.map(tenant => tenant.getAccountInfoPromise(userEmail))
         Promise.all(apiCallPromises)
         .then(function(results) {
@@ -45,7 +43,7 @@ const userInfo = (function() {
             userEmail,
             language
         }) {
-            let firstFetch = await getTenantClientIDs({
+            let firstFetch = await getClientAccounts({
                 userEmail
             })
         }
