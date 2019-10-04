@@ -34,7 +34,7 @@ const userInfo = (function() {
 
         //on ready is run once at application startup
         onReady: function(dataJSON) {
-
+            //construct tenant instances from dataJSON
             dataJSON.master.tenants.forEach(tenantInfo => {
                 if (tenantInfo.visible) {
                     let newTenant = new t.Tenant(tenantInfo);
