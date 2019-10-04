@@ -5,10 +5,17 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const config = require('config');
 
-const utils = require('./src/utils.js').utils
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
+
+
+const utils = require('./src/utils.js').utils
+const userInfo = require('./src/userInfo.js').userInfo
+const JSONData = utils.readServerDataFile()
+userInfo.onReady(JSONData)
+userInfo.getUserInfo({userEmail: "dontvo+hackerman@gmail.com", language:"fr"}); 
+
 
 const app = express();
 
@@ -31,7 +38,6 @@ app.use(function(req, res, next) {
   next(createError(404));
 });
 
-const JSONData = utils.readServerDataFile()
 
 // error handler
 app.use(function(err, req, res, next) {

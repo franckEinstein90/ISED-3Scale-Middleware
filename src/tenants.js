@@ -1,18 +1,19 @@
 "use strict";
-const rp = require('request-promise')
-const accounts = require('./accounts').accounts
+const request = require('request')
+//const accounts = require('./accounts').accounts
 
-const tenants = (function(){
+const tenants = (function() {
 
-    return{ 
+    return {
 
-        Tenant: class { 
-            constructor(tenantJSONInfo){
+        Tenant: class {
+
+            constructor(tenantJSONInfo) {
                 this.name = tenantJSONInfo.name
                 this.adminDomain = tenantJSONInfo.admin_domain
                 this.domain = tenantJSONInfo.domain
                 this.description = {
-                    en: tenantJSONInfo.description_en, 
+                    en: tenantJSONInfo.description_en,
                     fr: tenantJSONInfo.description_fr
                 }
                 this.accounts = new Map() //indexed by email addresses
@@ -24,46 +25,56 @@ const tenants = (function(){
 
 })()
 
-tenants.tenant.prototype.getAccountInfo = function(clientEmail){
+tenants.Tenant.prototype.getAccountInfoPromise = function(clientEmail) {
+    //returns a promise that gets the user info from the api
 
-    let newAccount, apiCall;
-    let that = this; 
+    let newAccount, apiCall, apiCallOptions;
+    let that = this;
 
-    apiCall  =   this.accountAdminAccountBaseURL + 
-                    `find.json?access_token=${this.accessToken}&email=${encodeURIComponent(clientEmail)}`
-    let options = {
-        uri: apiCall, 
-        headers: {
-            'Content-Type': 'application/json', 
-            'Accept': 'applicaton/json', 
-            'User-Agent': 'ISED Middleware'
-        } , 
-        transform: function(body, response, resolveWithFullResponse){
-           let parsedBody
-           if(response.headers['content-type'] === 'application/json; charset=utf-8'){
-               parsedBody = JSON.parse(body)
-           }
-           if(parsedBody.status && parsedBody.status === "Not found") {return null}
-           let newAccount = new accounts.Account(parsedBody)
-           if(that.accounts.has(clientEmail)){
-               that.accounts.get(clientEmail).push(new accounts.Account(parsedBody))
-           }
-           else{
-                that.accounts.set(clientEmail, [new accounts.Account(parsedBody)])
-                return newAccount
-           }
-        }
-    }
+    apiCall = [this.accountAdminAccountBaseURL,
+        "find.json?",
+        `access_token=${this.accessToken}&`,
+        `email=${encodeURIComponent(clientEmail)}`
+    ].join('')
 
-    //let apiCallResult =
-    rp(options)
-    /*    .then(x => {
-            console.log(x)
+
+    return new Promise((resolve, reject) => {
+        request(apiCall, function(err, response, body) {
+            if (err) {
+                return resolve(`{"status":"Not Found"}`)
+            }
+            try {
+                resolve(JSON.parse(body).account)
+            } catch (e) {
+                resolve(e)
+            }
         })
-        .catch(function(err){
-            console.log("call failed")
-        })*/
+    })
 }
+
+tenants.Tenant.prototype.getTenantSubscriptionKeysForUserPromise = function({
+    userEmail
+}) {
+    let apiCall, accountID
+    accountID = (this.accounts.has(userEmail)) ? this.accounts.get(userEmail).id : NaN
+    if (!NaN(accountID)) {
+        apiCall = [this.accountAdminAccountBaseURL,
+            accountID,
+            `/applications.json?access_token='${this.accessToken}'`
+        ].join()
+    }
+    return new Promise((resolve, reject) => {
+	    if(NaN(accountID)) {resolve(`{"status":"Not Found"}`)}
+	    else{
+		resolve("valid"); 
+	    }
+    })
+}
+
+tenants.Tenant.prototype.addAccount = function(email, accountInfo) {
+    this.accounts.set(email, accountInfo.account);
+}
+
 
 module.exports = {
     tenants

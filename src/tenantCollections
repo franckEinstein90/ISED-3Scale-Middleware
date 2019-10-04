@@ -1,11 +1,11 @@
-const tenantCollections = (function(){
+const tenantCollections = (function() {
 
-  return{
-  
-  
-  }
+    return {
+
+
+    }
 })()
 
 module.exports = {
-  tenantsCollections
-  }
+    tenantsCollections
+}
