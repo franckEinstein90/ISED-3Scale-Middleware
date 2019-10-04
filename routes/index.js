@@ -1,14 +1,21 @@
-const path = require('path');
 const express = require('express');
 const router = express.Router();
-//const fs = require('fs'); 
-//const userInfo = require(path.relative(__dirname, './src/userInfo.js')).userInfo;
+const validator = require('validator')
+const userInfo = require('userInfo')
 
 
 
 router.get('/userinfo.json', function(req, res, next) {
-	let email = req.query.email
+	let email, language
+	email = req.query.email
+	if(!validator.isEmail(email)){
+		res.send(app.errors.invalidEmail)
+		return
+	}
 	let language = req.query.lang
+	if(! (language === "fr" || language === 'en') ){
+		res.send(app.errors.invalidLanguage)	
+	}
 	try{
 		userInfo.getUserInfo(email, language)
 	}catch(err){
