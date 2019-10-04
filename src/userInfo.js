@@ -7,21 +7,23 @@ const t = require('./tenants').tenants;
 const userInfo = (function() {
 
     let tenants, getTenantClientIDs;
-	
+
     tenants = []
-    getTenantClientIDs = async function({userEmail}){
-		let apiCallPromises = tenants.map(tenant => tenant.getAccountInfoPromise(userEmail))
+    getTenantClientIDs = async function({
+        userEmail
+    }) {
+        let apiCallPromises = tenants.map(tenant => tenant.getAccountInfoPromise(userEmail))
         Promise.all(apiCallPromises)
-        	.then(function(results) {
-                    return results.map(result => JSON.parse(result))
-                })
             .then(function(results) {
-                    results.forEach((result, idx) => {
-                        if ('account' in result) {
-                            tenants[idx].addAccount(userEmail, result)
-                        }
-                    })
+                results.forEach((result, idx) => {
+                    if (typeof result === 'object') {
+                        tenants[idx].addAccount({
+                            userEmail,
+                            accountInfo: result
+                        })
+                    }
                 })
+            })
         return 1
     }
 
@@ -43,12 +45,15 @@ const userInfo = (function() {
             })
         },
 
-	
+
         getUserInfo: async function({
             userEmail,
-            language }) {
-				let firstFetch = await getTenantClientIDs({userEmail}) 
-           }
+            language
+        }) {
+            let firstFetch = await getTenantClientIDs({
+                userEmail
+            })
+        }
 
     }
 })()

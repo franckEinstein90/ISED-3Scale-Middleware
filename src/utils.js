@@ -7,7 +7,7 @@ const utils = (function() {
     return {
 
         readServerDataFile: function() {
-	console.log(__dirname)
+            console.log(__dirname)
             try {
                 let filePath, rawData;
                 filePath = path.normalize(__dirname + '/../data/serverData.json')
