@@ -15,13 +15,10 @@ const userInfo = (function() {
             .then(function(results) {
                 results.forEach((result, idx) => {
                     if (typeof result === 'object') {
-                        tenants[idx].addAccount({
-                            userEmail,
-                            accountInfo: result
-                        })
+                        tenants[idx].addAccount({userEmail,accountInfo: result})
                     }
-                })
-            })
+                 })
+             })
         return 1
     }
 
