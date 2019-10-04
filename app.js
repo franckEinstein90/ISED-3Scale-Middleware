@@ -24,23 +24,6 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-let readServerDataFile= function(){
-    try{
-      let filePath = path.relative("", './data/serverData.json')
-      let rawData = fs.readFileSync(filePath, {encoding: 'utf-8'})
-      return JSON.parse(rawData)
-    } catch(err){
-      	console.log(err)
-      	throw(err)
-	}
-}
-
-try{
-    userInfo.onReady(readServerDataFile())
-} catch(err){
-    res.send("error")
-}
-
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
