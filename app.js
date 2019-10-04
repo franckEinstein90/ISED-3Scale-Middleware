@@ -4,16 +4,14 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const config = require('config');
-const fs = require('fs'); 
-const userInfo = require('./src/userInfo').userInfo
 
+const utils = require('./src/utils.js').utils
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 
 const app = express();
 
- let filePath = path.join(__dirname, 'serverData.json') 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -33,7 +31,7 @@ app.use(function(req, res, next) {
   next(createError(404));
 });
 
-
+const JSONData = utils.readServerDataFile()
 
 // error handler
 app.use(function(err, req, res, next) {

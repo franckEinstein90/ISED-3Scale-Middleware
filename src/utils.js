@@ -8,10 +8,11 @@ const utils = (function(){
 
     readServerDataFile: function(){
     try{
-      let filePath = path.relative("", './data/serverData.json')
-      let rawData = fs.readFileSync(filePath, {encoding: 'utf-8'})
+      let filePath, rawData;
+	    filePath = path.relative("", './data/serverData.json')
+      rawData = fs.readFileSync(filePath, {encoding: 'utf-8'})
       return JSON.parse(rawData)
-     } catch(err){
+    } catch(err){
       	console.log(err)
       	throw(err)
       }

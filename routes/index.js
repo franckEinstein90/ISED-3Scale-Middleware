@@ -1,9 +1,8 @@
 const path = require('path');
 const express = require('express');
 const router = express.Router();
-const fs = require('fs'); 
-const userInfo = require(path.relative(__dirname, './src/userInfo.js')).userInfo;
-//const serverData = require(path.relative(__dirname, './data/serverData.json'))
+//const fs = require('fs'); 
+//const userInfo = require(path.relative(__dirname, './src/userInfo.js')).userInfo;
 
 
 
