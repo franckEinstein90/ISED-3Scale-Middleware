@@ -1,28 +1,37 @@
-const express = require('express');
-const router = express.Router();
+/***************************************
+ * Franck Binard, ISED
+ * Canadian Gov. API Store middleware
+ ***************************************/
+const path = require('path')
+const express = require('express')
+const router = express.Router()
+
 const validator = require('validator')
-const userInfo = require('userInfo')
+const tenantsManager = require('@services/userInfo').tenantsManager
+const assert = require('chai').assert
 
 
-
-router.get('/userinfo.json', function(req, res, next) {
-	let email, language
-	email = req.query.email
-	if(!validator.isEmail(email)){
-		res.send(app.errors.invalidEmail)
-		return
+const validateRequest = function(req){
+	let userEmail, language
+	userEmail = req.query.email
+	language = req.query.lang
+	if(!validator.isEmail(userEmail)){
+		throw(errors.invalidEmail)
 	}
-	let language = req.query.lang
 	if(! (language === "fr" || language === 'en') ){
-		res.send(app.errors.invalidLanguage)	
+		throw(errors.invalidLanguage)	
 	}
-	try{
-		userInfo.getUserInfo(email, language)
-	}catch(err){
-		res.send("error")
-	}
+	return {userEmail, language}
+}
+
 	
-});
+router.get('/userinfo.json', 
+	async function(req, res, next) {
+		let {userEmail, language} = validateRequest(req) 
+		let requestResponse = await tenantsManager.getUserInfo(
+			{userEmail, language})
+		return res.json(requestResponse)
+	});
 
 
 /* GET home page. */

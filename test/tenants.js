@@ -29,5 +29,24 @@ describe('tenants.Tenant class', function(){
 			.then(accountObj => expect(accountObj.id).to.eql(348))	
 
 	})
+
+	it( ['has an addAccount method which takes an email address', 
+		 'and account information as parameters, and adds the account', 
+		 `to the tenant's account register` ].join(''), 
+		function(){
+		let testUserEmail, testTenant, callPromise
+		testUserEmail = "dontvo+hackerman@gmail.com"
+		testTenant = new tenants.Tenant(tenantDescriptions[0])
+		callPromise = testTenant.getAccountInfoPromise( testUserEmail )
+		callPromise
+			.then(accountObj =>{
+					console.log(accountObj)
+					testTenant.addAccount({
+						userEmail: testUserEmail, 
+						accountInfo:accountObj})
+			})
+        expect(testTenant.accounts.has(testUserEmail)).to.be.true
+	})
+
 })
 

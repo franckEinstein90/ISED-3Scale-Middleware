@@ -1,3 +1,8 @@
+/***************************************
+ * Franck Binard, ISED
+ * Canadian Gov. API Store middleware
+ ***************************************/
+
 "use strict";
 
 const request = require('request')
@@ -35,6 +40,7 @@ tenants.Tenant.prototype.getAccountInfoPromise = function(clientEmail) {
         `email=${encodeURIComponent(clientEmail)}`
     ].join('')
 
+    let that = this
 
     return new Promise((resolve, reject) => {
         request(apiCall, function(err, response, body) {
@@ -42,7 +48,13 @@ tenants.Tenant.prototype.getAccountInfoPromise = function(clientEmail) {
                 return resolve(`{"status":"Not Found"}`)
             }
             try {
-                resolve(JSON.parse(body).account)
+                let accountInfo = JSON.parse(body).account
+                that.addAccount({userEmail:clientEmail, accountInfo})
+             //////////////   resolve(JSON.parse(body).account)
+                let secondRequest = that.getTenantSubscriptionKeysForUserPromise({
+                    userEmail:clientEmail
+                })
+                secondRequest.then(x => console.log(x))
             } catch (e) {
                 resolve(e)
             }
@@ -50,24 +62,23 @@ tenants.Tenant.prototype.getAccountInfoPromise = function(clientEmail) {
     })
 }
 
-tenants.Tenant.prototype.getTenantSubscriptionKeysForUserPromise = function({
-    userEmail
-}) {
+tenants.Tenant.prototype.getTenantSubscriptionKeysForUserPromise = 
+function({ userEmail }) {
     let apiCall, accountID
-    accountID = (this.accounts.has(userEmail)) ? this.accounts.get(userEmail).id : NaN
-    if (!NaN(accountID)) {
+    if(this.accounts.has(userEmail)){
+        accountID = this.accounts.get(userEmail).AccountID
         apiCall = [this.accountAdminAccountBaseURL,
             accountID,
             `/applications.json?access_token='${this.accessToken}'`
-        ].join()
+        ].join('')
+    
+        return new Promise((resolve, reject) => {
+            request(apiCall, function(err, response, body) {  
+                let info = JSON.parse(body)
+                console.log(info)
+            })
+        })
     }
-    return new Promise((resolve, reject) => {
-        if (NaN(accountID)) {
-            resolve(`{"status":"Not Found"}`)
-        } else {
-            resolve("valid");
-        }
-    })
 }
 
 tenants.Tenant.prototype.addAccount = function({
