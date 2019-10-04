@@ -1,6 +1,4 @@
 "use strict";
-
-const async = require('async');
 const t = require('./tenants').tenants;
 
 
