@@ -12,14 +12,14 @@ const userInfo = (function() {
     }) {
         let apiCallPromises = tenants.map(tenant => tenant.getAccountInfoPromise(userEmail))
         Promise.all(apiCallPromises)
-            .then(function(results) {
-                results.forEach((result, idx) => {
-                    if (typeof result === 'object') {
-                        tenants[idx].addAccount({userEmail,accountInfo: result})
-                    }
-                 })
+        .then(function(results) {
+            results.forEach((result, idx) => {
+                if (typeof result === 'object') {
+                    tenants[idx].addAccount({userEmail,accountInfo: result})
+                }
              })
-        return 1
+         })
+         return 1
     }
 
     return {
