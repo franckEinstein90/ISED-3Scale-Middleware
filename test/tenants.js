@@ -1,10 +1,12 @@
+require ('module-alias/register')
+
+const config = require('config')
 const expect = require('chai').expect
 const utils = require('../src/utils').utils
 const tenants = require('../src/tenants').tenants
 
 
-const JSONData = utils.readServerDataFile()
-const tenantDescriptions = JSONData.master.tenants
+const tenantDescriptions = config.get('master').tenants
 
 describe('tenants.Tenant class', function(){
 	it('is created from a tenant description stored in a file at /data/serverData', function(){

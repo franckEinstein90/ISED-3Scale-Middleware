@@ -12,18 +12,17 @@ const tenantsManager = (function() {
         //maps every tenant to an API call promise
         //and waits for all of them to be xcuted
         //then updates tenant objects
-        let apiCallPromises = tenants.map(
-            tenant => tenant.getAccountInfoPromise(userEmail))
+        let apiCallPromises = tenants.map( tenant => tenant.getAccountInfo(userEmail))
         Promise.all(apiCallPromises)
             .then(function(results) {
-                results.forEach((result, idx) => {
+                console.log(results)
+               /* results.forEach((result, idx) => {
                     if (typeof result === 'object') {
                         let tenant = tenants[idx]
                         console.log(`adding account ${result.id} to tenant ${tenant.name}`)
                       //  tenant.addAccount({userEmail,accountInfo: result})
-                    }
+                    }*/
              })
-         })
          return 1
     }
 
@@ -46,16 +45,22 @@ const tenantsManager = (function() {
         },
 
 
+        getApiInfo:  async function({
+            userEmail, 
+            language
+        }){
+            console.log('here'); 
+        }, 
         getUserInfo: async function({
             userEmail,
             language
         }) {
-            //update each tenant with the accounts
-            //associated to that email
-            let updateTenantAccounts = await getClientAccounts({
-                userEmail
-            })
-
+          
+            let apiCallPromises = tenants.map( tenant => tenant.getAccountInfo(userEmail))
+            Promise.all(apiCallPromises)
+            .then(function(results) {
+                console.log(results)
+             })
         }
 
     }

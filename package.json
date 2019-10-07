@@ -5,10 +5,10 @@
   "scripts": {
     "start": "nodemon ./bin/www"
   },
-  "_moduleAliases":{
-        "@src":"src",
-        "@services": "src/services"
-    },
+  "_moduleAliases": {
+    "@src": "src",
+    "@services": "src/services"
+  },
   "dependencies": {
     "async": "^3.1.0",
     "config": "^3.2.2",
