@@ -10,6 +10,7 @@ const accounts = (function() {
                 this.uniqueAccountID = accountInfo.unique_account_id || null
                 this.creationDate = moment(accountInfo.created_at)
                 this.lastUpdate = moment(accountInfo.updated_at)
+                this.applications = []
             }
         }
     }

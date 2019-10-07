@@ -15,7 +15,8 @@ const tenants = (function() {
             noAccount: 1, 
             noApplications: 2, 
             updatedAccountInfo:3, 
-            applicationsNotFound: 4
+            applicationsNotFound: 4, 
+            serviceNotFound: 5
         }, 
         Tenant: class {
 
@@ -27,10 +28,12 @@ const tenants = (function() {
                     en: tenantJSONInfo.description_en,
                     fr: tenantJSONInfo.description_fr
                 }
-                this.applications = []
                 this.accounts = new Map() //indexed by email addresses
-                this.accountAdminAccountBaseURL = `https://${this.adminDomain}/admin/api/accounts/`
                 this.accessToken = tenantJSONInfo.access_token
+                this.accountAdminBaseURL = {
+                    accounts: `https://${this.adminDomain}/admin/api/accounts/`,
+                    services: `https://${this.adminDomain}/admin/api/services.json?access_token=${this.accessToken}`
+                }
             }
         }
     }
@@ -46,7 +49,7 @@ tenants.Tenant.prototype.getAccountInfo = async function(clientEmail){
                 return resolve(result)
             }else{
                 console.log(`adding account ${result.id} to tenant ${that.name}`)
-                that.addAccount({userEmail: clientEmail, accountInfo: result})
+                that.accounts.set(clientEmail, new accounts.Account(result));
                 return tenants.codes.updatedAccountInfo 
             }
         }, function(){
@@ -72,10 +75,11 @@ tenants.Tenant.prototype.getAccountInfo = async function(clientEmail){
     })
 }
 
+
 tenants.Tenant.prototype.getAccountInfoPromise = function(clientEmail) {
     //returns a promise that gets the user info from the api
 
-    let apiCall = [this.accountAdminAccountBaseURL,
+    let apiCall = [this.accountAdminBaseURL.accounts,
         "find.json?",
         `access_token=${this.accessToken}&`,
         `email=${encodeURIComponent(clientEmail)}`
@@ -104,14 +108,13 @@ tenants.Tenant.prototype.getAccountInfoPromise = function(clientEmail) {
     })
 }
 
-tenants.Tenant.prototype.getTenantSubscriptionKeysForUserPromise = 
-function({ userEmail }) {
+tenants.Tenant.prototype.getTenantSubscriptionKeysForUserPromise = function({ userEmail }) {
     let apiCall, accountID, that
     that = this
 
     if(this.accounts.has(userEmail)){
         accountID = this.accounts.get(userEmail).AccountID
-        apiCall = [this.accountAdminAccountBaseURL,
+        apiCall = [this.accountAdminBaseURL.accounts,
             accountID,
             `/applications.json?access_token=${this.accessToken}`
         ].join('')
@@ -126,7 +129,8 @@ function({ userEmail }) {
                         resolve(tenants.codes.applicationsNotFound)
                     }
                     else{
-                        applications.forEach(application => that.applications.push(application))
+                        //add the applications to the correspnding accont
+                        applications.forEach(application => that.accounts.get(userEmail).applications.push(application))
                         resolve(applications)
                     }
                 } catch(e){
@@ -137,14 +141,31 @@ function({ userEmail }) {
     }
 }
 
-tenants.Tenant.prototype.addAccount = function({
-    userEmail,
-    accountInfo
-}) {
-    this.accounts.set(userEmail, new accounts.Account(accountInfo));
+tenants.Tenant.prototype.getApiInfo = async function() {
+   return new Promise((resolve, reject) => {
+       this.getApisPromise()
+        .then( function (result){
+            console.log(result)
+        })
+   }) 
 }
 
-
+tenants.Tenant.prototype.getApisPromise = function(){
+    let that = this
+    return new Promise((resolve, reject) => {
+        request(that.accountAdminBaseURL.services, function(err, response, body) {
+            if (err){
+                return resolve(tenants.codes.serviceNotFound)
+            }
+            try {
+                let result = JSON.parse(body)
+                return resolve(result)
+            }catch (e) {
+                resolve(e)
+            }
+        })
+    })
+}
 module.exports = {
     tenants
 }

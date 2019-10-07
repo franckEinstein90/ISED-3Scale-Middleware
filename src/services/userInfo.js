@@ -4,27 +4,7 @@ const t = require('@src/tenants').tenants;
 
 const tenantsManager = (function() {
 
-    let tenants, getClientAccounts;
-
-    tenants = []
-
-    getClientAccounts = async function({userEmail}) {
-        //maps every tenant to an API call promise
-        //and waits for all of them to be xcuted
-        //then updates tenant objects
-        let apiCallPromises = tenants.map( tenant => tenant.getAccountInfo(userEmail))
-        Promise.all(apiCallPromises)
-            .then(function(results) {
-                console.log(results)
-               /* results.forEach((result, idx) => {
-                    if (typeof result === 'object') {
-                        let tenant = tenants[idx]
-                        console.log(`adding account ${result.id} to tenant ${tenant.name}`)
-                      //  tenant.addAccount({userEmail,accountInfo: result})
-                    }*/
-             })
-         return 1
-    }
+    let tenants = []
 
     return {
 
@@ -49,8 +29,13 @@ const tenantsManager = (function() {
             userEmail, 
             language
         }){
-            console.log('here'); 
-        }, 
+            let apiCallPromises = tenants.map( tenant => tenant.getApiInfo())
+            Promise.all(apiCallPromises)
+            .then(function (results){
+                console.log(result)
+            })
+          },
+
         getUserInfo: async function({
             userEmail,
             language
