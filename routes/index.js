@@ -24,7 +24,7 @@ const validateRequest = function(req){
 	return {userEmail, language}
 }
 
-	
+/*make usre headers are correct */	
 router.get('/userinfo.json', 
 	async function(req, res, next) {
 		res.header("Content-Type", "application/json; charset=utf-8")
