@@ -46,7 +46,8 @@ tenants.Tenant.prototype.getAccountInfo = async function(clientEmail){
     return new Promise((resolve, reject) =>{
         apiCall.then( function(result){
             if(result === tenants.codes.noAccount){
-                return resolve(result)
+                console.log(`no accounts for tenant ${that.name}`)
+                return(result)
             }else{
                 console.log(`adding account ${result.id} to tenant ${that.name}`)
                 that.accounts.set(clientEmail, new accounts.Account(result));
@@ -61,12 +62,12 @@ tenants.Tenant.prototype.getAccountInfo = async function(clientEmail){
             }
             else{
                 let apiCall2 = that.getTenantSubscriptionKeysForUserPromise({userEmail: clientEmail})
-                apiCall2.then(function(result){
-                    if(result === tenants.codes.applicationsNotFound){
-                        resolve(result)
+                apiCall2.then(function(apps){
+                    if(apps === tenants.codes.applicationsNotFound){
+                        resolve(tenants.codes.applicationsNotFound)
                     }
                     else{
-                       resolve("updated this") 
+                       resolve(that) 
                     }
                 })
             }
@@ -74,7 +75,6 @@ tenants.Tenant.prototype.getAccountInfo = async function(clientEmail){
         
     })
 }
-
 
 tenants.Tenant.prototype.getAccountInfoPromise = function(clientEmail) {
     //returns a promise that gets the user info from the api
@@ -89,13 +89,12 @@ tenants.Tenant.prototype.getAccountInfoPromise = function(clientEmail) {
     return new Promise((resolve, reject) => {
         request(apiCall, function(err, response, body) {
             if (err) {
-                return resolve(`{"status":"Not Found"}`)
+                resolve(`{"status":"Not Found"}`)
             }
             try {
                 let result = JSON.parse(body)
                 if('status' in result){
-                    console.log('bad')
-                    return resolve(tenants.codes.noAccount)
+                    resolve(tenants.codes.noAccount)
                 }
                 else{
                     let accountInfo = JSON.parse(body).account
@@ -123,13 +122,14 @@ tenants.Tenant.prototype.getTenantSubscriptionKeysForUserPromise = function({ us
             request(apiCall, function(err, response, body) { 
                 if(err) {resolve(`{"status":"Not Found"}`)}
                 try{
-                    console.log(that.name)
                     let applications = JSON.parse(body).applications
                     if (applications.length === 0){
+                        console.log(`found no applications for ${that.name}`)
                         resolve(tenants.codes.applicationsNotFound)
                     }
                     else{
                         //add the applications to the correspnding accont
+                        console.log(`found ${applications.length} applications for ${that.name}`)
                         applications.forEach(application => that.accounts.get(userEmail).applications.push(application))
                         resolve(applications)
                     }

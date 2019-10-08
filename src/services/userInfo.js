@@ -4,7 +4,8 @@ const t = require('@src/tenants').tenants;
 
 const tenantsManager = (function() {
 
-    let tenants = []
+    let env, applicationAPIURI, tenants
+    tenants = []
 
     return {
 
@@ -15,6 +16,8 @@ const tenantsManager = (function() {
 
         //on ready is run once at application startup
         onReady: function(dataJSON) {
+            env = dataJSON.env
+            applicationAPIURI = (env === "dev"? ".dev" : "") + ".api.canada.ca/admin/applications/"
             //construct tenant instances from dataJSON
             dataJSON.tenants.forEach(tenantInfo => {
                 if (tenantInfo.visible) {
@@ -40,11 +43,30 @@ const tenantsManager = (function() {
             userEmail,
             language
         }) {
-          
+            let newLink = function(tenant, account, application){
+                let link = {
+                    rel: "self_new", 
+                    href: [`https://${tenant.name}`, 
+                            `${applicationAPIURI}${application.id}`].join('') 
+                }
+                return link
+            }
+
             let apiCallPromises = tenants.map( tenant => tenant.getAccountInfo(userEmail))
             Promise.all(apiCallPromises)
             .then(function(results) {
-                console.log(results)
+                let tenantsWithApplications = results.filter(x => x instanceof t.Tenant)
+                tenantsWithApplications.forEach(tenant => {
+                    tenant.accounts.forEach((account, email) =>{
+                        account.applications.forEach(application =>{
+                            application.application.links.push(newLink(tenant, account, application.application))
+                        })
+                    })
+                })
+                console.log(tenantsWithApplications)
+
+
+                //results.filter( x ...)
              })
         }
 
