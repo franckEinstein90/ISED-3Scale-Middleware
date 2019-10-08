@@ -24,9 +24,8 @@ const tenants = (function() {
                 this.name = tenantJSONInfo.name
                 this.adminDomain = tenantJSONInfo.admin_domain
                 this.domain = tenantJSONInfo.domain
-                this.description = {
-                    en: tenantJSONInfo.description_en,
-                    fr: tenantJSONInfo.description_fr
+                this.tenantDescription = function(lang)  {
+                    return (lang=== 'en')? tenantJSONInfo.description_en:tenantJSONInfo.description_fr
                 }
                 this.accounts = new Map() //indexed by email addresses
                 this.accessToken = tenantJSONInfo.access_token
@@ -130,7 +129,8 @@ tenants.Tenant.prototype.getTenantSubscriptionKeysForUserPromise = function({ us
                     else{
                         //add the applications to the correspnding accont
                         console.log(`found ${applications.length} applications for ${that.name}`)
-                        applications.forEach(application => that.accounts.get(userEmail).applications.push(application))
+                        applications.forEach(application => 
+                            that.accounts.get(userEmail).addApplication(application))
                         resolve(applications)
                     }
                 } catch(e){

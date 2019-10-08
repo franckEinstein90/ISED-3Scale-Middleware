@@ -1,11 +1,61 @@
 "use strict";
 const t = require('@src/tenants').tenants;
-
+const cache = require('memory-cache')
 
 const tenantsManager = (function() {
 
-    let env, applicationAPIURI, tenants
+    let env, applicationAPIURI, tenants, outputResponse, getApiName
     tenants = []
+
+    getApiName = function({tenant, serviceID, language}){
+        let cachedApiName, key
+        key = [tenant.name, serviceID, language].join('-')
+        console.log("checking this key: " + key) 
+        cachedApiName =  cache.get(key)
+        if(cachedApiName) return cachedApiName
+        key = [tenant.name, serviceID, "default"].join('-')
+        cachedApiName = cache.get(key)
+        if(cachedApiName) return cachedApiName
+        return serviceID
+    }
+    
+   outputResponse = function(userEmail, language){
+        let outputJSON, apps, newLink
+
+        outputJSON = {
+                userEmail: userEmail
+        }
+        newLink = function(tenant,  application){
+            let link = {
+                rel: "self_new", 
+                href: [`https://${tenant.name}`, 
+                        `${applicationAPIURI}${application.id}?`, 
+                        `lang=${language}`].join('') 
+            }
+            return link
+        }
+        outputJSON.tenants = tenants.map( function(tenant) {
+                apps = {applications:[]}
+                if(tenant.accounts.has(userEmail)){
+                    tenant.accounts.get(userEmail).applications.forEach(
+                        application => {
+                            application.links.push(newLink(tenant, application))
+                            application.apiname = getApiName({tenant, serviceID: application.service_id, language})
+                            delete application.service_id
+                            delete application.id
+                            apps.applications.push(application)
+                        }
+                    )
+                }
+               return {
+                    name: tenant.name,
+                    description: tenant.tenantDescription(language),
+                    applications: apps
+                    }
+        })
+        return outputJSON
+    }
+    
 
     return {
 
@@ -26,8 +76,7 @@ const tenantsManager = (function() {
                 }
             })
         },
-
-
+    
         getApiInfo:  async function({
             userEmail, 
             language
@@ -37,39 +86,19 @@ const tenantsManager = (function() {
             .then(function (results){
                 console.log(result)
             })
-          },
+        },
 
         getUserInfo: async function({
             userEmail,
             language
         }) {
-            let newLink = function(tenant, account, application){
-                let link = {
-                    rel: "self_new", 
-                    href: [`https://${tenant.name}`, 
-                            `${applicationAPIURI}${application.id}`].join('') 
-                }
-                return link
-            }
-
-            let apiCallPromises = tenants.map( tenant => tenant.getAccountInfo(userEmail))
-            Promise.all(apiCallPromises)
-            .then(function(results) {
-                let tenantsWithApplications = results.filter(x => x instanceof t.Tenant)
-                tenantsWithApplications.forEach(tenant => {
-                    tenant.accounts.forEach((account, email) =>{
-                        account.applications.forEach(application =>{
-                            application.application.links.push(newLink(tenant, account, application.application))
-                        })
-                    })
+           let apiCallPromises = tenants.map( tenant => tenant.getAccountInfo(userEmail))
+           let response = ""
+           return Promise.all(apiCallPromises)
+                .then(function(results) {
+                    return outputResponse(userEmail, language)
                 })
-                console.log(tenantsWithApplications)
-
-
-                //results.filter( x ...)
-             })
         }
-
     }
 })()
 

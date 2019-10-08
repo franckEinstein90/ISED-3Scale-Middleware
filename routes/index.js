@@ -29,15 +29,14 @@ router.get('/userinfo.json',
 	async function(req, res, next) {
 		res.header("Content-Type", "application/json; charset=utf-8")
 		let {userEmail, language} = validateRequest(req) 
-		tenantsManager.getUserInfo({userEmail, language})
+		res.json(await tenantsManager.getUserInfo({userEmail, language}))
 	});
 
 router.get('/api.json', 
 	async function(req, res, next) {
 		let {userEmail, language} = validateRequest(req) 
-		let requestResponse = await tenantsManager.getApiInfo(
-			{userEmail, language})
-		return res.json(requestResponse)
+		return(await tenantsManager.getApiInfo(
+			{userEmail, language}))
 	});
 
 
