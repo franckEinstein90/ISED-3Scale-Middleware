@@ -1,0 +1,62 @@
+{
+	"info": {
+		"_postman_id": "8906dce1-b1c2-4acf-98a1-bc84cbfcfe2b",
+		"name": "api.jso",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "local test rojabadd",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/api.json?email=rojabadd%2Btest2@gmail.com&lang=fr",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api.json"
+					],
+					"query": [
+						{
+							"key": "email",
+							"value": "rojabadd%2Btest2@gmail.com"
+						},
+						{
+							"key": "lang",
+							"value": "fr"
+						}
+					]
+				},
+				"description": "fas"
+			},
+			"response": []
+		},
+		{
+			"name": "test2",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": ""
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getAccountInfo",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": ""
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}

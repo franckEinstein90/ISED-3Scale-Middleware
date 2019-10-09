@@ -4,7 +4,8 @@ const cache = require('memory-cache')
 
 const tenantsManager = (function() {
 
-    let env, applicationAPIURI, tenants, outputResponse, getApiName
+    let env, applicationAPIURI, tenants, 
+    outputUserInfoResponse, outputApiInfoResult, getApiName
     tenants = []
 
     getApiName = function({tenant, serviceID, language}){
@@ -19,7 +20,7 @@ const tenantsManager = (function() {
         return serviceID
     }
     
-   outputResponse = function(userEmail, language){
+   outputUserInfoResponse = function(userEmail, language){
         let outputJSON, apps, newLink
 
         outputJSON = {
@@ -55,7 +56,11 @@ const tenantsManager = (function() {
         })
         return JSON.stringify(outputJSON)
     }
-    
+   
+    outputApiInfoResult = function(userEmail, language){
+        let outputObject = {test: "hello world"}
+        return JSON.stringify(outputObject)
+    }
 
     return {
 
@@ -82,11 +87,11 @@ const tenantsManager = (function() {
             language
         }){
             let apiCallPromises = tenants.map( tenant => tenant.getApiInfo())
-            Promise.all(apiCallPromises)
-            .then(function (results){
-                console.log(result)
-            })
-        },
+            return Promise.all(apiCallPromises)
+                    .then(function (results){
+                        return outputApiInfoResult(userEmail, language)
+                    })
+            },
 
         getUserInfo: async function({
             userEmail,
@@ -95,7 +100,7 @@ const tenantsManager = (function() {
            let apiCallPromises = tenants.map( tenant => tenant.getAccountInfo(userEmail))
            return Promise.all(apiCallPromises)
             .then(function(results) {
-                return outputResponse(userEmail, language)
+                return outputUserInfoResponse(userEmail, language)
             })
             
         }

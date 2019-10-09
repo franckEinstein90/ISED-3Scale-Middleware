@@ -35,8 +35,7 @@ router.get('/userinfo.json',
 router.get('/api.json', 
 	async function(req, res, next) {
 		let {userEmail, language} = validateRequest(req) 
-		return(await tenantsManager.getApiInfo(
-			{userEmail, language}))
+		res.send(await tenantsManager.getApiInfo({userEmail, language}))
 	});
 
 
@@ -44,7 +43,7 @@ router.get('/api.json',
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-	  res.render('index', { title: 'Express' });
+	  res.render('index', { title: 'ISED-3Scale-Middleware' });
 });
 
 module.exports = router;
