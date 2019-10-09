@@ -40,46 +40,50 @@ const tenants = (function() {
 
 })()
 
+tenants.Tenant.prototype.processAccountInfoResponse = function(clientEmail, promiseResult){
+    console.log(promiseResult)
+    if(promiseResult === tenants.codes.noAccount){
+        console.log(`no accounts for tenant ${this.name}`)
+        return promiseResult
+    }else{
+        console.log(`adding account ${promiseResult.id} to tenant ${this.name}`)
+        this.accounts.set(clientEmail, new accounts.Account(promiseResult));
+        return this.getTenantSubscriptionKeysForUserPromise({userEmail: clientEmail})
+    }
+}
+
+tenants.Tenant.prototype.processSubscriptionKeyInfoResponse = function(promiseResult){
+    if(Array.isArray(promiseResult)){ //the promise resolves to an array of applications if successful
+        return this
+    }
+    return promiseResult 
+}
+
 tenants.Tenant.prototype.getAccountInfo = async function(clientEmail){
-    let apiCall = this.getAccountInfoPromise(clientEmail)
     let that = this
-    return new Promise((resolve, reject) =>{
-        apiCall.then( function(result){
-            if(result === tenants.codes.noAccount){
-                console.log(`no accounts for tenant ${that.name}`)
-                return(result)
-            }else{
-                console.log(`adding account ${result.id} to tenant ${that.name}`)
-                that.accounts.set(clientEmail, new accounts.Account(result));
-                return tenants.codes.updatedAccountInfo 
-            }
-        }, function(){
-            console.log("failed")
-        })
-        .then(function(result){
-            if(result === tenants.codes.noAccount){ //did not found any accounts
-                resolve(result)
-            }
-            else{
-                let apiCall2 = that.getTenantSubscriptionKeysForUserPromise({userEmail: clientEmail})
-                apiCall2.then(function(apps){
-                    if(apps === tenants.codes.applicationsNotFound){
-                        resolve(tenants.codes.applicationsNotFound)
-                    }
-                    else{
-                       resolve(that) 
-                    }
-                })
-            }
-        })
-        
+    return new Promise((resolve, reject) => { 
+        this.getAccountInfoPromise(clientEmail)
+        .then(x => this.processAccountInfoResponse(clientEmail, x))
+        .then(this.processSubscriptionKeyInfoResponse)
+        .then(x => resolve(x))
     })
 }
 
+tenants.Tenant.prototype.getApiInfo = async function() {
+   return new Promise((resolve, reject) => {
+       this.getApisPromise()
+        .then( function (result){
+            console.log(result)
+        })
+   }) 
+}
+
+/***********************API Requests******************************* */
 tenants.Tenant.prototype.getAccountInfoPromise = function(clientEmail) {
     //returns a promise that gets the user info from the api
 
-    let apiCall = [this.accountAdminBaseURL.accounts,
+    let apiCall = [
+        this.accountAdminBaseURL.accounts,
         "find.json?",
         `access_token=${this.accessToken}&`,
         `email=${encodeURIComponent(clientEmail)}`
@@ -142,15 +146,6 @@ tenants.Tenant.prototype.getTenantSubscriptionKeysForUserPromise = function({ us
     }
 }
 
-tenants.Tenant.prototype.getApiInfo = async function() {
-   return new Promise((resolve, reject) => {
-       this.getApisPromise()
-        .then( function (result){
-            console.log(result)
-        })
-   }) 
-}
-
 tenants.Tenant.prototype.getApisPromise = function(){
     let that = this
     return new Promise((resolve, reject) => {
@@ -167,6 +162,7 @@ tenants.Tenant.prototype.getApisPromise = function(){
         })
     })
 }
+
 module.exports = {
     tenants
 }

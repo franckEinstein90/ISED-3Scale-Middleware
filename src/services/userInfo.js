@@ -35,7 +35,7 @@ const tenantsManager = (function() {
             return link
         }
         outputJSON.tenants = tenants.map( function(tenant) {
-                apps = {applications:[]}
+                apps = []
                 if(tenant.accounts.has(userEmail)){
                     tenant.accounts.get(userEmail).applications.forEach(
                         application => {
@@ -43,7 +43,7 @@ const tenantsManager = (function() {
                             application.apiname = getApiName({tenant, serviceID: application.service_id, language})
                             delete application.service_id
                             delete application.id
-                            apps.applications.push(application)
+                            apps.push(application)
                         }
                     )
                 }
@@ -53,7 +53,7 @@ const tenantsManager = (function() {
                     applications: apps
                     }
         })
-        return outputJSON
+        return JSON.stringify(outputJSON)
     }
     
 
@@ -93,11 +93,11 @@ const tenantsManager = (function() {
             language
         }) {
            let apiCallPromises = tenants.map( tenant => tenant.getAccountInfo(userEmail))
-           let response = ""
            return Promise.all(apiCallPromises)
-                .then(function(results) {
-                    return outputResponse(userEmail, language)
-                })
+            .then(function(results) {
+                return outputResponse(userEmail, language)
+            })
+            
         }
     }
 })()

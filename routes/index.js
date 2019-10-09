@@ -29,7 +29,7 @@ router.get('/userinfo.json',
 	async function(req, res, next) {
 		res.header("Content-Type", "application/json; charset=utf-8")
 		let {userEmail, language} = validateRequest(req) 
-		res.json(await tenantsManager.getUserInfo({userEmail, language}))
+		res.send(await tenantsManager.getUserInfo({userEmail, language}))
 	});
 
 router.get('/api.json', 
