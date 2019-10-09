@@ -9,8 +9,8 @@ const validator = require('validator')
 const assert = require('chai').assert
 
 const tenantsManager = require('@services/userInfo').tenantsManager
-
 const errors = require('@code/errors').errors
+
 errors.ensureLoaded(tenantsManager, errors)
 
 const validateRequest = function(req){
@@ -37,6 +37,7 @@ router.get('/userinfo.json',
 /*for this one, there might not be an email write handler for case*/
 router.get('/api.json', 
 	async function(req, res, next) {
+		res.header("Content-Type", "application/json; charset=utf-8")
 		let {userEmail, language} = validateRequest(req) 
 		res.send(await tenantsManager.getApiInfo({userEmail, language}))
 	});
