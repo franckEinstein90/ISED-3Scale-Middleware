@@ -9,7 +9,7 @@ const validator = require('validator')
 const assert = require('chai').assert
 
 const tenantsManager = require('@services/userInfo').tenantsManager
-const errors = require('@src/errors').errors
+const errors = require('@code/errors').errors
 
 errors.ensureLoaded(tenantsManager, errors)
 
