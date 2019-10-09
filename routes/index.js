@@ -5,16 +5,19 @@
 const path = require('path')
 const express = require('express')
 const router = express.Router()
-
 const validator = require('validator')
-const tenantsManager = require('@services/userInfo').tenantsManager
 const assert = require('chai').assert
 
+const tenantsManager = require('@services/userInfo').tenantsManager
+const errors = require('@src/errors').errors
+
+errors.ensureLoaded(tenantsManager, errors)
 
 const validateRequest = function(req){
 	let userEmail, language
 	userEmail = req.query.email
 	language = req.query.lang
+/*write handler error*/
 	if(!validator.isEmail(userEmail)){
 		throw(errors.invalidEmail)
 	}
@@ -24,7 +27,7 @@ const validateRequest = function(req){
 	return {userEmail, language}
 }
 
-/*make usre headers are correct */	
+/*make sure headers are correct */	
 router.get('/userinfo.json', 
 	async function(req, res, next) {
 		res.header("Content-Type", "application/json; charset=utf-8")
@@ -32,6 +35,7 @@ router.get('/userinfo.json',
 		res.send(await tenantsManager.getUserInfo({userEmail, language}))
 	});
 
+/*for this one, there might not be an email write handler for case*/
 router.get('/api.json', 
 	async function(req, res, next) {
 		let {userEmail, language} = validateRequest(req) 
@@ -39,9 +43,7 @@ router.get('/api.json',
 	});
 
 
-
-
-/* GET home page. */
+/* GET home page. Used to test connection*/
 router.get('/', function(req, res, next) {
 	  res.render('index', { title: 'ISED-3Scale-Middleware' });
 });
