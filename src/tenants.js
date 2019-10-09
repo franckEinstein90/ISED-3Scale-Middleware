@@ -6,7 +6,7 @@
 "use strict";
 
 const request = require('request')
-const accounts = require('./accounts').accounts
+const accounts = require('@src/accounts').accounts
 
 const tenants = (function() {
 
@@ -30,6 +30,7 @@ const tenants = (function() {
                 this.accounts = new Map() //indexed by email addresses
                 this.accessToken = tenantJSONInfo.access_token
                 this.accountAdminBaseURL = {
+                    base: `https://${this.adminDomain}/admin/api/`,
                     accounts: `https://${this.adminDomain}/admin/api/accounts/`,
                     services: `https://${this.adminDomain}/admin/api/services.json?access_token=${this.accessToken}`
                 }

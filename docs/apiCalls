@@ -1,0 +1,35 @@
+
+https = x => 'https://' + x
+token : function(url) = {
+    return `access_token = ${this.accessToken}`
+}
+
+urls.base = 
+
+https(
+    tenantWithResource.admin_domain/admin/api
+ /active_docs.json
+ ?access_token='tenantWithResource.access_token;
+          
+https(
+tenantWithResource.admin_domain/admin/api
+/account_plans/' 
+ plan.id 
+ '/features.json
+ ?access_token=' tenantWithResource.access_token;
+ 
+https(
+  tenantWithResource.admin_domain/admin/api/
+  services/' +
+   api.service.id +
+    '/features.json
+    ?access_token=' + tenantWithResource.access_token;
+
+
+ https(
+    tenantWithResource.admin_domain/admin/api/
+    accounts/find
+    ?access_token=' tenantWithResource.access_token 
+    '&email=' 
+    encodeURIComponent(tenant.authenticatedUser);
+                         r

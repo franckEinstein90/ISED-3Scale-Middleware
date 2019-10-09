@@ -6,11 +6,12 @@ const utils = (function() {
 
     return {
 
-        readServerDataFile: function() {
+        readConfigFile: function() {
+        //used for testing
             console.log(__dirname)
             try {
                 let filePath, rawData;
-                filePath = path.normalize(__dirname + '/../data/serverData.json')
+                filePath = path.normalize(__dirname + '/../config/default.json')
                 rawData = fs.readFileSync(filePath, {
                     encoding: 'utf-8'
                 })

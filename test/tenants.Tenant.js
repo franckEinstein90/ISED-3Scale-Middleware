@@ -1,15 +1,14 @@
 require ('module-alias/register')
 
-const config = require('config')
 const expect = require('chai').expect
-const utils = require('../src/utils').utils
-const tenants = require('../src/tenants').tenants
+const utils = require('@src/utils').utils
+const tenants = require('@src/tenants').tenants
 
 
-const tenantDescriptions = config.get('master').tenants
+const tenantDescriptions = utils.readConfigFile('master').master.tenants
 
-describe('tenants.Tenant class', function(){
-	it('is created from a tenant description stored in a file at /data/serverData', function(){
+describe('tenants.Tenant object', function(){
+	it('is created from a tenant description' , function(){
 		let testTenant = new tenants.Tenant(tenantDescriptions[0])
 		expect(testTenant).to.exist
 		expect(testTenant.name).to.eql("tc")
@@ -22,17 +21,18 @@ describe('tenants.Tenant class', function(){
 		expect('domain' in testTenant).to.eql(true) 
 	})
 
-	it('has a getAccountInfo method which takes an email address as its parameter, and returns user account information', 
+	it(['has a getAccountInfo method which takes',
+        ' an email address as its parameter, and',
+        'returns user account information'].join(''), 
 		function(){
-		let testUserEmail = "dontvo+hackerman@gmail.com"
-		let testTenant = new tenants.Tenant(tenantDescriptions[0])
-		let callPromise = testTenant.getAccountInfoPromise( testUserEmail )
-		callPromise
-			.then(accountObj => expect(accountObj.id).to.eql(348))	
+            let testUserEmail = "dontvo+hackerman@gmail.com"
+            let testTenant = new tenants.Tenant(tenantDescriptions[0])
+            let callPromise = testTenant.getAccountInfoPromise( testUserEmail )
+            callPromise.then(accountObj => expect(accountObj.id).to.eql(348))	
 
 	})
 
-	it( ['has an addAccount method which takes an email address', 
+/*	it( ['has an addAccount method which takes an email address', 
 		 'and account information as parameters, and adds the account', 
 		 `to the tenant's account register` ].join(''), 
 		function(){
@@ -49,6 +49,6 @@ describe('tenants.Tenant class', function(){
 			})
         expect(testTenant.accounts.has(testUserEmail)).to.be.true
 	})
-
+*/
 })
 
