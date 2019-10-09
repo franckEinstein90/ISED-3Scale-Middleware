@@ -15,8 +15,7 @@ errors.ensureLoaded(tenantsManager, errors)
 
 const validateRequest = function(req){
 	//if not valid, simply return null objects
-	let userEmail req.query.email
-	let language = req.query.lang
+	let {userEmail, language} = { req.query.email, req.query.lang }
 	
 	if(userEmail === undefined || !validator.isEmail(userEmail)){
 		userEmail = null
