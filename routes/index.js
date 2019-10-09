@@ -14,15 +14,15 @@ const errors = require('@code/errors').errors
 errors.ensureLoaded(tenantsManager, errors)
 
 const validateRequest = function(req){
-	let userEmail, language
-	userEmail = req.query.email
-	language = req.query.lang
-/*write handler error*/
-	if(!validator.isEmail(userEmail)){
-		throw(errors.invalidEmail)
+	//if not valid, simply return null objects
+	let userEmail req.query.email
+	let language = req.query.lang
+	
+	if(userEmail === undefined || !validator.isEmail(userEmail)){
+		userEmail = null
 	}
-	if(! (language === "fr" || language === 'en') ){
-		throw(errors.invalidLanguage)	
+	if(language === undefined || ! (language === "fr" || language === 'en') ){
+		language = null
 	}
 	return {userEmail, language}
 }
