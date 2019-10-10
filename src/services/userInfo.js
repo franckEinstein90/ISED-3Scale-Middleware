@@ -82,27 +82,20 @@ const tenantsManager = (function() {
             })
         },
     
-        getApiInfo:  async function({
-            userEmail, 
-            language
-        }){
-            let apiCallPromises = tenants.map( tenant => tenant.getApiInfo())
-            return Promise.all(apiCallPromises)
+        getApiInfo:  async function({ userEmail , language }){
+          
+            return Promise.all( tenants.map( tenant => tenant.getApiInfo()))
                     .then(function (results){
                         return outputApiInfoResult(userEmail, language)
                     })
             },
 
-        getUserInfo: async function({
-            userEmail,
-            language
-        }) {
-           let apiCallPromises = tenants.map( tenant => tenant.getAccountInfo(userEmail))
-           return Promise.all(apiCallPromises)
-            .then(function(results) {
-                return outputUserInfoResponse(userEmail, language)
-            })
-            
+        getUserInfo: async function({ userEmail , language}) {
+           
+           return Promise.all( tenants.map( tenant => tenant.getAccountInfo(userEmail)))
+                  .then(function(results) {
+                        return outputUserInfoResponse(userEmail, language)
+                   })
         }
     }
 })()
