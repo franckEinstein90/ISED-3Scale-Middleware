@@ -5,9 +5,8 @@
 
 "use strict";
 
-const request = require('request')
 const accounts = require('@src/accounts').accounts
-
+const ServiceRegister = require('@src/tenants/tenantServices').tenantServices.ServiceRegister
 const tenants = (function() {
 
     return {
@@ -20,6 +19,8 @@ const tenants = (function() {
             activeDocsNotFound: 6,
             noApiValidation: 7
         },
+
+      
         Tenant: class {
 
             constructor(tenantJSONInfo) {
@@ -30,22 +31,24 @@ const tenants = (function() {
                     return (lang === 'en') ? tenantJSONInfo.description_en : tenantJSONInfo.description_fr
                 }
                 this.accounts = new Map() //indexed by email addresses
-                this.services = []
+                this.services = new ServiceRegister()
                 this.accessToken = tenantJSONInfo.access_token
                 this.baseURL = `https://${this.adminDomain}/admin/api/`
                 this.accountAdminBaseURL = {
                     accounts: `https://${this.adminDomain}/admin/api/accounts/`,
                     services: `https://${this.adminDomain}/admin/api/services.json?access_token=${this.accessToken}`,
-                    apiDocs: `${this.baseURL}/active_docs.json?access_token=${this.accessToken}`,
-                    apiService: function(serviceID) {
-                        return `${this.baseURL}/services/${serviceID}/features.json?access_token=${this.accessToken}`
-                    }
+                    activeDocs: `${this.baseURL}/active_docs.json?access_token=${this.accessToken}`,
+                    apiService: serviceID => `${this.baseURL}/services/${serviceID}/features.json?access_token=${this.accessToken}`,
+                    userAccount: email => `${this.baseURL}/accounts/find?access_token=${this.accessToken}&email=${encodeURIComponent(email)}`
                 }
+
             }
         }
     }
 
 })()
+
+
 
 tenants.Tenant.prototype.processAccountInfoResponse = function(clientEmail, promiseResult) {
     console.log(promiseResult)
@@ -77,147 +80,91 @@ tenants.Tenant.prototype.getAccountInfo = async function(clientEmail) {
     })
 }
 
-tenants.Tenant.prototype.processApiInfoResponse = async function(promiseResult) {
-    let that = this;
-    this.getActiveDocsPromise()
-        .then(function(x) {
-            that
-            console.log(x)
-        })
+
+tenants.Tenant.prototype.addServices = async function(serviceArray) {
+	serviceArray.forEach(
+		service => {
+		    console.log(`adding service "${service.service.name}"(id:${service.service.id}) to ${this.name}`)
+		    this.services.addServiceDefinition(service.service)
+	})
+	//returns the ids of the services that were added to the tenant
+	return serviceArray.map(service => service.service.id)
+}
+
+tenants.Tenant.prototype.addDocs = async function(apiDocsArray){
+    if(!Array.isArray(apiDocsArray)){ return }
+    apiDocsArray.forEach(
+        apiDocObject => {
+            this.services.addServiceDocs(apiDocObject)
+    })
+}
+
+tenants.Tenant.prototype.addServiceFeatures = async function(featureDescriptions, servicesIDs){
+    if(Array.isArray(featureDescriptions)){
+        if(featureDescriptions.length !== servicesIDs.length){
+            console.log('problem')
+            return
+        }
+        featureDescriptions.forEach(
+            (features, idx) => {
+                this.services.addServiceFeatures(features, servicesIDs[idx])
+            })
+
+        return
+    }
+    console.log(featureDescription)
+}
+tenants.Tenant.prototype.validateAPIs = async function(serviceIDarray){
+	let promiseArray = serviceIDarray.map(serviceID => this.requestValidateAPI(serviceID))
+    return Promise.all(promiseArray)
+            .then(x => this.addServiceFeatures(x, serviceIDarray))
+}
+
+tenants.Tenant.prototype.getUserPlans = async function(userEmail){
+    let serviceListingPromise, activeDocsPromise
+
+    serviceListingPromise = new Promise((resolve, reject) => {
+        this.requestServiceListing()
+	    //get the service list for that tenant
+        .then(services => this.addServices(services))
+        .then(x => resolve(x))
+    })
+
+    activeDocsPromise = new Promise((resolve, reject) => {
+        this.requestActiveDocsListing()
+            .then(activeDocs => this.addDocs(activeDocs))
+            .then(x => resolve(x))
+    })
+
+    let promiseArray = [serviceListingPromise, activeDocsPromise]
+    return Promise.all(promiseArray)
 }
 
 tenants.Tenant.prototype.getApiInfo = async function() {
+    let serviceListingPromise, activeDocsPromise
 
-    return new Promise((resolve, reject) => {
-        this.getApisPromise()
-            .then(x => this.processApiInfoResponse(x))
-            //  .then(apiDocs => this.processApiDocs(x))
+    serviceListingPromise = new Promise((resolve, reject) => {
+        this.requestServiceListing()
+	    //get the service list for that tenant
+        .then(services => this.addServices(services))
+	    //then get the validations for those services
+	    .then(serviceIdArray => this.validateAPIs(serviceIdArray))
+        .then(x => resolve(x))
+    })
+
+    activeDocsPromise = new Promise((resolve, reject) => {
+        this.requestActiveDocsListing()
+            .then(activeDocs => this.addDocs(activeDocs))
             .then(x => resolve(x))
-        /*    this.getApisPromise()
-             .then( function (result){
-                 console.log(result)
-             })*/
     })
-}
 
-/***********************API Requests******************************* */
-tenants.Tenant.prototype.getAccountInfoPromise = function(clientEmail) {
-    //returns a promise that gets the user info from the api
-
-    let apiCall = [
-        this.accountAdminBaseURL.accounts,
-        "find.json?",
-        `access_token=${this.accessToken}&`,
-        `email=${encodeURIComponent(clientEmail)}`
-    ].join('')
+    let promiseArray = [serviceListingPromise, activeDocsPromise]
+    return Promise.all(promiseArray)
+ }
 
 
-    return new Promise((resolve, reject) => {
-        request(apiCall, function(err, response, body) {
-            if (err) {
-                resolve(`{"status":"Not Found"}`)
-            }
-            try {
-                let result = JSON.parse(body)
-                if ('status' in result) {
-                    resolve(tenants.codes.noAccount)
-                } else {
-                    let accountInfo = JSON.parse(body).account
-                    resolve(accountInfo)
-                }
-            } catch (e) {
-                resolve(e)
-            }
-        })
-    })
-}
 
-tenants.Tenant.prototype.getTenantSubscriptionKeysForUserPromise = function({
-    userEmail
-}) {
-    let apiCall, accountID, that
-    that = this
 
-    if (this.accounts.has(userEmail)) {
-        accountID = this.accounts.get(userEmail).AccountID
-        apiCall = [this.accountAdminBaseURL.accounts,
-            accountID,
-            `/applications.json?access_token=${this.accessToken}`
-        ].join('')
-
-        return new Promise((resolve, reject) => {
-            request(apiCall, function(err, response, body) {
-                if (err) {
-                    resolve(`{"status":"Not Found"}`)
-                }
-                try {
-                    let applications = JSON.parse(body).applications
-                    if (applications.length === 0) {
-                        console.log(`found no applications for ${that.name}`)
-                        resolve(tenants.codes.applicationsNotFound)
-                    } else {
-                        //add the applications to the correspnding accont
-                        console.log(`found ${applications.length} applications for ${that.name}`)
-                        applications.forEach(application =>
-                            that.accounts.get(userEmail).addApplication(application))
-                        resolve(applications)
-                    }
-                } catch (e) {
-                    resolve(e)
-                }
-            })
-        })
-    }
-}
-
-tenants.Tenant.prototype.getApisPromise = function() {
-    let apiCall = this.accountAdminBaseURL.services
-    let that = this
-    return new Promise((resolve, reject) => {
-        request(apiCall, function(err, response, body) {
-            if (err) {
-                resolve(tenants.codes.serviceNotFound)
-            }
-            try {
-                let services = JSON.parse(body).services
-                services.forEach(service => that.services.push(service))
-                resolve(services)
-            } catch (e) {
-                resolve(e)
-            }
-        })
-    })
-}
-
-tenants.Tenant.prototype.getActiveDocsPromise = function() {
-    let apiCall = this.accountAdminBaseURL.apiDocs
-    return new Promise((resolve, reject) => {
-        request(apiCall, function(err, response, body) {
-            if (err) {
-                resolve(tenants.codes.activeDocsNotFound)
-            }
-            try {
-                let activeDocs = JSON.parse(body).api_docs
-                resolve(activeDocs)
-
-            } catch (e) {
-                resolve(e)
-            }
-
-        })
-    })
-}
-
-tenants.Tenant.prototype.validateAPI = function() {
-    let apiCall = this.accountAdminBaseURL.apiServices(serviceID)
-    return new Promise((resolve, reject) => {
-        request(apiCall, function(err, response, body) {
-            if (err) {
-                resolve(tenants.codes.noApiValidation)
-            }
-        })
-    })
-}
 module.exports = {
     tenants
 }
