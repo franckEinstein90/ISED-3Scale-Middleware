@@ -6,6 +6,9 @@ const tenants = require('@src/tenants').tenants
 
 
 const tenantDescriptions = utils.readConfigFile('master').master.tenants
+const testEmails = {
+    email1: "rojabadd%2Btest2@gmail.com"
+}
 
 describe('tenants.Tenant object', function(){
 	it('is created from a tenant description' , function(){
@@ -25,9 +28,8 @@ describe('tenants.Tenant object', function(){
         ' an email address as its parameter, and',
         'returns user account information'].join(''), 
 		function(){
-            let testUserEmail = "dontvo+hackerman@gmail.com"
             let testTenant = new tenants.Tenant(tenantDescriptions[0])
-            let callPromise = testTenant.getAccountInfoPromise( testUserEmail )
+            let callPromise = testTenant.getAccountInfoPromise( testEmails.email1)
             callPromise.then(accountObj => expect(accountObj.id).to.eql(348))	
 
 	})
