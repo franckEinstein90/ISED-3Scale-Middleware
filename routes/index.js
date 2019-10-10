@@ -13,7 +13,7 @@ const errors = require('@code/errors').errors
 
 errors.ensureLoaded(tenantsManager, errors)
 
-const validateRequest = function(req){
+const validate = function(req){
 	//if not valid, simply return null objects
 	let {userEmail, language} = { req.query.email, req.query.lang }
 	
@@ -26,20 +26,18 @@ const validateRequest = function(req){
 	return {userEmail, language}
 }
 
-/*make sure headers are correct */	
+
 router.get('/userinfo.json', 
 	async function(req, res, next) {
 		res.header("Content-Type", "application/json; charset=utf-8")
-		let {userEmail, language} = validateRequest(req) 
-		res.send(await tenantsManager.getUserInfo({userEmail, language}))
+		res.send(await tenantsManager.getUserInfo(validate(req)))
 	});
 
 /*for this one, there might not be an email write handler for case*/
 router.get('/api.json', 
 	async function(req, res, next) {
 		res.header("Content-Type", "application/json; charset=utf-8")
-		let {userEmail, language} = validateRequest(req) 
-		res.send(await tenantsManager.getApiInfo({userEmail, language}))
+		res.send(await tenantsManager.getApiInfo(validate(req)))
 	});
 
 
