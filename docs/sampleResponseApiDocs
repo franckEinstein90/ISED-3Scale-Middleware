@@ -1,0 +1,774 @@
+[
+  {
+    "name": "tc",
+    "maintainers": {
+      "fn": "GC API Store Team",
+      "email": "ic.api_store-magasin_des_apis.ic@canada.ca",
+      "url": "https:\/\/api.canada.ca"
+    },
+    "description": "Transport Canada",
+    "apis": [
+      
+    ],
+    "authenticatedUser": "dontvo+smtptest@gmail.com",
+    "userGcInternal": false,
+    "userTenantInternal": false,
+    "plansforUser": [
+      {
+        "default": "true",
+        "id": "132",
+        "name": "Default",
+        "type": "account_plan",
+        "state": "published",
+        "setup_fee": "0.0",
+        "cost_per_month": "0.0",
+        "trial_period_days": {
+          
+        },
+        "cancellation_period": "0"
+      },
+      {
+        "id": "131",
+        "name": "Default",
+        "type": "service_plan",
+        "state": "published",
+        "service_id": "46",
+        "approval_required": "true",
+        "setup_fee": "0.0",
+        "cost_per_month": "0.0",
+        "trial_period_days": {
+          
+        },
+        "cancellation_period": "0"
+      }
+    ]
+  },
+  {
+    "name": "cra-arc",
+    "maintainers": {
+      "fn": "GC API Store Team",
+      "email": "ic.api_store-magasin_des_apis.ic@canada.ca",
+      "url": "https:\/\/api.canada.ca"
+    },
+    "description": "Canada Revenue Agency",
+    "apis": [
+      {
+        "name": "Test API for Echo (Beta)",
+        "description": "A sample test API for Echo",
+        "contact": {
+          
+        },
+        "baseURL": "https:\/\/testecho-cra-arc-apicast-staging.dev.api.canada.ca:443\/",
+        "humanUrl": "https:\/\/cra-arc.dev.api.canada.ca\/en\/detail?api=TestEcho"
+      },
+      {
+        "name": "Soap BN Test Production",
+        "description": "Send Soap requests over REST API",
+        "contact": {
+          "FN": "Jun Yang",
+          "email": "JunY.Yang@cra-rac.gc.ca"
+        },
+        "baseURL": "https:\/\/soapbntest-cra-arc-apicast-production.dev.api.canada.ca:443\/",
+        "humanUrl": "https:\/\/cra-arc.dev.api.canada.ca\/en\/detail?api=SoapBNTest"
+      },
+      {
+        "name": "Soap Api Test",
+        "description": "A sample test API for soap",
+        "contact": {
+          
+        },
+        "baseURL": "https:\/\/betasoapapi-cra-arc-apicast-staging.dev.api.canada.ca:443\/",
+        "humanUrl": "https:\/\/cra-arc.dev.api.canada.ca\/en\/detail?api=BetaSoapApi"
+      },
+      {
+        "name": "GC BN Validation Information - Dev",
+        "description": "Retrieves CRA information about a BN, which can be compared to data you have in order to determine if it is the same entity.",
+        "contact": {
+          "FN": "BN System",
+          "email": "do_we_have_a_global_email@cra-arc.gc.ca"
+        },
+        "baseURL": "https:\/\/gcbnvalidation-prod-cra-arc-apicast-production.dev.api.canada.ca\/ebci\/brom\/ws\/services\/BusinessService",
+        "humanUrl": "https:\/\/cra-arc.dev.api.canada.ca\/en\/detail?api=GcBnValidation-Dev"
+      }
+    ],
+    "authenticatedUser": "dontvo+smtptest@gmail.com",
+    "userGcInternal": true,
+    "userTenantInternal": false,
+    "plansforUser": [
+      {
+        "id": "16",
+        "name": "Default",
+        "type": "service_plan",
+        "state": "published",
+        "service_id": "6",
+        "approval_required": "false",
+        "setup_fee": "0.0",
+        "cost_per_month": "0.0",
+        "trial_period_days": {
+          
+        },
+        "cancellation_period": "0"
+      },
+      {
+        "id": "278",
+        "name": "Default",
+        "type": "service_plan",
+        "state": "published",
+        "service_id": "95",
+        "approval_required": "false",
+        "setup_fee": "0.0",
+        "cost_per_month": "0.0",
+        "trial_period_days": {
+          
+        },
+        "cancellation_period": "0"
+      },
+      {
+        "id": "165",
+        "name": "GC Internal",
+        "type": "account_plan",
+        "state": "published",
+        "setup_fee": "0.0",
+        "cost_per_month": "0.0",
+        "trial_period_days": {
+          
+        },
+        "cancellation_period": "0"
+      }
+    ]
+  },
+  {
+    "name": "esdc-edsc",
+    "maintainers": {
+      "fn": "GC API Store Team",
+      "email": "ic.api_store-magasin_des_apis.ic@canada.ca",
+      "url": "https:\/\/api.canada.ca"
+    },
+    "description": "Employment and Social Development Canada",
+    "apis": [
+      {
+        "name": "Labour Market Information (Wages and Outlooks)",
+        "description": "Wages and employment outlooks by occupation according to the National Occupational Classification (NOC).",
+        "contact": {
+          "FN": "ESDC - LMIDU",
+          "email": "NC-CLMI-ICMT@hrsdc-rhdcc.gc.ca"
+        },
+        "baseURL": "https:\/\/lmidu-wages-can-esdc-edsc-apicast-staging.dev.api.canada.ca\/",
+        "humanUrl": "https:\/\/esdc-edsc.dev.api.canada.ca\/en\/detail?api=lmidu-wages-can"
+      },
+      {
+        "name": "Cat Facts",
+        "description": "Using a combination of Node.js, Angular, and Tasker, this app will combine APIs and Services from the web to do just one thing\u2026 send cat facts.",
+        "contact": {
+          "FN": "Ash-Lee Hommy",
+          "email": "ashlee@catfacts.meow"
+        },
+        "baseURL": "https:\/\/undefinedundefined",
+        "humanUrl": "https:\/\/esdc-edsc.dev.api.canada.ca\/en\/detail?api=noc-test"
+      },
+      {
+        "name": "National Occupation Classification (NOC) AutoCoder",
+        "description": "Intelligent API that suggests occupations as classified by the National Occupation Classification (NOC) system from user specified input text.",
+        "contact": {
+          "FN": "ESDC - LMIDU",
+          "email": "NC-CLMI-ICMT-SUPPORT-GD@hrsdc-rhdcc.gc.ca"
+        },
+        "baseURL": "https:\/\/lmi-nac-esdc-edsc-apicast-production.api.canada.ca\/clmix-wsx\/",
+        "humanUrl": "https:\/\/esdc-edsc.dev.api.canada.ca\/en\/detail?api=nac-lmi"
+      },
+      {
+        "name": "Labour Market Information (Wages)",
+        "description": "Wages by occupation according to the National Occupational Classification (NOC).",
+        "contact": {
+          "FN": "ESDC - LMIDU",
+          "email": "NC-CLMI-ICMT-SUPPORT-GD@hrsdc-rhdcc.gc.ca"
+        },
+        "baseURL": "https:\/\/esdc-lmi-wages.dev.api.canada.ca\/clmix-wsx\/gcapis\/",
+        "humanUrl": "https:\/\/esdc-edsc.dev.api.canada.ca\/en\/detail?api=lmi-wages"
+      },
+      {
+        "name": "Labour Market Information (Employment Outlooks)",
+        "description": "Employment outlooks by occupation according to the National Occupational Classification (NOC).",
+        "contact": {
+          "FN": "ESDC - LMIDU",
+          "email": "NC-CLMI-ICMT-SUPPORT-GD@hrsdc-rhdcc.gc.ca"
+        },
+        "baseURL": "https:\/\/esdc-lmi-outlooks.dev.api.canada.ca\/clmix-wsx\/gcapis\/",
+        "humanUrl": "https:\/\/esdc-edsc.dev.api.canada.ca\/en\/detail?api=lmi-outlooks"
+      },
+      {
+        "name": "LoopBack Application",
+        "contact": {
+          
+        },
+        "baseURL": "https:\/\/province-api-esdc-edsc-apicast-staging.dev.api.canada.ca\/",
+        "humanUrl": "https:\/\/esdc-edsc.dev.api.canada.ca\/en\/detail?api=province-api"
+      }
+    ],
+    "authenticatedUser": "dontvo+smtptest@gmail.com",
+    "userGcInternal": true,
+    "userTenantInternal": true,
+    "plansforUser": [
+      {
+        "default": "true",
+        "id": "21",
+        "name": "default",
+        "type": "account_plan",
+        "state": "published",
+        "setup_fee": "0.0",
+        "cost_per_month": "0.0",
+        "trial_period_days": {
+          
+        },
+        "cancellation_period": "0"
+      },
+      {
+        "id": "44",
+        "name": "LMI Default",
+        "type": "service_plan",
+        "state": "published",
+        "service_id": "17",
+        "approval_required": "false",
+        "setup_fee": "0.0",
+        "cost_per_month": "0.0",
+        "trial_period_days": {
+          
+        },
+        "cancellation_period": "0"
+      }
+    ]
+  },
+  {
+    "name": "hc-sc",
+    "maintainers": {
+      "fn": "GC API Store Team",
+      "email": "ic.api_store-magasin_des_apis.ic@canada.ca",
+      "url": "https:\/\/api.canada.ca"
+    },
+    "description": "Health Canada",
+    "apis": [
+      {
+        "name": "Canadian Nutrient File (CNF)",
+        "description": "The Canadian Nutrient File (CNF) is the standard reference food composition database reporting the amount of nutrients in foods commonly consumed in Canada.",
+        "contact": {
+          "FN": "Health Canada",
+          "email": "Info@hc-sc.gc.ca"
+        },
+        "baseURL": "https:\/\/cnf-hc-sc-apicast-staging.dev.api.canada.ca\/api\/canadian-nutrient-file\/",
+        "humanUrl": "https:\/\/hc-sc.dev.api.canada.ca\/en\/detail?api=cnf"
+      },
+      {
+        "name": "Licensed Natural Health Products Database (LNHPD)",
+        "description": "The Licensed Natural Health Products Database (LNHPD) contains information about natural health products (NHPs) that have been issued a product licence by Health Canada.",
+        "contact": {
+          "FN": "Health Canada",
+          "email": "Info@hc-sc.gc.ca"
+        },
+        "baseURL": "https:\/\/lnhpd-hc-sc-apicast-staging.dev.api.canada.ca\/api\/natural-licences\/",
+        "humanUrl": "https:\/\/hc-sc.dev.api.canada.ca\/en\/detail?api=lnhpd"
+      },
+      {
+        "name": "Drug Product Database (DPD)",
+        "description": "The DPD contains product specific information on drugs approved for use in Canada. The database is managed by Health Canada and includes human pharmaceutical and biological drugs, veterinary drugs, radiopharmaceutical drugs and disinfectant products. It contains approximately 47,000 products that are currently approved, marketed, dormant or cancelled.\n\nHuman, veterinary, disinfectants and Schedule C drugs (e.g. radiopharmaceutical products) approved products will be available in the DPD online at the time of authorization, with the exception of three monographed product groups under Division 1, Part C of the Food and Drug Regulations: sunscreen (sunscreens, lipstick making a SPF claim, cosmetic-like products with sunscreen claims, etc.), anti-dandruff shampoo, and hard surface disinfectants. For these products, applications filed after June 15, 2015, there may be a six month delay after approval for the inclusion in the DPD online.\n\nHealth Canada is the federal regulator of therapeutic products and does not provide medical advice on the use of the products identified in this database. For information related to treatment options, choices of medications and their uses, illnesses, side effects or drug interactions, please contact your health care professional. For information on where these products are sold, please contact the individual company directly.\n",
+        "contact": {
+          "email": "open-ouvert@tbs-sct.gc.ca"
+        },
+        "baseURL": "https:\/\/dpd-hc-sc-apicast-staging.dev.api.canada.ca\/api\/drug\/",
+        "humanUrl": "https:\/\/hc-sc.dev.api.canada.ca\/en\/detail?api=dpd"
+      },
+      {
+        "name": "Notice of Compliance (NOC)",
+        "description": "A Notice of Compliance (NOC) is issued to a manufacturer following the satisfactory review of a submission for a new drug, and signifies compliance with the Food and Drug Regulations.\n\nThe database is updated nightly and contains NOC information on human drugs from January 1, 1994 to date. It also contains NOC information on Veterinary drugs from September 19, 2000 to date. Through a phased in approach Health Canada will populate the remaining NOCs for Veterinary drugs from January 1, 1994 to September 18, 2000.\n",
+        "contact": {
+          
+        },
+        "baseURL": "https:\/\/noc-hc-sc-apicast-staging.dev.api.canada.ca\/api\/notice-of-compliance\/",
+        "humanUrl": "https:\/\/hc-sc.dev.api.canada.ca\/en\/detail?api=noc"
+      },
+      {
+        "name": "Clinical Trial Database (CTA)",
+        "description": "The Clinical Trials Database provides to the public a listing of specific information relating to phase I, II and III clinical trials in patients. The database is managed by Health Canada and provides a source of information about Canadian clinical trials involving human pharmaceutical and biological drugs.\n",
+        "contact": {
+          
+        },
+        "baseURL": "https:\/\/cta-hc-sc-apicast-staging.dev.api.canada.ca\/api\/clinical-trial\/",
+        "humanUrl": "https:\/\/hc-sc.dev.api.canada.ca\/en\/detail?api=cta"
+      },
+      {
+        "name": "Medical Devices Active Licence Listing (MDALL)",
+        "description": "Health Canada is the federal regulator of therapeutic products, including medical devices. We do not provide medical advice on the use of the products identified in this listing.\n\nThe Medical Devices Bureau (Bureau) of the Therapeutic Products Directorate, Health Canada is the Canadian federal regulator responsible for licensing medical devices in accordance with the Food and Drugs Act and Regulations and the Medical Devices Regulations.\n\nThe Bureau maintains a database of all licensed Class II, III, and IV medical devices offered for sale in Canada. Class I medical devices do not require a medical device licence and are monitored by the Regulatory Operations and Regions Branch (Compliance and Enforcement) through Establishment Licensing.\n\nOnly products which appear in this database listing may be offered for general marketing purposes in Canada. Class I Devices, or devices which relate to Investigational Testing Authorization or Special Access do not appear in this listing.\n",
+        "contact": {
+          
+        },
+        "baseURL": "https:\/\/mdall-hc-sc-apicast-staging.dev.api.canada.ca\/api\/medical-devices\/",
+        "humanUrl": "https:\/\/hc-sc.dev.api.canada.ca\/en\/detail?api=mdall"
+      },
+      {
+        "name": "Summary Reports",
+        "description": "The Drug and Health Product Register brings together Information on product licences, drug and health product inspections, buying and using products safely, and side effects, recalls and complaints.",
+        "contact": {
+          
+        },
+        "baseURL": "https:\/\/sr-hc-sc-apicast-staging.dev.api.canada.ca\/api\/summary-report\/api\/",
+        "humanUrl": "https:\/\/hc-sc.dev.api.canada.ca\/en\/detail?api=sr"
+      },
+      {
+        "name": "Canada Vigilance Product (CVP)",
+        "description": "The Canada Vigilance Adverse Reaction Online Database contains information about suspected adverse reactions (also known as side effects) to health products.",
+        "contact": {
+          "FN": "Health Canada",
+          "email": "Info@hc-sc.gc.ca"
+        },
+        "baseURL": "https:\/\/cvp-hc-sc-apicast-staging.dev.api.canada.ca\/api\/canada-vigilance\/",
+        "humanUrl": "https:\/\/hc-sc.dev.api.canada.ca\/en\/detail?api=cvp"
+      }
+    ],
+    "authenticatedUser": "dontvo+smtptest@gmail.com",
+    "userGcInternal": false,
+    "userTenantInternal": false,
+    "plansforUser": [
+      {
+        "default": "true",
+        "id": "23",
+        "name": "default",
+        "type": "account_plan",
+        "state": "published",
+        "setup_fee": "0.0",
+        "cost_per_month": "0.0",
+        "trial_period_days": {
+          
+        },
+        "cancellation_period": "0"
+      },
+      {
+        "id": "97",
+        "name": "Default",
+        "type": "service_plan",
+        "state": "published",
+        "service_id": "34",
+        "approval_required": "false",
+        "setup_fee": "0.0",
+        "cost_per_month": "0.0",
+        "trial_period_days": {
+          
+        },
+        "cancellation_period": "0"
+      }
+    ]
+  },
+  {
+    "name": "ised-isde",
+    "maintainers": {
+      "fn": "GC API Store Team",
+      "email": "ic.api_store-magasin_des_apis.ic@canada.ca",
+      "url": "https:\/\/api.canada.ca"
+    },
+    "description": "Innovation, Science and Economic Development Canada",
+    "apis": [
+      {
+        "name": "Soap BN Test",
+        "description": "Send Soap requests over REST API",
+        "contact": {
+          "FN": "Jun Yang",
+          "email": "JunY.Yang@cra-rac.gc.ca"
+        },
+        "baseURL": "https:\/\/soapbntest-cra-arc-apicast-staging.dev.api.canada.ca:443\/",
+        "humanUrl": "https:\/\/ised-isde.dev.api.canada.ca\/en\/detail?api=echo-test"
+      },
+      {
+        "name": "ISED CRA Business Number API",
+        "description": "The ISED CRA Business Number API allows authorized users at ISED to call the CRA Business Number API using ISED departmental credentials to integrate Business Number information with their applications.",
+        "contact": {
+          "FN": "ISED Digital Policy Integration Directorate",
+          "email": "pam.king@canada.ca"
+        },
+        "baseURL": "https:\/\/cra-bn-ised-isde-apicast-production.dev.api.canada.ca\/ebci\/brom\/ws\/services\/",
+        "humanUrl": "https:\/\/ised-isde.dev.api.canada.ca\/en\/detail?api=cra-bn"
+      },
+      {
+        "name": "Online Reporting Application (ORA) API",
+        "description": "An API for Online Reporting Application.",
+        "contact": {
+          "FN": "ISED Canada, CIO, BSD",
+          "email": "ic.ora-adel.ic@canada.ca"
+        },
+        "baseURL": "https:\/\/mc-ora-adel-ised-isde.dev.api.canada.ca\/",
+        "humanUrl": "https:\/\/ised-isde.dev.api.canada.ca\/en\/detail?api=mc-ora-adel"
+      },
+      {
+        "name": "Federal Corporation API",
+        "description": "",
+        "contact": {
+          "FN": "Corporations Canada",
+          "email": "IC.corporationscanada.IC@canada.ca"
+        },
+        "baseURL": "https:\/\/corporations-ised-isde-apicast-production.dev.api.canada.ca\/api\/v1\/corporations",
+        "humanUrl": "https:\/\/ised-isde.dev.api.canada.ca\/en\/detail?api=corporations"
+      },
+      {
+        "name": "TM Goods and Services Manual API",
+        "description": "The CIPO Trademarks (TM) Goods and Services Manual Application Programming Interface (API) is an information delivery channel that enables real time interactions between systems, allowing trademarks goods and services data to be shared, recycled and monitored.",
+        "contact": {
+          "FN": "CIPO Business Services Branch",
+          "email": "ic.cipoipdata-opicdonneespi.ic@canada.ca"
+        },
+        "baseURL": "https:\/\/cipo-gsm-ised-isde-apicast-staging.dev.api.canada.ca\/app\/scr\/api\/cgs",
+        "humanUrl": "https:\/\/ised-isde.dev.api.canada.ca\/en\/detail?api=cipo-gsm"
+      },
+      {
+        "name": "Online Reporting Application (ORA) API - QA",
+        "description": "An API for Online Reporting Application - QA.",
+        "contact": {
+          "FN": "ISED Canada, CIO, BSD",
+          "email": "ic.ora-adel.ic@canada.ca"
+        },
+        "baseURL": "https:\/\/mc-ora-adel-qa-ised-isde.dev.api.canada.ca\/",
+        "humanUrl": "https:\/\/ised-isde.dev.api.canada.ca\/en\/detail?api=mc-ora-adel-qa"
+      }
+    ],
+    "authenticatedUser": "dontvo+smtptest@gmail.com",
+    "userGcInternal": true,
+    "userTenantInternal": true,
+    "plansforUser": [
+      {
+        "id": "11",
+        "name": "Default",
+        "type": "service_plan",
+        "state": "published",
+        "service_id": "5",
+        "approval_required": "false",
+        "setup_fee": "0.0",
+        "cost_per_month": "0.0",
+        "trial_period_days": {
+          
+        },
+        "cancellation_period": "0"
+      },
+      {
+        "id": "202",
+        "name": "Default",
+        "type": "service_plan",
+        "state": "published",
+        "service_id": "68",
+        "approval_required": "true",
+        "setup_fee": "0.0",
+        "cost_per_month": "0.0",
+        "trial_period_days": {
+          
+        },
+        "cancellation_period": "0"
+      },
+      {
+        "custom": "false",
+        "default": "false",
+        "id": "203",
+        "name": "public",
+        "type": "application_plan",
+        "state": "hidden",
+        "service_id": "68",
+        "end_user_required": "false",
+        "setup_fee": "0.0",
+        "cost_per_month": "0.0",
+        "trial_period_days": {
+          
+        },
+        "cancellation_period": "0"
+      },
+      {
+        "custom": "false",
+        "default": "false",
+        "id": "13",
+        "name": "CIPO Internal",
+        "type": "application_plan",
+        "state": "published",
+        "service_id": "5",
+        "end_user_required": "false",
+        "setup_fee": "0.0",
+        "cost_per_month": "0.0",
+        "trial_period_days": {
+          
+        },
+        "cancellation_period": "0"
+      },
+      {
+        "id": "162",
+        "name": "ISED User",
+        "type": "account_plan",
+        "state": "published",
+        "setup_fee": "0.0",
+        "cost_per_month": "0.0",
+        "trial_period_days": {
+          
+        },
+        "cancellation_period": "0"
+      }
+    ]
+  },
+  {
+    "name": "ssc-spc",
+    "maintainers": {
+      "fn": "GC API Store Team",
+      "email": "ic.api_store-magasin_des_apis.ic@canada.ca",
+      "url": "https:\/\/api.canada.ca"
+    },
+    "description": "Shared Services Canada",
+    "apis": [
+      
+    ],
+    "authenticatedUser": "dontvo+smtptest@gmail.com",
+    "userGcInternal": false,
+    "userTenantInternal": false
+  },
+  {
+    "name": "statcan",
+    "maintainers": {
+      "fn": "GC API Store Team",
+      "email": "ic.api_store-magasin_des_apis.ic@canada.ca",
+      "url": "https:\/\/api.canada.ca"
+    },
+    "description": "Statistics Canada",
+    "apis": [
+      {
+        "name": "Indicators from The Statcan homepage",
+        "description": "Returns all indicators available from the homepage",
+        "contact": {
+          "FN": "Statistics Canada",
+          "email": "STATCAN.infostats-infostats.STATCAN@canada.ca"
+        },
+        "baseURL": "https:\/\/statcan-homepage-indicators-statcan-apicast-production.dev.api.canada.ca\/v1",
+        "humanUrl": "https:\/\/statcan.dev.api.canada.ca\/en\/detail?api=statcan-homepage-indicators"
+      },
+      {
+        "name": "Economic Indicators from The Statcan Daily",
+        "description": "Returns all major economic indicators available from The Daily",
+        "contact": {
+          "FN": "Statistics Canada",
+          "email": "STATCAN.infostats-infostats.STATCAN@canada.ca"
+        },
+        "baseURL": "https:\/\/statcan-economic-indicators-statcan-apicast-production.dev.api.canada.ca\/v1",
+        "humanUrl": "https:\/\/statcan.dev.api.canada.ca\/en\/detail?api=statcan-economic-indicators"
+      }
+    ],
+    "authenticatedUser": "dontvo+smtptest@gmail.com",
+    "userGcInternal": false,
+    "userTenantInternal": false
+  },
+  {
+    "name": "tbs-sct",
+    "maintainers": {
+      "fn": "GC API Store Team",
+      "email": "ic.api_store-magasin_des_apis.ic@canada.ca",
+      "url": "https:\/\/api.canada.ca"
+    },
+    "description": "Treasury Board of Canada Secretariat",
+    "apis": [
+      {
+        "name": "TBS Sample API",
+        "description": "This is TBS Sample API",
+        "contact": {
+          "FN": " Rabie Almatarneh",
+          "email": "rabie.almatarneh@focisolutions.com"
+        },
+        "baseURL": "https:\/\/tbs-sample-api-tbs-sct-apicast-production.dev.api.canada.caundefined",
+        "humanUrl": "https:\/\/tbs-sct.dev.api.canada.ca\/en\/detail?api=tbs-sample-api"
+      }
+    ],
+    "authenticatedUser": "dontvo+smtptest@gmail.com",
+    "userGcInternal": false,
+    "userTenantInternal": false,
+    "plansforUser": [
+      {
+        "default": "true",
+        "id": "35",
+        "name": "Default",
+        "type": "account_plan",
+        "state": "published",
+        "setup_fee": "0.0",
+        "cost_per_month": "0.0",
+        "trial_period_days": {
+          
+        },
+        "cancellation_period": "0"
+      },
+      {
+        "id": "69",
+        "name": "Default",
+        "type": "service_plan",
+        "state": "published",
+        "service_id": "26",
+        "approval_required": "false",
+        "setup_fee": "0.0",
+        "cost_per_month": "0.0",
+        "trial_period_days": {
+          
+        },
+        "cancellation_period": "0"
+      }
+    ]
+  },
+  {
+    "name": "gac-amc",
+    "maintainers": {
+      "fn": "GC API Store Team",
+      "email": "ic.api_store-magasin_des_apis.ic@canada.ca",
+      "url": "https:\/\/api.canada.ca"
+    },
+    "description": "Global Affairs Canada",
+    "apis": [
+      
+    ],
+    "authenticatedUser": "dontvo+smtptest@gmail.com",
+    "userGcInternal": false,
+    "userTenantInternal": false
+  },
+  {
+    "name": "ec",
+    "maintainers": {
+      "fn": "GC API Store Team",
+      "email": "ic.api_store-magasin_des_apis.ic@canada.ca",
+      "url": "https:\/\/api.canada.ca"
+    },
+    "description": "Environment and Climate Change Canada",
+    "apis": [
+      
+    ],
+    "authenticatedUser": "dontvo+smtptest@gmail.com",
+    "userGcInternal": false,
+    "userTenantInternal": false
+  },
+  {
+    "name": "dfo-mpo",
+    "maintainers": {
+      "fn": "GC API Store Team",
+      "email": "ic.api_store-magasin_des_apis.ic@canada.ca",
+      "url": "https:\/\/api.canada.ca"
+    },
+    "description": "Fisheries and Oceans Canada",
+    "apis": [
+      
+    ],
+    "authenticatedUser": "dontvo+smtptest@gmail.com",
+    "userGcInternal": false,
+    "userTenantInternal": false
+  },
+  {
+    "name": "ingenium",
+    "maintainers": {
+      "fn": "GC API Store Team",
+      "email": "ic.api_store-magasin_des_apis.ic@canada.ca",
+      "url": "https:\/\/api.canada.ca"
+    },
+    "description": "Ingenium",
+    "apis": [
+      
+    ],
+    "authenticatedUser": "dontvo+smtptest@gmail.com",
+    "userGcInternal": false,
+    "userTenantInternal": false
+  },
+  {
+    "name": "cbsa-asfc",
+    "maintainers": {
+      "fn": "GC API Store Team",
+      "email": "ic.api_store-magasin_des_apis.ic@canada.ca",
+      "url": "https:\/\/api.canada.ca"
+    },
+    "description": "Canada Border Services Agency",
+    "apis": [
+      
+    ],
+    "authenticatedUser": "dontvo+smtptest@gmail.com",
+    "userGcInternal": false,
+    "userTenantInternal": false
+  },
+  {
+    "name": "cbs-scs",
+    "maintainers": {
+      "fn": "GC API Store Team",
+      "email": "ic.api_store-magasin_des_apis.ic@canada.ca",
+      "url": "https:\/\/api.canada.ca"
+    },
+    "description": "Canadian Blood Services",
+    "apis": [
+      
+    ],
+    "authenticatedUser": "dontvo+smtptest@gmail.com",
+    "userGcInternal": false,
+    "userTenantInternal": false
+  },
+  {
+    "name": "on",
+    "maintainers": {
+      "fn": "GC API Store Team",
+      "email": "ic.api_store-magasin_des_apis.ic@canada.ca",
+      "url": "https:\/\/api.canada.ca"
+    },
+    "description": "Government of Ontario",
+    "apis": [
+      
+    ],
+    "authenticatedUser": "dontvo+smtptest@gmail.com",
+    "userGcInternal": false,
+    "userTenantInternal": false
+  },
+  {
+    "name": "bc",
+    "maintainers": {
+      "fn": "GC API Store Team",
+      "email": "ic.api_store-magasin_des_apis.ic@canada.ca",
+      "url": "https:\/\/api.canada.ca"
+    },
+    "description": "Government of British Columbia",
+    "apis": [
+      
+    ],
+    "authenticatedUser": "dontvo+smtptest@gmail.com",
+    "userGcInternal": false,
+    "userTenantInternal": false
+  },
+  {
+    "name": "vac-acc",
+    "maintainers": {
+      "fn": "GC API Store Team",
+      "email": "ic.api_store-magasin_des_apis.ic@canada.ca",
+      "url": "https:\/\/api.canada.ca"
+    },
+    "description": "Veterans Affairs Canada",
+    "apis": [
+      
+    ],
+    "authenticatedUser": "dontvo+smtptest@gmail.com",
+    "userGcInternal": false,
+    "userTenantInternal": false
+  },
+  {
+    "name": "qc",
+    "maintainers": {
+      "fn": "GC API Store Team",
+      "email": "ic.api_store-magasin_des_apis.ic@canada.ca",
+      "url": "https:\/\/api.canada.ca"
+    },
+    "description": "Gouvernement du Qu\u00e9bec",
+    "apis": [
+      
+    ],
+    "authenticatedUser": "dontvo+smtptest@gmail.com",
+    "userGcInternal": false,
+    "userTenantInternal": false
+  },
+  {
+    "name": "dnd-mdn",
+    "maintainers": {
+      "fn": "GC API Store Team",
+      "email": "ic.api_store-magasin_des_apis.ic@canada.ca",
+      "url": "https:\/\/api.canada.ca"
+    },
+    "description": "Department of National Defence",
+    "apis": [
+      
+    ],
+    "authenticatedUser": "dontvo+smtptest@gmail.com",
+    "userGcInternal": false,
+    "userTenantInternal": false
+  }
+]
