@@ -82,6 +82,10 @@ const tenantsManager = (function() {
 
             return {
 
+                forEachTenant(tenantHandler){
+                    tenants.forEach(tenant => tenantHandler(tenant))
+                },
+
                 languages: {
                     francais: 2,
                     english: 1
@@ -106,11 +110,9 @@ const tenantsManager = (function() {
                 getApiInfo: async function({ userEmail, language }) {
                     if (userEmail === null) {
                         return Promise.all(tenants.map(tenant => tenant.getApiInfo()))
-                            .then(function(results) {
-                                return outputApiInfoResult(userEmail, language)
-                            })
-                    } else {
-                        return Promise.all(tenants.map(tenant => tenant.getUserPlans(userEmail)))
+                    } 
+                    else {
+                            return Promise.all(tenants.map(tenant => tenant.getUserPlans(userEmail)))
                             .then(function(results){
                                 return outputUserPlans(userEmail, language)
                             })

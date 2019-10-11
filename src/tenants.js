@@ -116,8 +116,8 @@ tenants.Tenant.prototype.addServiceFeatures = async function(featureDescriptions
 }
 
 tenants.Tenant.prototype.validateAPIs = async function(serviceIDarray){
-	let promiseArray = serviceIDarray.map(serviceID => this.requestValidateAPI(serviceID))
-    return Promise.all(promiseArray)
+    let promiseArray = serviceIDarray.map(serviceID => this.requestValidateAPI(serviceID))
+    return  Promise.all(promiseArray)
             .then(x => this.addServiceFeatures(x, serviceIDarray))
 }
 
@@ -142,25 +142,26 @@ tenants.Tenant.prototype.getUserPlans = async function(userEmail){
 }
 
 tenants.Tenant.prototype.getApiInfo = async function() {
-    let serviceListingPromise, activeDocsPromise
+    let promiseArray, serviceListingPromise, activeDocsPromise
 
     serviceListingPromise = new Promise((resolve, reject) => {
         this.requestServiceListing()
-	    //get the service list for that tenant
         .then(services => this.addServices(services))
-	    //then get the validations for those services
-	    .then(serviceIdArray => this.validateAPIs(serviceIdArray))
+        .then(x => this.validateAPIs(x))
         .then(x => resolve(x))
+        .catch(err => console.log(err))
     })
 
     activeDocsPromise = new Promise((resolve, reject) => {
         this.requestActiveDocsListing()
-            .then(activeDocs => this.addDocs(activeDocs))
-            .then(x => resolve(x))
+        .then(activeDocs => this.addDocs(activeDocs))
+        .then(x => resolve(x))
+        .catch(err => console.log(err))
     })
 
-    let promiseArray = [serviceListingPromise, activeDocsPromise]
-    return Promise.all(promiseArray)
+    //fulfills both promises in paralell
+    return Promise.all([serviceListingPromise, activeDocsPromise])
+
  }
 
 

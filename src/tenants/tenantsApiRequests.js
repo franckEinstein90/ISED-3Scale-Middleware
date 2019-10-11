@@ -73,18 +73,12 @@ tenants.Tenant.prototype.getTenantSubscriptionKeysForUserPromise = function({
     }
 }
 
-tenants.Tenant.prototype.requestServiceList = function() {
+tenants.Tenant.prototype.requestServiceListing = function() {
     let apiCall = this.accountAdminBaseURL.services
     return new Promise((resolve, reject) => {
         request(apiCall, function(err, response, body) {
-            if (err) {
-                resolve([])
-            }
-            try {
-                resolve(JSON.parse(body).services)
-            } catch (e) {
-                resolve(e)
-            }
+            if (err)  return resolve([])
+            resolve(JSON.parse(body).services)
         })
     })
 }
@@ -93,17 +87,8 @@ tenants.Tenant.prototype.requestActiveDocsListing = function() {
     let apiCall = this.accountAdminBaseURL.activeDocs
     return new Promise((resolve, reject) => {
         request(apiCall, function(err, response, body) {
-            if (err) {
-                resolve(tenants.codes.activeDocsNotFound)
-            }
-            try {
-                let activeDocs = JSON.parse(body).api_docs
-                resolve(activeDocs)
-
-            } catch (e) {
-                resolve(e)
-            }
-
+            if (err) return resolve(tenants.codes.activeDocsNotFound)
+            resolve(JSON.parse(body).api_docs)
         })
     })
 }
@@ -121,12 +106,7 @@ tenants.Tenant.prototype.requestValidateAPI = function(serviceID) {
             if (err) {
                 resolve(tenants.codes.noApiValidation)
             }
-            try {
-                let apiValidation = JSON.parse(body)
-                resolve(apiValidation)
-            } catch (e) {
-                resolve(e)
-            }
+            resolve(JSON.parse(body))
         })
     })
 }

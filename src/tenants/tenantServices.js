@@ -7,7 +7,7 @@ const tenantServices = (function(){
             constructor(){
                 this.register = new Map() //(serviceID => (serviceDef x serviceDoc))
             }
-        },
+        }
 
     }
 })()

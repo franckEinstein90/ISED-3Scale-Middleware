@@ -7,7 +7,7 @@ const utils = (function() {
     return {
 
         readConfigFile: function() {
-        //used for testing
+            //used for testing
             console.log(__dirname)
             try {
                 let filePath, rawData;
@@ -21,7 +21,7 @@ const utils = (function() {
                 throw (err)
             }
         }
-       
+
     }
 
 })()
