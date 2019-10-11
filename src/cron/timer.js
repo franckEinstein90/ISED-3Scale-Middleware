@@ -1,15 +1,25 @@
-const cron = require('node-cron')
+const tenantsManager = require('@services/userInfo').tenantsManager
 
-const cacheUpdates = (function(){
+const cacheManage = (function() {
 
     return {
-        updateCache: function(){
-            
+        cronUpdate: function() {
+            if (this.runningMinutes === undefined) {
+                this.runningMinutes = 0
+            }
+            this.runningMinutes += 1
+            console.log(`- app has been running for ${this.runningMinutes} mins`)
+            console.log(`Managing tenants:`)
+            tenantsManager.alive()
+        },
+
+        updateCache: function() {
+
         }
     }
 
 })()
 
 module.exports = {
-    cacheUpdates
+    cacheManage
 }

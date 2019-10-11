@@ -87,6 +87,9 @@ const tenantsManager = (function() {
                     english: 1
                 },
 
+                alive: function(){
+                    tenants.forEach( tenant => console.log(tenant.name))
+                }, 
                 //on ready is run once at application startup
                 onReady: function(dataJSON) {
                     env = dataJSON.env
