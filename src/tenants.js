@@ -114,6 +114,7 @@ tenants.Tenant.prototype.addServiceFeatures = async function(featureDescriptions
     }
     console.log(featureDescription)
 }
+
 tenants.Tenant.prototype.validateAPIs = async function(serviceIDarray){
 	let promiseArray = serviceIDarray.map(serviceID => this.requestValidateAPI(serviceID))
     return Promise.all(promiseArray)

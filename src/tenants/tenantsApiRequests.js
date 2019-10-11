@@ -73,7 +73,7 @@ tenants.Tenant.prototype.getTenantSubscriptionKeysForUserPromise = function({
     }
 }
 
-tenants.Tenant.prototype.requestServiceListing = function() {
+tenants.Tenant.prototype.requestServiceList = function() {
     let apiCall = this.accountAdminBaseURL.services
     return new Promise((resolve, reject) => {
         request(apiCall, function(err, response, body) {

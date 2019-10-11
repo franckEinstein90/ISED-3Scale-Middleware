@@ -1,0 +1,37 @@
+
+- changed method of loading config information from ad-hoc file read to standard method (config)
+- implemented a tenant class to store tenant information
+- as well as an account class
+
+- rearchitected the script completely, placed routes in their own separate file, added a path loading scheme for requires, separated into logical components...objective for product : 
+    : can be xpanded
+    : is modularized so evry component can be tested separately
+done. 
+
+- added postman test scripts and mocha+chai unit tests
+- untangled the super-messy web of promises and request calls, changed the way init data is loaded (at startup of script instead of for every api call)
+- removed about 5 or 6 uneccessary libraries (promise-request, bluebird, async.js, ...) replaced by native nodeJS javascript
+- got the userInfo part working and on openShift dev
+- started work on the api.json part
+
+reason for late
+
+The calls made to the api.json endpoint get the information from 3scale and present it on the drupal portal 
+
+In the original script, api requests calls to 3Scale are made in series, using an asyn.js library function "eachSeries", which as its name indicates, xcutes promises in series...
+
+...which is unfortunate, because those calls don't rely on each other, and because between 4 and 6 are made for each tenant. 
+
+For example, the calls to get the api docs don't rely on the calls to get the service list, and the call to get the user information from email input don't rely on either...and once the service list is obtained, more calls are made that rely on the information previously fetched, but not on each other. As before, they also can and should be made in parallel. It's as if every add on a page loaded one after the other...twould take forever
+
+it adds up. 
+
+I've mapped the dependencies between the calls and changed the call order to paralize what should  be parallized. also
+- put all the requests routine to the api in their own file
+- added a serviceRegister class which encapsulates service information
+- added a validation module that verifies the query input
+- added a code table for error returns
+- as before, I also changed the code structure to make debugging and testing easier
+
+
+below is a diagram of what the call order is now as opposed to what it was before.  
