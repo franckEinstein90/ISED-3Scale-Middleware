@@ -38,8 +38,8 @@ const tenants = (function() {
                     accounts: `https://${this.adminDomain}/admin/api/accounts/`,
                     services: `https://${this.adminDomain}/admin/api/services.json?access_token=${this.accessToken}`,
                     activeDocs: `${this.baseURL}/active_docs.json?access_token=${this.accessToken}`,
-                    apiService: serviceID => `${this.baseURL}/services/${serviceID}/features.json?access_token=${this.accessToken}`,
-                    userAccount: email => `${this.baseURL}accounts/find?access_token=${this.accessToken}&email=${encodeURIComponent(email)}`
+                    apiService: serviceID => `${this.baseURL}services/${serviceID}/features.json?access_token=${this.accessToken}`,
+                    userAccount: email => `${this.baseURL}accounts/find.json?access_token=${this.accessToken}&email=${encodeURIComponent(email)}`
                 }
 
             }
@@ -52,33 +52,33 @@ const tenants = (function() {
 
 tenants.Tenant.prototype.processAccountInfoResponse = function(clientEmail, promiseResult) {
     console.log(promiseResult)
-    if (promiseResult === tenants.codes.noAccount) {
+    if (promiseResult === null) {
         console.log(`no accounts for tenant ${this.name}`)
-        return promiseResult
+        return null
     } else {
         console.log(`adding account ${promiseResult.id} to tenant ${this.name}`)
         this.accounts.set(clientEmail, new accounts.Account(promiseResult));
-        return this.getTenantSubscriptionKeysForUserPromise({
-            userEmail: clientEmail
-        })
+        return this.getTenantSubscriptionKeysForUserPromise({ userEmail: clientEmail })
     }
 }
 
-tenants.Tenant.prototype.processSubscriptionKeyInfoResponse = function(promiseResult) {
-    if (Array.isArray(promiseResult)) { //the promise resolves to an array of applications if successful
+tenants.Tenant.prototype.processSubscriptionKeyInfoResponse = function(subscriptions, email) {
+    if (Array.isArray(subscriptions)) { //the promise resolves to an array of applications if successful
+        let accountApplications = this.accounts.get(email).applications
+        subscriptions.forEach(
+            function(application) {
+                let accountApplication = accountApplications.find(x => x.id === application.application.id)
+                accountApplication.enabled = application.application.enabled 
+                accountApplication.end_user_required = application.application.end_user_required
+                accountApplication.plan_id = application.application.plan_id
+                accountApplication.provider_verification_key = application.application.provider_verification_key
+            })
         return this
     }
-    return promiseResult
+    return subscriptions
 }
 
-tenants.Tenant.prototype.getAccountInfo = async function(clientEmail) {
-    return new Promise((resolve, reject) => {
-        this.getAccountInfoPromise(clientEmail)
-            .then(x => this.processAccountInfoResponse(clientEmail, x))
-            .then(x => this.processSubscriptionKeyInfoResponse(x))
-            .then(x => resolve(x))
-    })
-}
+
 
 
 tenants.Tenant.prototype.addServices = async function(serviceArray) {
@@ -99,26 +99,33 @@ tenants.Tenant.prototype.addDocs = async function(apiDocsArray){
     })
 }
 
-tenants.Tenant.prototype.addServiceFeatures = async function(featureDescriptions, servicesIDs){
+tenants.Tenant.prototype.addServiceFeatures = async function(featureDescriptions){
     if(Array.isArray(featureDescriptions)){
-        if(featureDescriptions.length !== servicesIDs.length){
+        if(featureDescriptions.length !== this.services.length()){
             console.log('problem')
             return
         }
-        featureDescriptions.forEach(
-            (features, idx) => {
-                this.services.addServiceFeatures(features, servicesIDs[idx])
-            })
-
-        return
+        featureDescriptions.forEach(features => this.services.addServiceFeatures(features))
+        return 'done'
     }
     console.log(featureDescription)
 }
 
-tenants.Tenant.prototype.validateAPIs = async function(serviceIDarray){
-    let promiseArray = serviceIDarray.map(serviceID => this.requestValidateAPI(serviceID))
+tenants.Tenant.prototype.validateAPIs = async function(){
+    let promiseArray = this.services.mapIDs(serviceID => this.requestValidateAPI(serviceID))
     return  Promise.all(promiseArray)
-            .then(x => this.addServiceFeatures(x, serviceIDarray))
+            .then(x => this.addServiceFeatures(x))
+}
+
+
+//processes userInfo.json
+tenants.Tenant.prototype.getUserInfo = async function(clientEmail) {
+    return new Promise((resolve, reject) => {
+        this.getAccountInfoPromise(clientEmail)
+            .then(x => this.processAccountInfoResponse(clientEmail, x))
+            .then(x => this.processSubscriptionKeyInfoResponse(x, clientEmail))
+            .then(x => resolve(x))
+    })
 }
 
 tenants.Tenant.prototype.getUserPlans = async function(userEmail){
@@ -158,12 +165,11 @@ tenants.Tenant.prototype.getApiInfo = async function() {
     serviceListingPromise = new Promise((resolve, reject) => {
         this.requestServiceListing()
         .then(services => this.addServices(services))
-        .then(x => this.validateAPIs(x))
         .then(x => resolve(x))
         .catch(err => console.log(err))
     })
 
-    activeDocsPromise = new Promise((resolve, reject) => {
+   activeDocsPromise = new Promise((resolve, reject) => {
         this.requestActiveDocsListing()
         .then(activeDocs => this.addDocs(activeDocs))
         .then(x => resolve(x))
@@ -172,6 +178,7 @@ tenants.Tenant.prototype.getApiInfo = async function() {
 
     //fulfills both promises in paralell
     return Promise.all([serviceListingPromise, activeDocsPromise])
+        .then(_ => this.validateAPIs())
 
  }
 

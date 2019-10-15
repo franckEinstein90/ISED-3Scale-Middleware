@@ -2,36 +2,23 @@
 
 const request = require('request')
 const tenants = require('@src/tenants').tenants
-const xmlParser = require('xml2js').parseString
 /***********************API Requests******************************* */
 
 tenants.Tenant.prototype.getAccountInfoPromise = function(clientEmail) {
     //returns a promise that gets the user info from the api
-
-    let apiCall = [
-        this.accountAdminBaseURL.accounts,
-        "find.json?",
-        `access_token=${this.accessToken}&`,
-        `email=${encodeURIComponent(clientEmail)}`
-    ].join('')
-
-
+    let apiCall = this.accountAdminBaseURL.userAccount(clientEmail)
+    
     return new Promise((resolve, reject) => {
         request(apiCall, function(err, response, body) {
             if (err) {
-                resolve(`{"status":"Not Found"}`)
+                return null
             }
-            try {
-                let result = JSON.parse(body)
-                if ('status' in result) {
-                    resolve(tenants.codes.noAccount)
+            let result = JSON.parse(body)
+            if ('status' in result) {
+                    resolve(null)
                 } else {
-                    let accountInfo = JSON.parse(body).account
-                    resolve(accountInfo)
+                    resolve(JSON.parse(body).account)
                 }
-            } catch (e) {
-                resolve(e)
-            }
         })
     })
 }
@@ -99,25 +86,11 @@ tenants.Tenant.prototype.requestUserPlan = function(userEmail){
     return new Promise((resolve, reject)=>{
         request(apiCall, function(err, response, body){
             if(err) return resolve(null)
-            let account
-            xmlParser(body, (err, result)=>{
-                if(result === null){
-                    account = {}
-                }else{
-                account = result.account
-                }
-            })
-            resolve(account)
+            resolve(JSON.parse.body)
         })
     })
 }
-/*
-'https://' 
- tenantWithResource.admin_domain 
- '/admin/api/services/' 
- api.service.id 
- '/features.json?access_token=' + tenantWithResource.access_token;
- */
+
 tenants.Tenant.prototype.requestValidateAPI = function(serviceID) {
     let apiCall = this.accountAdminBaseURL.apiService(serviceID)
     return new Promise((resolve, reject) => {
@@ -125,7 +98,7 @@ tenants.Tenant.prototype.requestValidateAPI = function(serviceID) {
             if (err) {
                 resolve(tenants.codes.noApiValidation)
             }
-            resolve(JSON.parse(body))
+            resolve({service: serviceID, body: JSON.parse(body)})
         })
     })
 }
