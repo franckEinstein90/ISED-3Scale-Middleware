@@ -12,8 +12,7 @@ const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 
 const utils = require('@src/utils.js').utils
-const tenantsManager = require('@services/userInfo.js').tenantsManager
-
+const tenantsManager = require('@services/tenantsManager').tenantsManager 
 const cronJob = require('node-cron')
 const timer = require('@src/cron/timer.js').cacheManage
 

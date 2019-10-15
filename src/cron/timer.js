@@ -1,4 +1,4 @@
-const tenantsManager = require('@services/userInfo').tenantsManager
+const tenantsManager = require('@services/tenantsManager').tenantsManager
 const cache = require('memory-cache')
 
 const cacheManage = (function() {

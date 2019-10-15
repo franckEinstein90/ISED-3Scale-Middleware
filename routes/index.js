@@ -7,7 +7,7 @@ const express = require('express')
 const router = express.Router()
 const assert = require('chai').assert
 
-const tenantsManager = require('@services/userInfo').tenantsManager
+const tenantsManager = require('@services/tenantsManager').tenantsManager
 const validate = require('./queryManager').query.validate
 
 router.get('/userinfo.json', 
