@@ -10,17 +10,12 @@ tenants.Tenant.prototype.getAccountInfoPromise = function(clientEmail) {
     
     return new Promise((resolve, reject) => {
         request(apiCall, function(err, response, body) {
-            if (err) {
-                return null
-            }
+            if (err) return resolve(null)
+           
             let result = JSON.parse(body)
-            if ('status' in result) {
-                    resolve(null)
-                } else {
-                    resolve(JSON.parse(body).account)
-                }
-        })
-    })
+            if ('status' in result) return resolve(null)
+            resolve(JSON.parse(body).account)
+        }
 }
 
 tenants.Tenant.prototype.getTenantSubscriptionKeysForUserPromise = function({
@@ -95,9 +90,7 @@ tenants.Tenant.prototype.requestValidateAPI = function(serviceID) {
     let apiCall = this.accountAdminBaseURL.apiService(serviceID)
     return new Promise((resolve, reject) => {
         request(apiCall, function(err, response, body) {
-            if (err) {
-                resolve(tenants.codes.noApiValidation)
-            }
+            if (err) return resolve(tenants.codes.noApiValidation)
             resolve({service: serviceID, body: JSON.parse(body)})
         })
     })
