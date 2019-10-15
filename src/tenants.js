@@ -39,7 +39,7 @@ const tenants = (function() {
                     services: `https://${this.adminDomain}/admin/api/services.json?access_token=${this.accessToken}`,
                     activeDocs: `${this.baseURL}/active_docs.json?access_token=${this.accessToken}`,
                     apiService: serviceID => `${this.baseURL}/services/${serviceID}/features.json?access_token=${this.accessToken}`,
-                    userAccount: email => `${this.baseURL}/accounts/find?access_token=${this.accessToken}&email=${encodeURIComponent(email)}`
+                    userAccount: email => `${this.baseURL}accounts/find?access_token=${this.accessToken}&email=${encodeURIComponent(email)}`
                 }
 
             }
@@ -122,7 +122,7 @@ tenants.Tenant.prototype.validateAPIs = async function(serviceIDarray){
 }
 
 tenants.Tenant.prototype.getUserPlans = async function(userEmail){
-    let serviceListingPromise, activeDocsPromise
+    let serviceListingPromise, activeDocsPromise, accountPlans
 
     serviceListingPromise = new Promise((resolve, reject) => {
         this.requestServiceListing()
@@ -137,7 +137,18 @@ tenants.Tenant.prototype.getUserPlans = async function(userEmail){
             .then(x => resolve(x))
     })
 
-    let promiseArray = [serviceListingPromise, activeDocsPromise]
+    accountPlans = new Promise((resolve, reject) =>{
+        this.requestUserPlan(userEmail)
+            .then(result => {
+                console.log(result)
+                if ((typeof(result) === 'object') && ('id' in result)){
+                    this.accounts.set(userEmail, result)
+                } 
+            })
+            .then(x => resolve(x))
+    })
+
+    let promiseArray = [serviceListingPromise, activeDocsPromise, accountPlans]
     return Promise.all(promiseArray)
 }
 

@@ -2,6 +2,7 @@
 
 const request = require('request')
 const tenants = require('@src/tenants').tenants
+const xmlParser = require('xml2js').parseString
 /***********************API Requests******************************* */
 
 tenants.Tenant.prototype.getAccountInfoPromise = function(clientEmail) {
@@ -89,6 +90,24 @@ tenants.Tenant.prototype.requestActiveDocsListing = function() {
         request(apiCall, function(err, response, body) {
             if (err) return resolve(tenants.codes.activeDocsNotFound)
             resolve(JSON.parse(body).api_docs)
+        })
+    })
+}
+
+tenants.Tenant.prototype.requestUserPlan = function(userEmail){
+    let apiCall = this.accountAdminBaseURL.userAccount(userEmail)
+    return new Promise((resolve, reject)=>{
+        request(apiCall, function(err, response, body){
+            if(err) return resolve(null)
+            let account
+            xmlParser(body, (err, result)=>{
+                if(result === null){
+                    account = {}
+                }else{
+                account = result.account
+                }
+            })
+            resolve(account)
         })
     })
 }

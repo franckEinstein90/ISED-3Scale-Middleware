@@ -12,6 +12,11 @@ const tenantServices = (function(){
     }
 })()
 
+
+tenantServices.ServiceRegister.prototype.forEach = function(callback){
+    this.register.forEach(callback)
+}
+
 tenantServices.ServiceRegister.prototype.addServiceDocs = async function(docObj){
     let serviceID = docObj.api_doc.service_id
     if(this.register.has(serviceID)){

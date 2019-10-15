@@ -21,7 +21,7 @@ let initISEDMiddleWare = async function() {
     let JSONData = config.get('master')
     tenantsManager.onReady(JSONData)
 //    cronJob.schedule('* * * * *', timer.cronUpdate);
-    timer.cronUpdate()
+  //  timer.cronUpdate()
 }
 
 initISEDMiddleWare()

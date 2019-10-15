@@ -27,7 +27,8 @@
     "request": "^2.88.0",
     "request-promise": "^4.2.4",
     "unirest": "^0.6.0",
-    "validator": "^11.1.0"
+    "validator": "^11.1.0",
+    "xml2js": "^0.4.22"
   },
   "devDependencies": {
     "chai": "^4.2.0",
