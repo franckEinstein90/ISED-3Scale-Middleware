@@ -31,11 +31,11 @@ tenantServices.ServiceRegister.prototype.forEach = function(callback){
 tenantServices.ServiceRegister.prototype.addServiceDocs = async function(docObj){
     let serviceID = docObj.api_doc.service_id
     if(this.register.has(serviceID)){
-        (this.register.get(serviceID)).serviceDocumentation = docObj.api_doc
+        (this.register.get(serviceID)).serviceDocumentation.push(docObj.api_doc)
     }
     else{
         this.serviceIDs.push(serviceID)
-        this.register.set(serviceID, {serviceDocumentation: docObj.api_doc})
+        this.register.set(serviceID, {serviceDocumentation: [docObj.api_doc]})
     }
 }
 

@@ -15,7 +15,8 @@ tenants.Tenant.prototype.getAccountInfoPromise = function(clientEmail) {
             let result = JSON.parse(body)
             if ('status' in result) return resolve(null)
             resolve(JSON.parse(body).account)
-        }
+        })
+    })
 }
 
 tenants.Tenant.prototype.getTenantSubscriptionKeysForUserPromise = function({
@@ -81,7 +82,7 @@ tenants.Tenant.prototype.requestUserPlan = function(userEmail){
     return new Promise((resolve, reject)=>{
         request(apiCall, function(err, response, body){
             if(err) return resolve(null)
-            resolve(JSON.parse.body)
+            resolve(JSON.parse(body))
         })
     })
 }

@@ -92,15 +92,19 @@ const tenantsManager = (function() {
     return {
         tenants: function(){
             return tenants
-        }, 
-        //called by cron job, updates all tenant information 
-        //in memory
-        updateTenantInformation: function() {
+        },
+        
+
+        //called by cron job, updates all 
+        //tenant information in memory
+        updateTenantInformation: async function() {
+            let resolveCheck = function(updateErrors){
+                //checks for update errors and recovers
+                console.log(tenants)
+            }
             console.log(`updating tenant information`)
-            return Promise.all(tenants.map(tenant => tenant.getApiInfo()))
-            .then(
-                x => console.log(tenants)
-                )
+            return Promise.all( tenants.map( t => t.getApiInfo()))
+                   .then( updateErrors => resolveCheck(updateErrors)) 
         },
 
         languages: {
