@@ -4,22 +4,40 @@ const tenantServices = (function(){
 
     return{
         ServiceRegister: class{
-            constructor(){
+            constructor(tenant){
+                this.tenant = tenant
                 this.serviceIDs = []
                 this.register = new Map() //(serviceID => (serviceDef x serviceDoc))
             }
+        }, 
+        Service: class{
+            constructor(serviceID, tenant){
+                this.id = serviceID
+                this.tenant = tenant
+            }
         }
-
     }
 })()
 
+tenantServices.Service.prototype.updateDefinition = function(defObj){
+    console.log("here")
+    if(typeof(defObj) === 'object' && 'id' in defObj && defObj.id === this.id){
+        Object.assign(this, defObj) 
+    }
+}
+
+tenantServices.Service.prototype.addDocs = function(docObj){
+
+}
+tenantServices.Service.prototype.fetchFeatures = function(){
+
+}
 tenantServices.ServiceRegister.prototype.length = function(){
     return this.serviceIDs.length
 }
 tenantServices.ServiceRegister.prototype.mapIDs = function (callback){
 	return this.serviceIDs.map(callback)
 }
-	
 tenantServices.ServiceRegister.prototype.forEachServiceID = function(callback){
     this.serviceIDs.forEach(callback)
 }
@@ -42,11 +60,13 @@ tenantServices.ServiceRegister.prototype.addServiceDocs = async function(docObj)
 tenantServices.ServiceRegister.prototype.addServiceDefinition = async function(serviceDefinitionObject){
     let serviceID = serviceDefinitionObject.id
     if(this.register.has(serviceID)){
-        (this.register.get(serviceID)).serviceDefinition = serviceDefinitionObject
+        (this.register.get(serviceID)).updateDefinition(serviceDefinitionObject)
     }
     else{
         this.serviceIDs.push(serviceID)
-        this.register.set(serviceID, {serviceDefinition: serviceDefinitionObject})
+        let newServiceObject = new tenantServices.Service(serviceID, this.tenant)
+        newServiceObject.updateDefinition(serviceDefinitionObject)
+        this.register.set(serviceID, newServiceObject) 
     }
 }
 

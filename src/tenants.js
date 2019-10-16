@@ -31,7 +31,7 @@ const tenants = (function() {
                     return (lang === 'en') ? tenantJSONInfo.description_en : tenantJSONInfo.description_fr
                 }
                 this.accounts = new Map() //indexed by email addresses
-                this.services = new ServiceRegister()
+                this.services = new ServiceRegister(this)
                 this.accessToken = tenantJSONInfo.access_token
                 this.baseURL = `https://${this.adminDomain}/admin/api/`
                 this.accountAdminBaseURL = {
