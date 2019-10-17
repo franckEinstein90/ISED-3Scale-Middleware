@@ -20,7 +20,10 @@ const utils = (function() {
                 console.log(err)
                 throw (err)
             }
-        }
+        }, 
+				log: function(str){
+					console.log(str)
+				}
 
     }
 

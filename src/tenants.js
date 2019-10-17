@@ -84,7 +84,6 @@ tenants.Tenant.prototype.processSubscriptionKeyInfoResponse = function(subscript
 tenants.Tenant.prototype.addServices = async function(serviceArray) {
 	serviceArray.forEach(
 		service => {
-		    console.log(`adding service "${service.service.name}"(id:${service.service.id}) to ${this.name}`)
 		    this.services.addServiceDefinition(service.service)
 	})
 	//returns the ids of the services that were added to the tenant
@@ -178,7 +177,14 @@ tenants.Tenant.prototype.getApiInfo = async function() {
 
     //fulfills both promises in paralell
     return Promise.all([serviceListingPromise, activeDocsPromise])
-        .then(_ => this.validateAPIs())
+        .then(function(result){
+            console.log(result)
+        })
+        .catch(err) {
+            //error updating tenant services
+        }
+        
+        //=> this.validateAPIs())
 
  }
 
