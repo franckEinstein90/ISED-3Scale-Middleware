@@ -7,9 +7,9 @@ const cache = require('memory-cache')
 const tenantsManager = (function() {
 
     let env, applicationAPIURI, tenants,
-        outputUserInfoResponse, apiReqResponse,
-        tenantToUserPlans, outputUserPlans,
-        getApiName
+        outputUserInfoResponse, 
+	apiReqResponse, tenantToUserPlans, tenantToApiInfo, 
+	outputUserPlans, getApiName
 
     tenants = []
 
@@ -70,6 +70,7 @@ const tenantsManager = (function() {
         })
         return JSON.stringify(outputJSON)
     }
+
     tenantToUserPlans = function(tenant, userEmail, language) {
         return {
             name: tenant.name,
@@ -83,28 +84,31 @@ const tenantsManager = (function() {
             authenticatedUser: userEmail
         }
     }
-    apiReqResponse = function(tenant, language) {
+
+    tenantToApiInfo = function(tenant, language) {
         return {
             name: tenant.name,
             description: tenant.tenantDescription(language),
+            maintainers: tenant.maintainers(language), 
+            apis: tenant.apiDescriptions(language)
         }
     }
     return {
-        tenants: function(){
+        tenants: function() {
             return tenants
         },
-        
+
 
         //called by cron job, updates all 
         //tenant information in memory
         updateTenantInformation: async function() {
-            let resolveCheck = function(updateErrors){
+            let resolveCheck = function(updateErrors) {
                 //checks for update errors and recovers
                 console.log(tenants)
             }
             console.log(`updating tenant information`)
-            return Promise.all( tenants.map( t => t.getApiInfo()))
-                   .then( updateErrors => resolveCheck(updateErrors)) 
+            return Promise.all(tenants.map(t => t.getApiInfo()))
+                .then(updateErrors => resolveCheck(updateErrors))
         },
 
         languages: {
@@ -128,18 +132,24 @@ const tenantsManager = (function() {
             })
         },
 
-        getApiInfo: async function({ userEmail, language }) {
+        getApiInfo: function({
+            userEmail,
+            language
+        }) {
             if (userEmail === null) {
-                return Promise.all(tenants.map(tenant => tenant.getApiInfo()))
-                    .then(_ =>
-                        JSON.stringify(tenants.map(
-                            tenant => apiReqResponse(tenant, language))))
-            } else {
-                return Promise.all(tenants.map(tenant => tenant.getUserPlans(userEmail)))
+		        let answer = JSON.stringify(
+                    tenants
+                        .map(t => tenantToApiInfo(t, language))
+                        .sort((t1,t2) => t1.name.localeCompare(t2.name)))
+            	return answer
+            } 
+		
+	
+           /*     return Promise.all(tenants.map(tenant => tenant.getUserPlans(userEmail)))
                     .then(_ =>
                         JSON.stringify(tenants.map(
                             tenant => tenantToUserPlans(tenant, userEmail, language))))
-            }
+           */ 
         },
 
         getUserInfo: async function({

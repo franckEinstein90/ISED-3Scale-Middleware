@@ -5,7 +5,6 @@
 
 "use strict";
 
-const errHandle = require('@errors').errors.errorHandler
 const accounts = require('@src/accounts').accounts
 const ServiceRegister = require('@src/tenants/tenantServices').tenantServices.ServiceRegister
 const tenants = (function() {
@@ -21,46 +20,11 @@ const tenants = (function() {
             noApiValidation: 7
         },
 
-
+      
         Tenant: class {
 
             constructor(tenantJSONInfo) {
                 this.name = tenantJSONInfo.name
-                this.maintainers = function(lang) {
-                    let maintainerObject = {
-                        email: "ic.api_store-magasin_des_apis.ic@canada.ca",
-                        url: "https://api.canada.ca"
-                    }
-                    if (lang === 'en') {
-                        maintainerObject.fn = "GC API Store Team"
-                    } else {
-                        maintainerObject.fn = "Infrench"
-                    }
-                    return maintainerObject
-                }
-		this.apiDescriptions = function(language){
-
-            let result, apiDescription
-            result = []
-            apiDescription = function(service){
-                let documentationHandle = `${service.system_name.toLowerCase()}-${language}`
-                if(service.documentation.has(documentationHandle)){
-                    let docInfo = service.documentation.get(documentationHandle)
-                    let swaggerBody = JSON.parse(docInfo.body)
-                    return {
-                        name: swaggerBody.info.title,
-                        baseURL: `https://${swaggerBody.host}${swaggerBody.basePath}`
-                    }
-                }
-            }
-            this.services.register.forEach(
-                (service, serviceID) => {
-                    let apiDesc = apiDescription(service)
-                    if(apiDesc) result.push(apiDesc)
-                }
-            )
-			return result
-		}
                 this.adminDomain = tenantJSONInfo.admin_domain
                 this.domain = tenantJSONInfo.domain
                 this.tenantDescription = function(lang) {
@@ -77,6 +41,7 @@ const tenants = (function() {
                     apiService: serviceID => `${this.baseURL}services/${serviceID}/features.json?access_token=${this.accessToken}`,
                     userAccount: email => `${this.baseURL}accounts/find.json?access_token=${this.accessToken}&email=${encodeURIComponent(email)}`
                 }
+
             }
         }
     }
@@ -93,9 +58,7 @@ tenants.Tenant.prototype.processAccountInfoResponse = function(clientEmail, prom
     } else {
         console.log(`adding account ${promiseResult.id} to tenant ${this.name}`)
         this.accounts.set(clientEmail, new accounts.Account(promiseResult));
-        return this.getTenantSubscriptionKeysForUserPromise({
-            userEmail: clientEmail
-        })
+        return this.getTenantSubscriptionKeysForUserPromise({ userEmail: clientEmail })
     }
 }
 
@@ -105,7 +68,7 @@ tenants.Tenant.prototype.processSubscriptionKeyInfoResponse = function(subscript
         subscriptions.forEach(
             function(application) {
                 let accountApplication = accountApplications.find(x => x.id === application.application.id)
-                accountApplication.enabled = application.application.enabled
+                accountApplication.enabled = application.application.enabled 
                 accountApplication.end_user_required = application.application.end_user_required
                 accountApplication.plan_id = application.application.plan_id
                 accountApplication.provider_verification_key = application.application.provider_verification_key
@@ -118,30 +81,26 @@ tenants.Tenant.prototype.processSubscriptionKeyInfoResponse = function(subscript
 
 
 
-tenants.Tenant.prototype.addServices =
-    async function(serviceArray) {
-
-        let resultArray = serviceArray.map(
-            service => this.services.addServiceDefinition(service.service)
-        )
-        //returns the ids of the services that were added to the tenant
-        return resultArray
-    }
-
-tenants.Tenant.prototype.addDocs = async function(apiDocsArray) {
-
-    if (!Array.isArray(apiDocsArray)) {
-        return
-    }
-    let resultArray = apiDocsArray.map(
-        apiDocObject => this.services.addServiceDocs(apiDocObject)
-    )
-    return resultArray
+tenants.Tenant.prototype.addServices = async function(serviceArray) {
+	serviceArray.forEach(
+		service => {
+		    this.services.addServiceDefinition(service.service)
+	})
+	//returns the ids of the services that were added to the tenant
+	return serviceArray.map(service => service.service.id)
 }
 
-tenants.Tenant.prototype.addServiceFeatures = async function(featureDescriptions) {
-    if (Array.isArray(featureDescriptions)) {
-        if (featureDescriptions.length !== this.services.length()) {
+tenants.Tenant.prototype.addDocs = async function(apiDocsArray){
+    if(!Array.isArray(apiDocsArray)){ return }
+    apiDocsArray.forEach(
+        apiDocObject => {
+            this.services.addServiceDocs(apiDocObject)
+    })
+}
+
+tenants.Tenant.prototype.addServiceFeatures = async function(featureDescriptions){
+    if(Array.isArray(featureDescriptions)){
+        if(featureDescriptions.length !== this.services.length()){
             console.log('problem')
             return
         }
@@ -151,31 +110,31 @@ tenants.Tenant.prototype.addServiceFeatures = async function(featureDescriptions
     console.log(featureDescription)
 }
 
-tenants.Tenant.prototype.validateAPIs = async function() {
+tenants.Tenant.prototype.validateAPIs = async function(){
     let promiseArray = this.services.mapIDs(serviceID => this.requestValidateAPI(serviceID))
-    return Promise.all(promiseArray)
-        .then(x => this.addServiceFeatures(x))
+    return  Promise.all(promiseArray)
+            .then(x => this.addServiceFeatures(x))
 }
 
 
 //processes userInfo.json
-tenants.Tenant.prototype.getUserInfo =
-    async function(clientEmail) {
-        return new Promise((resolve, reject) => {
-            this.getAccountInfoPromise(clientEmail)
-                .then(x => this.processAccountInfoResponse(clientEmail, x))
-                .then(x => this.processSubscriptionKeyInfoResponse(x, clientEmail))
-                .then(x => resolve(x))
-        })
-    }
+tenants.Tenant.prototype.getUserInfo = async function(clientEmail) {
+    return new Promise((resolve, reject) => {
+        this.getAccountInfoPromise(clientEmail)
+            .then(x => this.processAccountInfoResponse(clientEmail, x))
+            .then(x => this.processSubscriptionKeyInfoResponse(x, clientEmail))
+            .then(x => resolve(x))
+    })
+}
 
-tenants.Tenant.prototype.getUserPlans = async function(userEmail) {
+tenants.Tenant.prototype.getUserPlans = async function(userEmail){
     let serviceListingPromise, activeDocsPromise, accountPlans
 
     serviceListingPromise = new Promise((resolve, reject) => {
         this.requestServiceListing()
-            .then(services => this.addServices(services))
-            .then(x => resolve(x))
+	    //get the service list for that tenant
+        .then(services => this.addServices(services))
+        .then(x => resolve(x))
     })
 
     activeDocsPromise = new Promise((resolve, reject) => {
@@ -184,13 +143,13 @@ tenants.Tenant.prototype.getUserPlans = async function(userEmail) {
             .then(x => resolve(x))
     })
 
-    accountPlans = new Promise((resolve, reject) => {
+    accountPlans = new Promise((resolve, reject) =>{
         this.requestUserPlan(userEmail)
             .then(result => {
                 console.log(result)
-                if ((typeof(result) === 'object') && ('id' in result)) {
+                if ((typeof(result) === 'object') && ('id' in result)){
                     this.accounts.set(userEmail, result)
-                }
+                } 
             })
             .then(x => resolve(x))
     })
@@ -200,29 +159,34 @@ tenants.Tenant.prototype.getUserPlans = async function(userEmail) {
 }
 
 tenants.Tenant.prototype.getApiInfo = async function() {
-
     let promiseArray, serviceListingPromise, activeDocsPromise
+
     serviceListingPromise = new Promise((resolve, reject) => {
         this.requestServiceListing()
-            .then(services => resolve(this.addServices(services)))
-            .catch(err => errHandle.log(err))
+        .then(services => this.addServices(services))
+        .then(x => resolve(x))
+        .catch(err => console.log(err))
     })
 
-    activeDocsPromise = new Promise((resolve, reject) => {
+   activeDocsPromise = new Promise((resolve, reject) => {
         this.requestActiveDocsListing()
-            .then(activeDocs => resolve(this.addDocs(activeDocs)))
-            .catch(err => errHandle(err))
+        .then(activeDocs => this.addDocs(activeDocs))
+        .then(x => resolve(x))
+        .catch(err => console.log(err))
     })
 
     //fulfills both promises in paralell
     return Promise.all([serviceListingPromise, activeDocsPromise])
-        .then(x => this.validateAPIs())
-        .catch(err => {
-            console.log(err) //error updating tenant services
+        .then(function(result){
+            console.log(result)
         })
-}
+        .catch(err) {
+            //error updating tenant services
+        }
+        
+        //=> this.validateAPIs())
 
-
+ }
 
 
 
