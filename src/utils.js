@@ -4,8 +4,19 @@ const path = require('path')
 
 const utils = (function() {
 
-    return {
+	 let langCodes, envCodes, runningEnv;
 
+	 langCodes = {
+		 fr: "fr", 
+		 en: "en"
+	 }
+	 envCodes = {
+		 dev: "dev", 
+		 prod: "prod"
+	 }
+    return {
+		  runningEnv(){
+		  }, 
         readConfigFile: function() {
             //used for testing
             console.log(__dirname)
@@ -20,11 +31,17 @@ const utils = (function() {
                 console.log(err)
                 throw (err)
             }
-        }, 
-				log: function(str){
-					console.log(str)
-				}
+        },
 
+        log: function(str) {
+            console.log(str)
+        }, 
+
+		  langMsg: function(language, {fr, en}){
+				if(language === langCodes.fr) return fr
+			   if(language === langCodes.en) return en
+			   throw "non recognized error code"
+		  }
     }
 
 })()

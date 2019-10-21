@@ -2,6 +2,7 @@
 
 const request = require('request')
 const tenants = require('@src/tenants').tenants
+const parseXML = require('xml2js').parseString
 /***********************API Requests******************************* */
 
 tenants.Tenant.prototype.getAccountInfoPromise = function(clientEmail) {
@@ -78,11 +79,19 @@ tenants.Tenant.prototype.requestActiveDocsListing = function() {
 }
 
 tenants.Tenant.prototype.requestUserPlan = function(userEmail){
-    let apiCall = this.accountAdminBaseURL.userAccount(userEmail)
+    let apiCall = this.accountAdminBaseURL.userPlans(userEmail)
+    //Note: 
+    //1. This is a different call than the userAccount call
+    //2. This call returns xml as opposed to JSON
     return new Promise((resolve, reject)=>{
         request(apiCall, function(err, response, body){
+            let jsonResult
             if(err) return resolve(null)
-            resolve(JSON.parse(body))
+            if(body === "") return resolve(null)
+            parseXML(body, function(err, result){
+                jsonResult = result
+            })
+            resolve(jsonResult)
         })
     })
 }

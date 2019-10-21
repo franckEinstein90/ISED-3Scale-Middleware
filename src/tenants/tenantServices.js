@@ -42,6 +42,35 @@ const tenantServices = (function() {
     }
 })()
 
+tenantServices.Service.prototype.outputAPIDescription = function(language) {
+		let documentationHandle = `${this.system_name.toLowerCase()}-${language}`
+      //service.system_name is used to link the french and the english versions
+      //of the documentation. We only display the API and its associated information
+      //if both linguistic versions are present
+      if (this.documentation.has(documentationHandle)) {
+			let docInfo, swaggerBody, apiDescription
+         docInfo = this.documentation.get(documentationHandle)
+         swaggerBody = JSON.parse(docInfo.body)
+         apiDescription = {
+         	name: swaggerBody.info.title,
+            description: swaggerBody.info.description,
+            baseURL: `https://${swaggerBody.host}${swaggerBody.basePath}`,
+            humanURL: [`https://${this.tenant.name}`, 
+								(this.tenant.env === "dev"?".dev":""), 
+								`.api.canada.ca/${language}`, 
+								`/detail?api=${this.system_name}`].join('')	
+         }
+         if (swaggerBody.info.contact) {
+         	apiDescription.contact = {
+            	FN: swaggerBody.info.contact.name,
+               email: swaggerBody.info.contact.email
+            }
+         }
+			return apiDescription 
+		}
+		return null
+}
+
 tenantServices.Service.prototype.updateDefinition = function(defObj) {
     try {
         if (typeof(defObj) === 'object' &&

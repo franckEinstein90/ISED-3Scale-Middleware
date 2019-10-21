@@ -4,7 +4,7 @@
  ***************************************/
 
 "use strict";
-
+const utils = require('@src/utils').utils
 const errHandle = require('@errors').errors.errorHandler
 const accounts = require('@src/accounts').accounts
 const ServiceRegister = require('@src/tenants/tenantServices').tenantServices.ServiceRegister
@@ -24,43 +24,34 @@ const tenants = (function() {
 
         Tenant: class {
 
-            constructor(tenantJSONInfo) {
+            constructor(tenantJSONInfo, env) {
+                this.env = env
                 this.name = tenantJSONInfo.name
                 this.maintainers = function(lang) {
                     let maintainerObject = {
                         email: "ic.api_store-magasin_des_apis.ic@canada.ca",
-                        url: "https://api.canada.ca"
-                    }
-                    if (lang === 'en') {
-                        maintainerObject.fn = "GC API Store Team"
-                    } else {
-                        maintainerObject.fn = "Infrench"
+                        url: "https://api.canada.ca",
+                        fn: utils.langMsg(lang, {
+                            fr: "Equipe du magasin API",
+                            en: "GC API Store Team"
+                        })
                     }
                     return maintainerObject
                 }
-		this.apiDescriptions = function(language){
 
-            let result, apiDescription
-            result = []
-            apiDescription = function(service){
-                let documentationHandle = `${service.system_name.toLowerCase()}-${language}`
-                if(service.documentation.has(documentationHandle)){
-                    let docInfo = service.documentation.get(documentationHandle)
-                    let swaggerBody = JSON.parse(docInfo.body)
-                    return {
-                        name: swaggerBody.info.title,
-                        baseURL: `https://${swaggerBody.host}${swaggerBody.basePath}`
-                    }
+                this.apiDescriptions = function(language) {
+
+                    let listOfApis = []
+                    this.services.register.forEach(
+                        (service, serviceID) => {
+                            //checks if there is a valid set of documentation 
+                            //attached to this service
+                            let apiDesc = service.outputAPIDescription(language)
+                            if (apiDesc) listOfApis.push(apiDesc)
+                        }
+                    )
+                    return listOfApis
                 }
-            }
-            this.services.register.forEach(
-                (service, serviceID) => {
-                    let apiDesc = apiDescription(service)
-                    if(apiDesc) result.push(apiDesc)
-                }
-            )
-			return result
-		}
                 this.adminDomain = tenantJSONInfo.admin_domain
                 this.domain = tenantJSONInfo.domain
                 this.tenantDescription = function(lang) {
@@ -75,7 +66,8 @@ const tenants = (function() {
                     services: `https://${this.adminDomain}/admin/api/services.json?access_token=${this.accessToken}`,
                     activeDocs: `${this.baseURL}/active_docs.json?access_token=${this.accessToken}`,
                     apiService: serviceID => `${this.baseURL}services/${serviceID}/features.json?access_token=${this.accessToken}`,
-                    userAccount: email => `${this.baseURL}accounts/find.json?access_token=${this.accessToken}&email=${encodeURIComponent(email)}`
+                    userAccount: email => `${this.baseURL}accounts/find.json?access_token=${this.accessToken}&email=${encodeURIComponent(email)}`, 
+                    userPlans: email => `${this.baseURL}accounts/find?access_token=${this.accessToken}&email=${encodeURIComponent(email)}`
                 }
             }
         }
@@ -88,15 +80,20 @@ const tenants = (function() {
 tenants.Tenant.prototype.processAccountInfoResponse = function(clientEmail, promiseResult) {
     console.log(promiseResult)
     if (promiseResult === null) {
-        console.log(`no accounts for tenant ${this.name}`)
         return null
-    } else {
-        console.log(`adding account ${promiseResult.id} to tenant ${this.name}`)
-        this.accounts.set(clientEmail, new accounts.Account(promiseResult));
-        return this.getTenantSubscriptionKeysForUserPromise({
-            userEmail: clientEmail
-        })
+    } 
+    if (typeof(promiseResult) ==='object' && 'status' in promiseResult && promiseResult.status === "Not found")
+    {
+        return null
     }
+    
+    if (typeof(promiseResult) === 'object' && 'account' in promiseResult){
+        promiseResult = promiseResult.account
+    }
+
+    console.log(`adding account ${promiseResult.id} to tenant ${this.name}`)
+    this.accounts.set(clientEmail, new accounts.Account(promiseResult));
+    return this.getTenantSubscriptionKeysForUserPromise({userEmail: clientEmail})
 }
 
 tenants.Tenant.prototype.processSubscriptionKeyInfoResponse = function(subscriptions, email) {
@@ -118,8 +115,7 @@ tenants.Tenant.prototype.processSubscriptionKeyInfoResponse = function(subscript
 
 
 
-tenants.Tenant.prototype.addServices =
-    async function(serviceArray) {
+tenants.Tenant.prototype.addServices =async function(serviceArray) {
 
         let resultArray = serviceArray.map(
             service => this.services.addServiceDefinition(service.service)
@@ -159,8 +155,7 @@ tenants.Tenant.prototype.validateAPIs = async function() {
 
 
 //processes userInfo.json
-tenants.Tenant.prototype.getUserInfo =
-    async function(clientEmail) {
+tenants.Tenant.prototype.getUserInfo = async function(clientEmail) {
         return new Promise((resolve, reject) => {
             this.getAccountInfoPromise(clientEmail)
                 .then(x => this.processAccountInfoResponse(clientEmail, x))
@@ -169,34 +164,27 @@ tenants.Tenant.prototype.getUserInfo =
         })
     }
 
-tenants.Tenant.prototype.getUserPlans = async function(userEmail) {
-    let serviceListingPromise, activeDocsPromise, accountPlans
 
-    serviceListingPromise = new Promise((resolve, reject) => {
-        this.requestServiceListing()
-            .then(services => this.addServices(services))
-            .then(x => resolve(x))
-    })
-
-    activeDocsPromise = new Promise((resolve, reject) => {
-        this.requestActiveDocsListing()
-            .then(activeDocs => this.addDocs(activeDocs))
-            .then(x => resolve(x))
-    })
-
-    accountPlans = new Promise((resolve, reject) => {
+tenants.Tenant.prototype.processUserPlan = function(planInfo, userEmail){
+    console.log(planInfo)
+    if(planInfo === null) return
+    let accountID = planInfo.account.id[0]
+    this.accounts.set(userEmail, new accounts.Account(accountID))
+    console.log('here')
+}
+tenants.Tenant.prototype.getUserPlans = async function(userEmail) {   
+    
+    let accountPlans = new Promise((resolve, reject) => {
         this.requestUserPlan(userEmail)
-            .then(result => {
-                console.log(result)
+            .then(result => this.processUserPlan(result, userEmail)
+               /* console.log(result)
                 if ((typeof(result) === 'object') && ('id' in result)) {
                     this.accounts.set(userEmail, result)
                 }
-            })
+            }*/)
             .then(x => resolve(x))
     })
 
-    let promiseArray = [serviceListingPromise, activeDocsPromise, accountPlans]
-    return Promise.all(promiseArray)
 }
 
 tenants.Tenant.prototype.getApiInfo = async function() {

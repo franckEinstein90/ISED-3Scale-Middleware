@@ -1,6 +1,6 @@
 "use strict";
 
-
+const utils = require('@src/utils').utils
 const t = require('@src/tenants/tenantsApiRequests').tenants;
 const cache = require('memory-cache')
 
@@ -126,7 +126,7 @@ const tenantsManager = (function() {
             //construct tenant instances from dataJSON
             dataJSON.tenants.forEach(tenantInfo => {
                 if (tenantInfo.visible) {
-                    let newTenant = new t.Tenant(tenantInfo);
+                    let newTenant = new t.Tenant(tenantInfo, env)
                     tenants.push(newTenant)
                 }
             })
@@ -143,13 +143,12 @@ const tenantsManager = (function() {
                         .sort((t1,t2) => t1.name.localeCompare(t2.name)))
             	return answer
             } 
-		
-	
-           /*     return Promise.all(tenants.map(tenant => tenant.getUserPlans(userEmail)))
-                    .then(_ =>
-                        JSON.stringify(tenants.map(
-                            tenant => tenantToUserPlans(tenant, userEmail, language))))
-           */ 
+            //if there is an email associated with the request
+           return Promise.all(tenants.map(tenant => tenant.getUserPlans(userEmail)))
+                   .then(res => console.log(res))
+//                        JSON.stringify(tenants.map(
+ //                           tenant => tenantToUserPlans(tenant, userEmail, language))))
+            
         },
 
         getUserInfo: async function({
