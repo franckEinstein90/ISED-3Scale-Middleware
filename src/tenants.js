@@ -78,7 +78,6 @@ const tenants = (function() {
 
 
 tenants.Tenant.prototype.processAccountInfoResponse = function(clientEmail, promiseResult) {
-    console.log(promiseResult)
     if (promiseResult === null) {
         return null
     } 
@@ -90,30 +89,21 @@ tenants.Tenant.prototype.processAccountInfoResponse = function(clientEmail, prom
     if (typeof(promiseResult) === 'object' && 'account' in promiseResult){
         promiseResult = promiseResult.account
     }
-
-    console.log(`adding account ${promiseResult.id} to tenant ${this.name}`)
-    this.accounts.set(clientEmail, new accounts.Account(promiseResult));
-    return this.getTenantSubscriptionKeysForUserPromise({userEmail: clientEmail})
+    let newAccount = new accounts.Account(promiseResult.id, clientEmail)
+    newAccount.setBasicAccountInfo(promiseResult)
+    this.accounts.set(clientEmail, newAccount)
+    return newAccount 
 }
 
-tenants.Tenant.prototype.processSubscriptionKeyInfoResponse = function(subscriptions, email) {
-    if (Array.isArray(subscriptions)) { //the promise resolves to an array of applications if successful
-        let accountApplications = this.accounts.get(email).applications
-        subscriptions.forEach(
-            function(application) {
-                let accountApplication = accountApplications.find(x => x.id === application.application.id)
-                accountApplication.enabled = application.application.enabled
-                accountApplication.end_user_required = application.application.end_user_required
-                accountApplication.plan_id = application.application.plan_id
-                accountApplication.provider_verification_key = application.application.provider_verification_key
-            })
-        return this
-    }
-    return subscriptions
+tenants.Tenant.prototype.processSubscriptions = function(applications, email) {
+    if (Array.isArray(applications)) { //the promise resolves to an array of applications if successful
+	 	applications.forEach(app => {
+			let application = app.application
+			this.accounts.get(email).addApplication(application)
+		})
+   }
+   return applications
 }
-
-
-
 
 tenants.Tenant.prototype.addServices =async function(serviceArray) {
 
@@ -156,27 +146,39 @@ tenants.Tenant.prototype.validateAPIs = async function() {
 
 //processes userInfo.json
 tenants.Tenant.prototype.getUserInfo = async function(clientEmail) {
-        return new Promise((resolve, reject) => {
-            this.getAccountInfoPromise(clientEmail)
-                .then(x => this.processAccountInfoResponse(clientEmail, x))
-                .then(x => this.processSubscriptionKeyInfoResponse(x, clientEmail))
-                .then(x => resolve(x))
-        })
-    }
-
-
-tenants.Tenant.prototype.processUserPlan = function(planInfo, userEmail){
-    console.log(planInfo)
-    if(planInfo === null) return
-    let accountID = planInfo.account.id[0]
-    this.accounts.set(userEmail, new accounts.Account(accountID))
-    console.log('here')
+	return new Promise((resolve, reject) => {
+   	this.getAccountInfoPromise(clientEmail)
+      .then(x => this.processAccountInfoResponse(clientEmail, x))
+	   .then(newAccount => this.getTenantSubscriptionKeys(newAccount))
+      .then(x => resolve(this.processSubscriptions(x, clientEmail)))
+    })
 }
+
+
+tenants.Tenant.prototype.getPlanIDs = function(planInfo, userEmail){
+	 //creates a new account object for userEmail 
+	 // and associates it with its plan ids
+	 let accountID, newAccount, planIDs
+    if(planInfo === null) return null
+    accountID = planInfo.account.id[0]
+    newAccount = new accounts.Account(accountID, userEmail)
+	 planIDs = planInfo.account.plans[0].plan.map(plan => plan.id[0])
+	 featureReqPromises = planIDs.map(planID => this.reqTenantPlanFeatures(planID))
+	 
+    newAccount.associatePlans(planIDs)
+    this.accounts.set(userEmail, newAccount)
+}
+
+tenants.Tenant.prototype.getPlanFeatures = async function(userEmail) {   
+
+}
+
 tenants.Tenant.prototype.getUserPlans = async function(userEmail) {   
     
     let accountPlans = new Promise((resolve, reject) => {
         this.requestUserPlan(userEmail)
-            .then(result => this.processUserPlan(result, userEmail)
+            .then(result => this.getPlanIDs(result, userEmail))
+		 	   .then(_ => this.getPlanFeatures(userEmail))
                /* console.log(result)
                 if ((typeof(result) === 'object') && ('id' in result)) {
                     this.accounts.set(userEmail, result)
@@ -193,7 +195,7 @@ tenants.Tenant.prototype.getApiInfo = async function() {
     serviceListingPromise = new Promise((resolve, reject) => {
         this.requestServiceListing()
             .then(services => resolve(this.addServices(services)))
-            .catch(err => errHandle.log(err))
+            .catch(err => console.log('197'))
     })
 
     activeDocsPromise = new Promise((resolve, reject) => {

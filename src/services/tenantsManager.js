@@ -56,8 +56,6 @@ const tenantsManager = (function() {
                             serviceID: application.service_id,
                             language
                         })
-                        delete application.service_id
-                        delete application.id
                         apps.push(application)
                     }
                 )

@@ -8,11 +8,11 @@ const parseXML = require('xml2js').parseString
 tenants.Tenant.prototype.getAccountInfoPromise = function(clientEmail) {
     //returns a promise that gets the user info from the api
     let apiCall = this.accountAdminBaseURL.userAccount(clientEmail)
-    
+
     return new Promise((resolve, reject) => {
         request(apiCall, function(err, response, body) {
             if (err) return resolve(null)
-           
+
             let result = JSON.parse(body)
             if ('status' in result) return resolve(null)
             resolve(JSON.parse(body).account)
@@ -20,49 +20,35 @@ tenants.Tenant.prototype.getAccountInfoPromise = function(clientEmail) {
     })
 }
 
-tenants.Tenant.prototype.getTenantSubscriptionKeysForUserPromise = function({
-    userEmail
-}) {
-    let apiCall, accountID, that
-    that = this
+tenants.Tenant.prototype.getTenantSubscriptionKeys = function(userAccount) {
+    if (userAccount === null) return null
 
-    if (this.accounts.has(userEmail)) {
-        accountID = this.accounts.get(userEmail).AccountID
-        apiCall = [this.accountAdminBaseURL.accounts,
-            accountID,
-            `/applications.json?access_token=${this.accessToken}`
-        ].join('')
+    let apiCall = [this.accountAdminBaseURL.accounts,
+        userAccount.accountID,
+        `/applications.json?access_token=${this.accessToken}`
+    ].join('')
 
-        return new Promise((resolve, reject) => {
-            request(apiCall, function(err, response, body) {
-                if (err) {
-                    resolve(`{"status":"Not Found"}`)
-                }
-                try {
-                    let applications = JSON.parse(body).applications
-                    if (applications.length === 0) {
-                        console.log(`found no applications for ${that.name}`)
-                        resolve(tenants.codes.applicationsNotFound)
-                    } else {
-                        //add the applications to the correspnding accont
-                        console.log(`found ${applications.length} applications for ${that.name}`)
-                        applications.forEach(application =>
-                            that.accounts.get(userEmail).addApplication(application))
-                        resolve(applications)
-                    }
-                } catch (e) {
-                    resolve(e)
-                }
-            })
+    return new Promise((resolve, reject) => {
+        request(apiCall, function(err, response, body) {
+            if (err) return resolve(null)
+            let callResult
+            try {
+                callResult = JSON.parse(body)
+            } catch (err) {
+                return resolve(null)
+            }
+            if (typeof(callResult) === 'object' && 'status' in callResult) return resolve(null)
+            if (!('applications' in callResult)) return resolve(null)
+            resolve(callResult.applications)
         })
-    }
+    })
 }
 
 tenants.Tenant.prototype.requestServiceListing = function() {
     let apiCall = this.accountAdminBaseURL.services
     return new Promise((resolve, reject) => {
         request(apiCall, function(err, response, body) {
-            if (err)  return resolve([])
+            if (err) return resolve([])
             resolve(JSON.parse(body).services)
         })
     })
@@ -78,17 +64,17 @@ tenants.Tenant.prototype.requestActiveDocsListing = function() {
     })
 }
 
-tenants.Tenant.prototype.requestUserPlan = function(userEmail){
+tenants.Tenant.prototype.requestUserPlan = function(userEmail) {
     let apiCall = this.accountAdminBaseURL.userPlans(userEmail)
     //Note: 
     //1. This is a different call than the userAccount call
     //2. This call returns xml as opposed to JSON
-    return new Promise((resolve, reject)=>{
-        request(apiCall, function(err, response, body){
+    return new Promise((resolve, reject) => {
+        request(apiCall, function(err, response, body) {
             let jsonResult
-            if(err) return resolve(null)
-            if(body === "") return resolve(null)
-            parseXML(body, function(err, result){
+            if (err) return resolve(null)
+            if (body === "") return resolve(null)
+            parseXML(body, function(err, result) {
                 jsonResult = result
             })
             resolve(jsonResult)
@@ -96,12 +82,28 @@ tenants.Tenant.prototype.requestUserPlan = function(userEmail){
     })
 }
 
+tenants.Tenant.prototype.reqTenantPlanFeatures = function(planID){
+   let apiCall = [this.baseURL, 
+		  `account_plans/${planID}/features.json?`, 
+		  `access_token=${this.accessToken}`].join('')
+
+   return new Promise((resolve, reject) => {
+      request(apiCall, function(err, response, body){
+	 if(err) return resolve(null)
+	 console.log('here')
+      })
+   })
+}
+
 tenants.Tenant.prototype.requestValidateAPI = function(serviceID) {
     let apiCall = this.accountAdminBaseURL.apiService(serviceID)
     return new Promise((resolve, reject) => {
         request(apiCall, function(err, response, body) {
             if (err) return resolve(tenants.codes.noApiValidation)
-            resolve({service: serviceID, body: JSON.parse(body)})
+            resolve({
+                service: serviceID,
+                body: JSON.parse(body)
+            })
         })
     })
 }
