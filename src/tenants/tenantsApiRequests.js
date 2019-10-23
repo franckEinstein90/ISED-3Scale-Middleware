@@ -1,9 +1,30 @@
 "use strict";
 
+const utils = require('@src/utils').utils
 const request = require('request')
 const tenants = require('@src/tenants').tenants
 const parseXML = require('xml2js').parseString
 /***********************API Requests******************************* */
+
+
+const alwaysResolveRequest = function(apiCall, {bad, good}){
+    return new Promise((resolve, reject) => {
+        request(apiCall, function(err, response, body) {
+
+        })
+    })
+}
+
+
+tenants.Tenant.prototype.getAccountInfo = function(clientEmail) {
+    //returns a promise that gets the user info from the api
+    let apiCall = this.accountAdminBaseURL.userAccount(clientEmail)
+    return alwaysResolveRequest(apiCall,
+            {
+                bad: null, 
+                good: body => JSON.parse(body).account
+            })
+}
 
 tenants.Tenant.prototype.getAccountInfoPromise = function(clientEmail) {
     //returns a promise that gets the user info from the api
@@ -12,7 +33,6 @@ tenants.Tenant.prototype.getAccountInfoPromise = function(clientEmail) {
     return new Promise((resolve, reject) => {
         request(apiCall, function(err, response, body) {
             if (err) return resolve(null)
-
             let result = JSON.parse(body)
             if ('status' in result) return resolve(null)
             resolve(JSON.parse(body).account)
@@ -44,7 +64,13 @@ tenants.Tenant.prototype.getTenantSubscriptionKeys = function(userAccount) {
     })
 }
 
-tenants.Tenant.prototype.requestServiceListing = function() {
+
+tenants.Tenant.prototype.getServiceList = function() {
+    let apiCall = this.accountAdminBaseURL.services
+    return alwaysResolveRequest(apiCall)
+}
+/*
+tenants.Tenant.prototype.getServiceList = function() {
     let apiCall = this.accountAdminBaseURL.services
     return new Promise((resolve, reject) => {
         request(apiCall, function(err, response, body) {
@@ -53,8 +79,8 @@ tenants.Tenant.prototype.requestServiceListing = function() {
         })
     })
 }
-
-tenants.Tenant.prototype.requestActiveDocsListing = function() {
+*/
+tenants.Tenant.prototype.getActiveDocsListing = function() {
     let apiCall = this.accountAdminBaseURL.activeDocs
     return new Promise((resolve, reject) => {
         request(apiCall, function(err, response, body) {
@@ -64,7 +90,7 @@ tenants.Tenant.prototype.requestActiveDocsListing = function() {
     })
 }
 
-tenants.Tenant.prototype.requestUserPlan = function(userEmail) {
+tenants.Tenant.prototype.getUserPlan = function(userEmail) {
     let apiCall = this.accountAdminBaseURL.userPlans(userEmail)
     //Note: 
     //1. This is a different call than the userAccount call
@@ -82,7 +108,7 @@ tenants.Tenant.prototype.requestUserPlan = function(userEmail) {
     })
 }
 
-tenants.Tenant.prototype.reqTenantPlanFeatures = function(planID){
+tenants.Tenant.prototype.getTenantPlanFeatures = function(planID){
    let apiCall = [this.baseURL, 
 		  `account_plans/${planID}/features.json?`, 
 		  `access_token=${this.accessToken}`].join('')
@@ -95,7 +121,7 @@ tenants.Tenant.prototype.reqTenantPlanFeatures = function(planID){
    })
 }
 
-tenants.Tenant.prototype.requestValidateAPI = function(serviceID) {
+tenants.Tenant.prototype.validateAPI = function(serviceID) {
     let apiCall = this.accountAdminBaseURL.apiService(serviceID)
     return new Promise((resolve, reject) => {
         request(apiCall, function(err, response, body) {

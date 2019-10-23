@@ -84,10 +84,12 @@ const tenantsManager = (function() {
     }
 
     tenantToApiInfo = function(tenant, language) {
+        //transforms a tenant object into a response
+        //for api.json?language=...
         return {
             name: tenant.name,
             description: tenant.tenantDescription(language),
-            maintainers: tenant.maintainers(language), 
+            maintainers: utils.maintainerTag(language), 
             apis: tenant.apiDescriptions(language)
         }
     }
@@ -134,6 +136,7 @@ const tenantsManager = (function() {
             userEmail,
             language
         }) {
+            if (language === null) language="en"
             if (userEmail === null) {
 		        let answer = JSON.stringify(
                     tenants
