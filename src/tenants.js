@@ -115,14 +115,10 @@ tenants.Tenant.prototype.addServices =async function(serviceArray) {
     }
 
 tenants.Tenant.prototype.addDocs = async function(apiDocsArray) {
-
     if (!Array.isArray(apiDocsArray)) {
         return
     }
-    let resultArray = apiDocsArray.map(
-        apiDocObject => this.services.addServiceDocs(apiDocObject)
-    )
-    return resultArray
+    return apiDocsArray.map( apiDocObject => this.services.addServiceDocs(apiDocObject)) 
 }
 
 tenants.Tenant.prototype.addServiceFeatures = async function(featureDescriptions) {
@@ -156,15 +152,13 @@ tenants.Tenant.prototype.getUserInfo = async function(clientEmail) {
 
 
 tenants.Tenant.prototype.getPlanIDs = function(planInfo, userEmail){
-	 //creates a new account object for userEmail 
-	 // and associates it with its plan ids
-	 let accountID, newAccount, planIDs
+    //creates a new account object for userEmail 
+    // and associates it with its plan ids
+    let accountID, newAccount, planIDs
     if(planInfo === null) return null
     accountID = planInfo.account.id[0]
     newAccount = new accounts.Account(accountID, userEmail)
-	 planIDs = planInfo.account.plans[0].plan.map(plan => plan.id[0])
-	 featureReqPromises = planIDs.map(planID => this.reqTenantPlanFeatures(planID))
-	 
+    planIDs = planInfo.account.plans[0].plan.map(plan => plan.id[0])
     newAccount.associatePlans(planIDs)
     this.accounts.set(userEmail, newAccount)
 }
@@ -173,17 +167,17 @@ tenants.Tenant.prototype.getPlanFeatures = async function(userEmail) {
 
 }
 
-tenants.Tenant.prototype.getUserPlans = async function(userEmail) {   
+tenants.Tenant.prototype.getUserApiInfo= async function(userEmail) {   
     
     let accountPlans = new Promise((resolve, reject) => {
-        this.requestUserPlan(userEmail)
-            .then(result => this.getPlanIDs(result, userEmail))
-		 	   .then(_ => this.getPlanFeatures(userEmail))
+        this.getUserPlan(userEmail)
+        .then(result => this.getPlanIDs(result, userEmail))
+	.then(_ => this.getPlanFeatures(userEmail))
                /* console.log(result)
                 if ((typeof(result) === 'object') && ('id' in result)) {
                     this.accounts.set(userEmail, result)
                 }
-            }*/)
+            }*/
             .then(x => resolve(x))
     })
 
@@ -193,13 +187,13 @@ tenants.Tenant.prototype.getApiInfo = async function() {
 
     let promiseArray, serviceListingPromise, activeDocsPromise
     serviceListingPromise = new Promise((resolve, reject) => {
-        this.requestServiceListing()
+        this.getServiceList()
             .then(services => resolve(this.addServices(services)))
             .catch(err => console.log('197'))
     })
 
     activeDocsPromise = new Promise((resolve, reject) => {
-        this.requestActiveDocsListing()
+        this.getActiveDocsList()
             .then(activeDocs => resolve(this.addDocs(activeDocs)))
             .catch(err => errHandle(err))
     })

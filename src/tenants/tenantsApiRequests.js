@@ -4,6 +4,20 @@ const request = require('request')
 const tenants = require('@src/tenants').tenants
 const parseXML = require('xml2js').parseString
 /***********************API Requests******************************* */
+const alwaysResolve = function(apiCall, {good, bad}){
+	return new Promise((resolve, reject) => {
+		request(apiCall, function(err, response, body){
+			if(err) return resolve(bad)
+			if(response && response.statusCode === 200 && response.statusMessage === "OK"){
+				resolve(good(body))	
+			}
+			else{
+				return resolve(bad)
+			}
+		})
+	})
+}
+
 
 tenants.Tenant.prototype.getAccountInfoPromise = function(clientEmail) {
     //returns a promise that gets the user info from the api
@@ -44,32 +58,33 @@ tenants.Tenant.prototype.getTenantSubscriptionKeys = function(userAccount) {
     })
 }
 
-tenants.Tenant.prototype.requestServiceListing = function() {
+
+tenants.Tenant.prototype.getServiceList = function() {
     let apiCall = this.accountAdminBaseURL.services
-    return new Promise((resolve, reject) => {
-        request(apiCall, function(err, response, body) {
-            if (err) return resolve([])
-            resolve(JSON.parse(body).services)
-        })
-    })
+	 return alwaysResolve(apiCall, {good: x => JSON.parse(x).services, bad:0})
 }
 
-tenants.Tenant.prototype.requestActiveDocsListing = function() {
+tenants.Tenant.prototype.getActiveDocsList = function() {
     let apiCall = this.accountAdminBaseURL.activeDocs
-    return new Promise((resolve, reject) => {
-        request(apiCall, function(err, response, body) {
-            if (err) return resolve(tenants.codes.activeDocsNotFound)
-            resolve(JSON.parse(body).api_docs)
-        })
-    })
+	 return alwaysResolve(apiCall, {good: body => JSON.parse(body).api_docs, bad: 0})
 }
 
-tenants.Tenant.prototype.requestUserPlan = function(userEmail) {
-    let apiCall = this.accountAdminBaseURL.userPlans(userEmail)
+tenants.Tenant.prototype.getUserPlan = function(userEmail) {
     //Note: 
     //1. This is a different call than the userAccount call
     //2. This call returns xml as opposed to JSON
-    return new Promise((resolve, reject) => {
+    let apiCall = this.accountAdminBaseURL.userPlans(userEmail)
+	 let processGoodResponse = function(body){
+		let jsonResult
+		parseXML(body, function(err, result){
+			jsonResult = result
+		})
+		return jsonResult 
+	 }
+
+	 return alwaysResolve(apiCall, {good: processGoodResponse, bad: null})
+		 	
+/*    return new Promise((resolve, reject) => {
         request(apiCall, function(err, response, body) {
             let jsonResult
             if (err) return resolve(null)
@@ -79,7 +94,7 @@ tenants.Tenant.prototype.requestUserPlan = function(userEmail) {
             })
             resolve(jsonResult)
         })
-    })
+    })*/
 }
 
 tenants.Tenant.prototype.reqTenantPlanFeatures = function(planID){
@@ -95,8 +110,10 @@ tenants.Tenant.prototype.reqTenantPlanFeatures = function(planID){
    })
 }
 
-tenants.Tenant.prototype.requestValidateAPI = function(serviceID) {
+tenants.Tenant.prototype.getValidateAPI = function(serviceID) {
     let apiCall = this.accountAdminBaseURL.apiService(serviceID)
+	 return alwaysResolve(apiCall, {good: 5, bad: null})
+	/*
     return new Promise((resolve, reject) => {
         request(apiCall, function(err, response, body) {
             if (err) return resolve(tenants.codes.noApiValidation)
@@ -105,7 +122,7 @@ tenants.Tenant.prototype.requestValidateAPI = function(serviceID) {
                 body: JSON.parse(body)
             })
         })
-    })
+    })*/
 }
 
 module.exports = {

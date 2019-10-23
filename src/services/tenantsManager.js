@@ -142,10 +142,10 @@ const tenantsManager = (function() {
             	return answer
             } 
             //if there is an email associated with the request
-           return Promise.all(tenants.map(tenant => tenant.getUserPlans(userEmail)))
-                   .then(res => console.log(res))
-//                        JSON.stringify(tenants.map(
- //                           tenant => tenantToUserPlans(tenant, userEmail, language))))
+           return Promise.all(tenants.map(tenant => tenant.getUserApiInfo(userEmail)))
+                  .then(function(result){
+                        return JSON.stringify(tenants.map(tenant => tenantToUserPlans(tenant, userEmail, language)))
+						})
             
         },
 
