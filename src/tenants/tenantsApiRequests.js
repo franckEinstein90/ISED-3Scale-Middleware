@@ -60,16 +60,16 @@ tenants.Tenant.prototype.getTenantSubscriptionKeys = function(userAccount) {
 
 
 tenants.Tenant.prototype.getServiceList = function() {
-    let apiCall = this.accountAdminBaseURL.services
-	 return alwaysResolve(apiCall, {good: x => JSON.parse(x).services, bad:0})
+	let apiCall = this.accountAdminBaseURL.services
+	return alwaysResolve(apiCall, {good: x => JSON.parse(x).services, bad:0})
 }
 
 tenants.Tenant.prototype.getActiveDocsList = function() {
-    let apiCall = this.accountAdminBaseURL.activeDocs
-	 return alwaysResolve(apiCall, {good: body => JSON.parse(body).api_docs, bad: 0})
+   let apiCall = this.accountAdminBaseURL.activeDocs
+   return alwaysResolve(apiCall, {good: body => JSON.parse(body).api_docs, bad: 0})
 }
 
-tenants.Tenant.prototype.getUserPlan = function(userEmail) {
+tenants.Tenant.prototype.getUserPlans = function(userEmail) {
     //Note: 
     //1. This is a different call than the userAccount call
     //2. This call returns xml as opposed to JSON
@@ -83,37 +83,20 @@ tenants.Tenant.prototype.getUserPlan = function(userEmail) {
 	 }
 
 	 return alwaysResolve(apiCall, {good: processGoodResponse, bad: null})
-		 	
-/*    return new Promise((resolve, reject) => {
-        request(apiCall, function(err, response, body) {
-            let jsonResult
-            if (err) return resolve(null)
-            if (body === "") return resolve(null)
-            parseXML(body, function(err, result) {
-                jsonResult = result
-            })
-            resolve(jsonResult)
-        })
-    })*/
 }
 
-tenants.Tenant.prototype.reqTenantPlanFeatures = function(planID){
+tenants.Tenant.prototype.getTenantPlanFeatures = function(planID){
    let apiCall = [this.baseURL, 
 		  `account_plans/${planID}/features.json?`, 
 		  `access_token=${this.accessToken}`].join('')
-
-   return new Promise((resolve, reject) => {
-      request(apiCall, function(err, response, body){
-	 if(err) return resolve(null)
-	 console.log('here')
-      })
-   })
+	let processGoodResponse = function(body){
+		return JSON.parse(body).features
+	}
+   return alwaysResolve(apiCall, {good: processGoodResponse, bad: null})
 }
 
 tenants.Tenant.prototype.getValidateAPI = function(serviceID) {
     let apiCall = this.accountAdminBaseURL.apiService(serviceID)
-	 return alwaysResolve(apiCall, {good: 5, bad: null})
-	/*
     return new Promise((resolve, reject) => {
         request(apiCall, function(err, response, body) {
             if (err) return resolve(tenants.codes.noApiValidation)
@@ -122,7 +105,7 @@ tenants.Tenant.prototype.getValidateAPI = function(serviceID) {
                 body: JSON.parse(body)
             })
         })
-    })*/
+    })
 }
 
 module.exports = {

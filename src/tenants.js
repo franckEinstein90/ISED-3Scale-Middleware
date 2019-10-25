@@ -8,6 +8,7 @@ const utils = require('@src/utils').utils
 const errHandle = require('@errors').errors.errorHandler
 const accounts = require('@src/accounts').accounts
 const ServiceRegister = require('@src/tenants/tenantServices').tenantServices.ServiceRegister
+
 const tenants = (function() {
 
     return {
@@ -134,7 +135,8 @@ tenants.Tenant.prototype.addServiceFeatures = async function(featureDescriptions
 }
 
 tenants.Tenant.prototype.validateAPIs = async function() {
-    let promiseArray = this.services.mapIDs(serviceID => this.requestValidateAPI(serviceID))
+    let promiseArray = this.services.mapIDs(
+				serviceID => this.getValidateAPI(serviceID))
     return Promise.all(promiseArray)
         .then(x => this.addServiceFeatures(x))
 }
@@ -151,28 +153,61 @@ tenants.Tenant.prototype.getUserInfo = async function(clientEmail) {
 }
 
 
-tenants.Tenant.prototype.getPlanIDs = function(planInfo, userEmail){
+tenants.Tenant.prototype.getAccountPlan = function(planInfo, userEmail){
+    if(this.name === "ised-isde") debugger
     //creates a new account object for userEmail 
     // and associates it with its plan ids
     let accountID, newAccount, planIDs
     if(planInfo === null) return null
     accountID = planInfo.account.id[0]
     newAccount = new accounts.Account(accountID, userEmail)
-    planIDs = planInfo.account.plans[0].plan.map(plan => plan.id[0])
-    newAccount.associatePlans(planIDs)
+	 //within the plans included with this user, 
     this.accounts.set(userEmail, newAccount)
+	 //only one has a plan of type "account_plan"
+	 //that's the one we need
+	 let accountPlan =  planInfo.account.plans[0].plan.filter(plan => plan.type[0] === "account_plan")[0]
+//    planIDs = planInfo.account.plans[0].plan.map(plan => plan.id[0])
+ //   newAccount.associatePlans(planIDs)
+	return accountPlan
+	//at this point, we only care abou tthe plan that has type: account_plan
+	//1. get that account info
+	//2. get the features for that account
+	//so for 161, get feature 31, once that's in: 
+	//extract the system name (in this case gc-internal)
+	//k
 }
 
-tenants.Tenant.prototype.getPlanFeatures = async function(userEmail) {   
+tenants.Tenant.prototype.checkAccountPlanFeatures = async function(userEmail, accountPlan) {   
+	//fetches and process the features of all the plans this
+	 let processPlanFeatures = function(features){
+		console.log(features)
+	 }
+	 if(accountPlan === null) return null
+    if(this.name === "ised-isde") debugger
+	 let planID = accountPlan.id[0]
+	 this.getTenantPlanFeatures(planID)
+	 .then(features => processPlanFeatures(features))
 
+	//account has access to
+	console.log('here')
+/*	let verifyPlanIDForUser = function(planID){
+		console.log("here")
+	}
+	if(this.accounts.has(userEmail)){
+		let planIDs = this.accounts.get(userEmail).plans
+	   let planFeatures = planIDs.map(planID => this.getTenantPlanFeatures(planID))
+	   Promise.all(planFeatures)
+			  .then(x => verifyPlanIDForUser(x))
+						 //.plans.map(this.getTenantPlanFeatures)
+	}	*/
 }
 
 tenants.Tenant.prototype.getUserApiInfo= async function(userEmail) {   
     
     let accountPlans = new Promise((resolve, reject) => {
-        this.getUserPlan(userEmail)
-        .then(result => this.getPlanIDs(result, userEmail))
-	.then(_ => this.getPlanFeatures(userEmail))
+        this.getUserPlans(userEmail)
+        .then(result => this.getAccountPlan(result, userEmail))
+		  .then(accountPlan => this.checkAccountPlanFeatures(userEmail, accountPlan))
                /* console.log(result)
                 if ((typeof(result) === 'object') && ('id' in result)) {
                     this.accounts.set(userEmail, result)
