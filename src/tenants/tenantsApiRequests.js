@@ -4,21 +4,8 @@ const validator = require('validator')
 const request = require('request')
 const tenants = require('@src/tenants').tenants
 const parseXML = require('xml2js').parseString
+const alwaysResolve= require('@src/utils').utils.alwaysResolve
 /***********************API Requests******************************* */
-const alwaysResolve = function(apiCall, {good, bad}){
-	return new Promise((resolve, reject) => {
-		request(apiCall, function(err, response, body){
-			if(err) return resolve(bad)
-			if(response && response.statusCode === 200 && response.statusMessage === "OK"){
-				resolve(good(body))	
-			}
-			else{
-				return resolve(bad)
-			}
-		})
-	})
-}
-
 
 tenants.Tenant.prototype.getAccountInfoPromise = function(clientEmail) {
     //returns a promise that gets the user info from the api
@@ -106,25 +93,7 @@ tenants.Tenant.prototype.getTenantPlanFeatures = function(planID){
    return alwaysResolve(apiCall, {good: processGoodResponse, bad: null})
 }
 
-tenants.Tenant.prototype.getValidateAPI = function(serviceID) {
-    let apiCall = this.accountAdminBaseURL.apiService(serviceID)
-    let processGoodResponse = function(body){
-        if(validator.isJSON(body)){
-            return JSON.parse(body).features
-        }
-        return 0  
-    }
-    return alwaysResolve(apiCall, {good: processGoodResponse, bad: 0})
-/*    return new Promise((resolve, reject) => {
-        request(apiCall, function(err, response, body) {
-            if (err) return resolve(tenants.codes.noApiValidation)
-            resolve({
-                service: serviceID,
-                body: JSON.parse(body)
-            })
-        })
-    })*/
-}
+
 
 module.exports = {
     tenants

@@ -1,10 +1,16 @@
 "use strict";
 
 const log = require('@src/utils').utils.log
+const validator = require('validator')
+const alwaysResolve= require('@src/utils').utils.alwaysResolve
 
 const tenantServices = (function() {
 
     return {
+        codes: {
+            updateServiceFeaturesOk: "update service feature ok", 
+            updateServiceFeaturesNotOk: "update service feature not ok"
+        },
         updateOk: function(serviceID) {
             return {
                 serviceID: serviceID,
@@ -96,6 +102,24 @@ tenantServices.Service.prototype.addDocumentationSet = function(docObj) {
 
 tenantServices.Service.prototype.hasBillingualDoc = function(){
     return (this.documentation.size === 2) //one french, one english
+}
+
+tenantServices.Service.prototype.updateFeatureInfo = async function(){
+    let thisServiceID, that, bad
+    bad = tenantServices.codes.updateServiceFeaturesNotOk
+    thisServiceID = this.id
+    that = this
+    let apiCall = [`${this.tenant.baseURL}services/${thisServiceID}/`, 
+                    `features.json?access_token=${this.tenant.accessToken}`].join('')
+    let processGoodResponse = function(body) {
+            if(validator.isJSON(body)){
+                let features = JSON.parse(body).features
+                that.features = features.map(obj => obj.feature)
+                return tenantServices.codes.updateServiceFeaturesOk 
+            }
+            return bad
+        }
+   return alwaysResolve(apiCall, {good: processGoodResponse, bad})
 }
 
 tenantServices.ServiceRegister.prototype.length = function() {

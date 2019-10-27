@@ -23,7 +23,9 @@ const tenants = (function() {
             activeDocsUpdateOK: "active docs update OK",
             noApiValidation: 7, 
             serviceUpdateError: "service definition update not ok", 
-            serviceUpdateOK: "service definition update ok" 
+            serviceUpdateOK: "service definition update ok", 
+            tenantUpdateOk: "tenant successfully updated", 
+            tenantUpdateNotOk: "tenant not successfuly updated" 
         },
 
 
@@ -71,7 +73,6 @@ const tenants = (function() {
                     accounts: `https://${this.adminDomain}/admin/api/accounts/`,
                     services: `https://${this.adminDomain}/admin/api/services.json?access_token=${this.accessToken}`,
                     activeDocs: `${this.baseURL}/active_docs.json?access_token=${this.accessToken}`,
-                    apiService: serviceID => `${this.baseURL}services/${serviceID}/features.json?access_token=${this.accessToken}`,
                     userAccount: email => `${this.baseURL}accounts/find.json?access_token=${this.accessToken}&email=${encodeURIComponent(email)}`, 
                     userPlans: email => `${this.baseURL}accounts/find?access_token=${this.accessToken}&email=${encodeURIComponent(email)}`
                 }
