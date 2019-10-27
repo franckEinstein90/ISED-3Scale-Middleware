@@ -1,10 +1,12 @@
+"use strict";
+
 const tenantsManager = require('@services/tenantsManager').tenantsManager
 const log = require('@src/utils').utils.log
 const cache = require('memory-cache')
 
 const cacheManage = (function() {
 
-    let cacheRefreshMinutes = 15
+    let cacheRefreshMinutes = 5
 
     let defaultKey = (tenant, service) =>{ 
         return {
@@ -34,35 +36,25 @@ const cacheManage = (function() {
     return {
         cronUpdate: function() {
             if (this.runningMinutes === undefined) {
-                this.runningMinutes = 1
+                this.runningMinutes = 0
             }
             log('----------------------------------------------------------------------')
             log(`app has been running for ${this.runningMinutes} minutes`)
-            if (this.lastRefresh === undefined) {
+            if (this.lastRefresh === undefined || 
+                this.lastRefresh >= cacheRefreshMinutes) {
                 this.lastRefresh = 0
-            }
-            this.runningMinutes += 1
-
-            try{
+             try{
                 tenantsManager.updateTenantInformation()
                 .then(results => checkResults(results))
             }catch(err){
                 console.log(err)
                 debugger
             }
-            /*if (this.lastRefresh === 0) {
-                console.log(`Updating cache`)
-                tenantsManager.getApiInfo({userEmail:null, language:null})
-                .then(resolve(1))
-       //             .then(x => writeToCache())
-        //            .then(x => console.log(cache.keys()))
-         //           .catch(err => console.log(err))
+                
             }
-            this.lastRefresh = this.lastRefresh > cacheRefreshMinutes? 0: this.lastRefresh + 1
-            console.log(`- app has been running for ${this.runningMinutes} mins`)
-            console.log(`Managing tenants:`)
-            tenantsManager.alive()*/
-        },
+            this.runningMinutes += 1
+            this.lastRefresh += 1
+       },
 
     }
 

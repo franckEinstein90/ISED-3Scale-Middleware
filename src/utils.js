@@ -43,6 +43,7 @@ const utils = (function() {
 			   if(language === langCodes.en) return en
 			   throw "non recognized error code"
           }, 
+
           alwaysResolve: function(apiCall, {good, bad}){
             return new Promise((resolve, reject) => {
                 request(apiCall, function(err, response, body){
