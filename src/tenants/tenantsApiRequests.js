@@ -1,5 +1,6 @@
 "use strict";
 
+const validator = require('validator')
 const request = require('request')
 const tenants = require('@src/tenants').tenants
 const parseXML = require('xml2js').parseString
@@ -70,7 +71,11 @@ tenants.Tenant.prototype.getServiceList = function() {
 tenants.Tenant.prototype.getActiveDocsList = function() {
    let apiCall = this.accountAdminBaseURL.activeDocs
    let processGoodResponse = function(body){
-       return JSON.parse(body).api_docs
+       if(validator.isJSON(body)){
+            return JSON.parse(body).api_docs
+       }else{
+           return tenants.codes.activeDocsUpdateError
+       }
    }
    return alwaysResolve(apiCall, {good: processGoodResponse,  bad: tenants.codes.activeDocsUpdateError})
 }

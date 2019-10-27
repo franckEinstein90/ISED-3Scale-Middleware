@@ -18,12 +18,14 @@ tenants.Tenant.prototype.updateServices =async function(serviceArray) {
 
 tenants.Tenant.prototype.addDocs = async function(apiDocsInfo) {
   if(apiDocsInfo === tenants.codes.activeDocsUpdateError){
+    log(`error getting apiDocs`)
     return apiDocsInfo
   }
   if (!Array.isArray(apiDocsInfo)) {
         return tenants.codes.activeDocsUpdateError
-    }
-    return apiDocsInfo.map( apiDocObject => this.services.addServiceDocs(apiDocObject)) 
+  }
+  log(`updating doc info for ${this.name}`)
+  return apiDocsInfo.map( apiDocObject => this.services.addServiceDocs(apiDocObject)) 
 }
 
 tenants.Tenant.prototype.getApiInfo = async function() {
