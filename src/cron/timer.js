@@ -1,4 +1,5 @@
 const tenantsManager = require('@services/tenantsManager').tenantsManager
+const log = require('@src/utils').utils.log
 const cache = require('memory-cache')
 
 const cacheManage = (function() {
@@ -35,7 +36,8 @@ const cacheManage = (function() {
             if (this.runningMinutes === undefined) {
                 this.runningMinutes = 1
             }
-            console.log(`app has been running for ${this.runningMinutes} minutes`)
+            log('----------------------------------------------------------------------')
+            log(`app has been running for ${this.runningMinutes} minutes`)
             if (this.lastRefresh === undefined) {
                 this.lastRefresh = 0
             }

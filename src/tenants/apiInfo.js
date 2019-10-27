@@ -16,6 +16,16 @@ tenants.Tenant.prototype.updateServices =async function(serviceArray) {
     return tenants.codes.serviceUpdateOK 
 }
 
+tenants.Tenant.prototype.addDocs = async function(apiDocsInfo) {
+  if(apiDocsInfo === tenants.codes.activeDocsUpdateError){
+    return apiDocsInfo
+  }
+  if (!Array.isArray(apiDocsInfo)) {
+        return tenants.codes.activeDocsUpdateError
+    }
+    return apiDocsInfo.map( apiDocObject => this.services.addServiceDocs(apiDocObject)) 
+}
+
 tenants.Tenant.prototype.getApiInfo = async function() {
 
     let promiseArray, serviceListingPromise, activeDocsPromise
@@ -24,14 +34,13 @@ tenants.Tenant.prototype.getApiInfo = async function() {
         .then(services => resolve(this.updateServices(services)))
     })
 
-/*    activeDocsPromise = new Promise((resolve, reject) => {
+    activeDocsPromise = new Promise((resolve, reject) => {
         this.getActiveDocsList()
-            .then(activeDocs => resolve(this.addDocs(activeDocs)))
-            .catch(err => errHandle(err))
-    })*/
+        .then(activeDocs => resolve(this.addDocs(activeDocs)))
+    })
 
     //fulfills both promises in paralell
-    return Promise.all([serviceListingPromise, /*activeDocsPromise*/])
+    return Promise.all([serviceListingPromise, activeDocsPromise])
 //        .then(x => this.validateAPIs())
         .catch(err => {
             console.log(err) //error updating tenant services

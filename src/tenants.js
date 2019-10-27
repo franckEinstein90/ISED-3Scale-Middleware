@@ -19,10 +19,10 @@ const tenants = (function() {
             updatedAccountInfo: 3,
             applicationsNotFound: 4,
             serviceNotFound: 5,
-            activeDocsNotFound: 6,
+            activeDocsUpdateError: "active docs update not OK",
             noApiValidation: 7, 
-            serviceUpdateError: 8, 
-            serviceUpdateOK: "service update ok" 
+            serviceUpdateError: "service definition update not ok", 
+            serviceUpdateOK: "service definition update ok" 
         },
 
 
@@ -109,12 +109,6 @@ tenants.Tenant.prototype.processSubscriptions = function(applications, email) {
    return applications
 }
 
-tenants.Tenant.prototype.addDocs = async function(apiDocsArray) {
-    if (!Array.isArray(apiDocsArray)) {
-        return
-    }
-    return apiDocsArray.map( apiDocObject => this.services.addServiceDocs(apiDocObject)) 
-}
 
 tenants.Tenant.prototype.addServiceFeatures = async function(featureDescriptions) {
     if (Array.isArray(featureDescriptions)) {

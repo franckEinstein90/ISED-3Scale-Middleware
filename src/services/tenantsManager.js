@@ -100,13 +100,7 @@ const tenantsManager = (function() {
         //called by cron job, updates all 
         //tenant information in memory
         updateTenantInformation: async function() {
-            let resolveCheck = function(updateErrors) {
-                //checks for update errors and recovers
-                console.log(tenants)
-            }
-            console.log(`updating tenant information`)
             return Promise.all(tenants.map(t => t.getApiInfo()))
-      //          .then(updateErrors => resolveCheck(updateErrors))
         },
 
         languages: {
