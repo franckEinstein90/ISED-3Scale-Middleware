@@ -27,27 +27,39 @@ const cacheManage = (function() {
            cache.put(key, value, 1500 * 60000)
        }
     }
-
+    let checkResults = function(updateResults){
+        console.log(`Updating Tenant Information`)
+    }
     return {
         cronUpdate: function() {
             if (this.runningMinutes === undefined) {
                 this.runningMinutes = 0
             }
+            console.log(`app has been running for ${this.runningMinutes} minutes`)
             if (this.lastRefresh === undefined) {
                 this.lastRefresh = 0
             }
-            if (this.lastRefresh === 0) {
+            this.runningMinutes += 1
+
+            try{
+                tenantsManager.updateTenantInformation()
+                .then(results => checkResults(results))
+            }catch(err){
+                console.log(err)
+                debugger
+            }
+            /*if (this.lastRefresh === 0) {
                 console.log(`Updating cache`)
                 tenantsManager.getApiInfo({userEmail:null, language:null})
-                    .then(x => writeToCache())
-                    .then(x => console.log(cache.keys()))
-                    .catch(err => console.log(err))
+                .then(resolve(1))
+       //             .then(x => writeToCache())
+        //            .then(x => console.log(cache.keys()))
+         //           .catch(err => console.log(err))
             }
-            this.runningMinutes += 1
             this.lastRefresh = this.lastRefresh > cacheRefreshMinutes? 0: this.lastRefresh + 1
             console.log(`- app has been running for ${this.runningMinutes} mins`)
             console.log(`Managing tenants:`)
-            tenantsManager.alive()
+            tenantsManager.alive()*/
         },
 
     }

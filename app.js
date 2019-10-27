@@ -19,12 +19,8 @@ const timer = require('@src/cron/timer.js').cacheManage
 let initISEDMiddleWare = async function() {
     let JSONData = config.get('master')
     tenantsManager.onReady(JSONData)
-    tenantsManager.updateTenantInformation()
-    .then(
-        _ => console.log(tenantsManager.tenants)
-        )
-//    cronJob.schedule('* * * * *', timer.cronUpdate);
-  //  timer.cronUpdate()
+    timer.cronUpdate() //initial call to populate tenant info
+    cronJob.schedule('* * * * *', timer.cronUpdate)
 }
 
 initISEDMiddleWare()

@@ -106,7 +106,7 @@ const tenantsManager = (function() {
             }
             console.log(`updating tenant information`)
             return Promise.all(tenants.map(t => t.getApiInfo()))
-                .then(updateErrors => resolveCheck(updateErrors))
+      //          .then(updateErrors => resolveCheck(updateErrors))
         },
 
         languages: {
