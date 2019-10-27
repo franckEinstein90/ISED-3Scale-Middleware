@@ -1,7 +1,7 @@
 "use strict";
 
 const utils = require('@src/utils').utils
-const t = require('@src/tenants/tenantsApiRequests').tenants;
+const t = require('@src/tenants/apiInfo').tenants;
 const cache = require('memory-cache')
 
 const tenantsManager = (function() {
@@ -128,6 +128,7 @@ const tenantsManager = (function() {
                     tenants.push(newTenant)
                 }
             })
+            tenants.sort((t1, t2) => t1.name.localeCompare(t2.name))
         },
 
         getApiInfo: function({
@@ -136,9 +137,7 @@ const tenantsManager = (function() {
         }) {
             if (userEmail === null) {
 		        let answer = JSON.stringify(
-                    tenants
-                        .map(t => tenantToApiInfo(t, language))
-                        .sort((t1,t2) => t1.name.localeCompare(t2.name)))
+                    tenants.map(t => tenantToApiInfo(t, language)))
             	return answer
             } 
             //if there is an email associated with the request

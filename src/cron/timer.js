@@ -33,7 +33,7 @@ const cacheManage = (function() {
     return {
         cronUpdate: function() {
             if (this.runningMinutes === undefined) {
-                this.runningMinutes = 0
+                this.runningMinutes = 1
             }
             console.log(`app has been running for ${this.runningMinutes} minutes`)
             if (this.lastRefresh === undefined) {

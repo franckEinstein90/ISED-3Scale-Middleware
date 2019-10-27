@@ -22,7 +22,7 @@ const tenants = (function() {
             activeDocsNotFound: 6,
             noApiValidation: 7, 
             serviceUpdateError: 8, 
-            serviceUpdateOK: 8
+            serviceUpdateOK: "service update ok" 
         },
 
 
@@ -107,20 +107,6 @@ tenants.Tenant.prototype.processSubscriptions = function(applications, email) {
 		})
    }
    return applications
-}
-
-tenants.Tenant.prototype.addServices =async function(serviceArray) {
-    let resultArray
-    if(serviceArray ===  tenants.codes.serviceUpdateError){
-       log(`Error updating services for ${this.name}`) 
-       return tenants.codes.serviceUpdateError
-    }
-    log(`updating service definitions for ${this.name}`)
-    resultArray = serviceArray.map(
-         service => this.services.addServiceDefinition(service.service)
-    )
-        //returns the ids of the services that were added to the tenant
-    return tenants.codes.serviceUpdateOK 
 }
 
 tenants.Tenant.prototype.addDocs = async function(apiDocsArray) {
@@ -225,32 +211,6 @@ tenants.Tenant.prototype.getUserApiInfo= async function(userEmail) {
     })
 
 }
-
-tenants.Tenant.prototype.getApiInfo = async function() {
-
-    let promiseArray, serviceListingPromise, activeDocsPromise
-    serviceListingPromise = new Promise((resolve, reject) => {
-        this.getServiceList()
-        .then(services => resolve(this.addServices(services)))
-        .catch(err => console.log('197'))
-    })
-
-/*    activeDocsPromise = new Promise((resolve, reject) => {
-        this.getActiveDocsList()
-            .then(activeDocs => resolve(this.addDocs(activeDocs)))
-            .catch(err => errHandle(err))
-    })*/
-
-    //fulfills both promises in paralell
-    return Promise.all([serviceListingPromise, /*activeDocsPromise*/])
-//        .then(x => this.validateAPIs())
-        .catch(err => {
-            console.log(err) //error updating tenant services
-        })
-}
-
-
-
 
 
 
