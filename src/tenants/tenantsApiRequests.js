@@ -60,8 +60,11 @@ tenants.Tenant.prototype.getTenantSubscriptionKeys = function(userAccount) {
 
 
 tenants.Tenant.prototype.getServiceList = function() {
-	let apiCall = this.accountAdminBaseURL.services
-	return alwaysResolve(apiCall, {good: x => JSON.parse(x).services, bad:0})
+    let apiCall = this.accountAdminBaseURL.services
+    let processGood = function(body){
+        return JSON.parse(body).services
+    }
+	return alwaysResolve(apiCall, {good:processGood,  bad:tenants.codes.serviceUpdateError})
 }
 
 tenants.Tenant.prototype.getActiveDocsList = function() {

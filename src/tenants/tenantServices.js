@@ -129,7 +129,6 @@ tenantServices.ServiceRegister.prototype.addServiceDocs = function(docObj) {
 tenantServices.ServiceRegister.prototype.addServiceDefinition = function(serviceDefinitionObject) {
 
     let serviceID, service
-    console.log(serviceDefinitionObject)
     serviceID = serviceDefinitionObject.id
 
     if (!this.register.has(serviceID)) { //this service is not registered
@@ -140,7 +139,6 @@ tenantServices.ServiceRegister.prototype.addServiceDefinition = function(service
 
     service = this.register.get(serviceID)
     let serviceUpdate = service.updateDefinition(serviceDefinitionObject)
-    log(`updating service "${service.name}"(id:${service.id}) for tenant ${this.tenant.name}`)
     return serviceUpdate
 }
 

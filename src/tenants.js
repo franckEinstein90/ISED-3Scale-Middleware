@@ -5,6 +5,7 @@
 
 "use strict";
 const utils = require('@src/utils').utils
+const log = require('@src/utils').utils.log
 const errHandle = require('@errors').errors.errorHandler
 const accounts = require('@src/accounts').accounts
 const ServiceRegister = require('@src/tenants/tenantServices').tenantServices.ServiceRegister
@@ -19,7 +20,9 @@ const tenants = (function() {
             applicationsNotFound: 4,
             serviceNotFound: 5,
             activeDocsNotFound: 6,
-            noApiValidation: 7
+            noApiValidation: 7, 
+            serviceUpdateError: 8, 
+            serviceUpdateOK: 8
         },
 
 
@@ -107,13 +110,18 @@ tenants.Tenant.prototype.processSubscriptions = function(applications, email) {
 }
 
 tenants.Tenant.prototype.addServices =async function(serviceArray) {
-
-        let resultArray = serviceArray.map(
-            service => this.services.addServiceDefinition(service.service)
-        )
-        //returns the ids of the services that were added to the tenant
-        return resultArray
+    let resultArray
+    if(serviceArray ===  tenants.codes.serviceUpdateError){
+       log(`Error updating services for ${this.name}`) 
+       return tenants.codes.serviceUpdateError
     }
+    log(`updating service definitions for ${this.name}`)
+    resultArray = serviceArray.map(
+         service => this.services.addServiceDefinition(service.service)
+    )
+        //returns the ids of the services that were added to the tenant
+    return tenants.codes.serviceUpdateOK 
+}
 
 tenants.Tenant.prototype.addDocs = async function(apiDocsArray) {
     if (!Array.isArray(apiDocsArray)) {
@@ -223,19 +231,19 @@ tenants.Tenant.prototype.getApiInfo = async function() {
     let promiseArray, serviceListingPromise, activeDocsPromise
     serviceListingPromise = new Promise((resolve, reject) => {
         this.getServiceList()
-            .then(services => resolve(this.addServices(services)))
-            .catch(err => console.log('197'))
+        .then(services => resolve(this.addServices(services)))
+        .catch(err => console.log('197'))
     })
 
-    activeDocsPromise = new Promise((resolve, reject) => {
+/*    activeDocsPromise = new Promise((resolve, reject) => {
         this.getActiveDocsList()
             .then(activeDocs => resolve(this.addDocs(activeDocs)))
             .catch(err => errHandle(err))
-    })
+    })*/
 
     //fulfills both promises in paralell
-    return Promise.all([serviceListingPromise, activeDocsPromise])
-        .then(x => this.validateAPIs())
+    return Promise.all([serviceListingPromise, /*activeDocsPromise*/])
+//        .then(x => this.validateAPIs())
         .catch(err => {
             console.log(err) //error updating tenant services
         })
