@@ -25,12 +25,37 @@ tenants.Tenant.prototype.addDocs = async function(apiDocsInfo) {
         return tenants.codes.activeDocsUpdateError
   }
   log(`updating doc info for ${this.name}`)
-  return apiDocsInfo.map( apiDocObject => this.services.addServiceDocs(apiDocObject)) 
+  apiDocsInfo.forEach( apiDocObject => this.services.addServiceDocs(apiDocObject)) 
+  return tenants.codes.activeDocsUpdateOK
 }
+
+tenants.Tenant.prototype.addServiceFeatures = async function(featureDescriptions) {
+  if (Array.isArray(featureDescriptions)) {
+      if (featureDescriptions.length !== this.services.length()) {
+          console.log('problem')
+          return
+      }
+      featureDescriptions.forEach(features => this.services.addServiceFeatures(features))
+      return 'done'
+  }
+  console.log(featureDescription)
+}
+
+tenants.Tenant.prototype.validateAPIs = async function(serviceUpdateResults) {
+    this.visibleServices.length = 0
+    this.services.forEach((service, id) => {
+      if(service.hasBillingualDoc()) this.visibleServices.push(service)
+    })
+    let promiseArray = this.services.mapIDs(serviceID => this.getValidateAPI(serviceID))
+    return Promise.all(promiseArray)
+        .then(x => this.addServiceFeatures(x))
+}
+
 
 tenants.Tenant.prototype.getApiInfo = async function() {
 
     let promiseArray, serviceListingPromise, activeDocsPromise
+    this.visibleServices =[]
     serviceListingPromise = new Promise((resolve, reject) => {
         this.getServiceList()
         .then(services => resolve(this.updateServices(services)))
@@ -43,10 +68,7 @@ tenants.Tenant.prototype.getApiInfo = async function() {
 
     //fulfills both promises in paralell
     return Promise.all([serviceListingPromise, activeDocsPromise])
-//        .then(x => this.validateAPIs())
-        .catch(err => {
-            console.log(err) //error updating tenant services
-        })
+        .then(updateResult => this.validateAPIs(updateResult))
 }
 
 

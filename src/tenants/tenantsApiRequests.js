@@ -108,7 +108,14 @@ tenants.Tenant.prototype.getTenantPlanFeatures = function(planID){
 
 tenants.Tenant.prototype.getValidateAPI = function(serviceID) {
     let apiCall = this.accountAdminBaseURL.apiService(serviceID)
-    return new Promise((resolve, reject) => {
+    let processGoodResponse = function(body){
+        if(validator.isJSON(body)){
+            return JSON.parse(body).features
+        }
+        return 0  
+    }
+    return alwaysResolve(apiCall, {good: processGoodResponse, bad: 0})
+/*    return new Promise((resolve, reject) => {
         request(apiCall, function(err, response, body) {
             if (err) return resolve(tenants.codes.noApiValidation)
             resolve({
@@ -116,7 +123,7 @@ tenants.Tenant.prototype.getValidateAPI = function(serviceID) {
                 body: JSON.parse(body)
             })
         })
-    })
+    })*/
 }
 
 module.exports = {

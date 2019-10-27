@@ -94,10 +94,9 @@ tenantServices.Service.prototype.addDocumentationSet = function(docObj) {
     }
 }
 
-tenantServices.Service.prototype.fetchFeatures = function() {
-
+tenantServices.Service.prototype.hasBillingualDoc = function(){
+    return (this.documentation.size === 2) //one french, one english
 }
-
 
 tenantServices.ServiceRegister.prototype.length = function() {
     return this.serviceIDs.length

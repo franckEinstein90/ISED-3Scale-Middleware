@@ -20,6 +20,7 @@ const tenants = (function() {
             applicationsNotFound: 4,
             serviceNotFound: 5,
             activeDocsUpdateError: "active docs update not OK",
+            activeDocsUpdateOK: "active docs update OK",
             noApiValidation: 7, 
             serviceUpdateError: "service definition update not ok", 
             serviceUpdateOK: "service definition update ok" 
@@ -62,6 +63,7 @@ const tenants = (function() {
                     return (lang === 'en') ? tenantJSONInfo.description_en : tenantJSONInfo.description_fr
                 }
                 this.accounts = new Map() //indexed by email addresses
+                this.visibleServices = []
                 this.services = new ServiceRegister(this)
                 this.accessToken = tenantJSONInfo.access_token
                 this.baseURL = `https://${this.adminDomain}/admin/api/`
@@ -110,24 +112,7 @@ tenants.Tenant.prototype.processSubscriptions = function(applications, email) {
 }
 
 
-tenants.Tenant.prototype.addServiceFeatures = async function(featureDescriptions) {
-    if (Array.isArray(featureDescriptions)) {
-        if (featureDescriptions.length !== this.services.length()) {
-            console.log('problem')
-            return
-        }
-        featureDescriptions.forEach(features => this.services.addServiceFeatures(features))
-        return 'done'
-    }
-    console.log(featureDescription)
-}
 
-tenants.Tenant.prototype.validateAPIs = async function() {
-    let promiseArray = this.services.mapIDs(
-				serviceID => this.getValidateAPI(serviceID))
-    return Promise.all(promiseArray)
-        .then(x => this.addServiceFeatures(x))
-}
 
 
 //processes userInfo.json
