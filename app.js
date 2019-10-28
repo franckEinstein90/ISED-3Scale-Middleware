@@ -17,10 +17,22 @@ const cronJob = require('node-cron')
 const timer = require('@src/cron/timer.js').cacheManage
 
 let initISEDMiddleWare = async function() {
-    let JSONData = config.get('master')
+    let JSONData, checkFetchResults
+	 JSONData = config.get('master')
+	 checkFetchResults = function(fetchResults){
+		console.log('finished fetching tenant information')
+		let updateErrors = fetchResults.filter(
+			fetchRes => fetchRes !== "tenant successfully updated")
+		if (updateErrors.length > 0) debugger
+		console.log('ready to receive requests')
+		return 1
+	 }
     tenantsManager.onReady(JSONData)
-    timer.cronUpdate() //initial call to populate tenant info
-    cronJob.schedule('* * * * *', timer.cronUpdate)
+	 //initial data fetching on loading
+	 tenantsManager.updateTenantInformation()
+	 .then(checkFetchResults)
+    //timer.cronUpdate() //initial call to populate tenant info
+   // cronJob.schedule('* * * * *', timer.cronUpdate)
 }
 
 initISEDMiddleWare()

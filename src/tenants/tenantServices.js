@@ -125,6 +125,15 @@ tenantServices.Service.prototype.updateFeatureInfo = async function(){
    return alwaysResolve(apiCall, {good: processGoodResponse, bad})
 }
 
+tenantServices.Service.prototype.servicePlans = function(){
+	//return null if the plan doesn't have a service plan
+	//returns the service plans otherwise
+	if('features' in this){
+		return this.features.filter(feature => feature.scope === 'service_plan')
+	}
+	return null
+}
+
 tenantServices.ServiceRegister.prototype.length = function() {
     return this.serviceIDs.length
 }

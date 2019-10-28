@@ -8,9 +8,9 @@ const UserAccount = require('@src/accounts').accounts.UserAccount
 const tenantsManager = (function() {
 
     let env, applicationAPIURI, tenants,
-        outputUserInfoResponse, 
-	apiReqResponse, tenantToUserPlans, tenantToApiInfo, 
-	outputUserPlans, getApiName
+        outputUserInfoResponse,
+        apiReqResponse, tenantToUserPlans, tenantToApiInfo,
+        userApiInfoResponse, getApiName
 
     tenants = []
 
@@ -46,18 +46,18 @@ const tenantsManager = (function() {
             }
             return link
         }
-        outputJSON.tenants = tenants.map(function(tenant) {
+    outputJSON.tenants = tenants.map(function(tenant) {
             apps = []
             if (tenant.accounts.has(userEmail)) {
                 tenant.accounts.get(userEmail).applications.forEach(
                     application => {
                         let appClone = {
-                            name: application.name, 
-                            state: application.state, 
-                            created_at: application.created_at, 
-                            user_key: application.user_key, 
-                            links: application.links 
-                        } 
+                            name: application.name,
+                            state: application.state,
+                            created_at: application.created_at,
+                            user_key: application.user_key,
+                            links: application.links
+                        }
                         appClone.links.push(newLink(tenant, application))
                         appClone.apiname = getApiName({
                             tenant,
@@ -77,8 +77,54 @@ const tenantsManager = (function() {
         return JSON.stringify(outputJSON)
     }
 
-    tenantToUserPlans = function(tenant, userEmail, language) {
-        return {
+    userApiInfoResponse = function(requestResult, user, language) {
+		let response, serviceOutputInfo
+			 response = [], 
+			 serviceOutputInfo = function(service){
+				return {
+					name: service.name
+				}
+			 }
+
+		tenants.forEach( tenant => {
+			let tenantResponse = {
+				name: tenant.name, 
+				apis: []
+			}
+			tenant.services.forEach((service, serviceID) => {
+				//does this service have a set of bilingual definitions
+				if(!service.hasBillingualDoc()) return
+				//do the service plans match? 
+				let servicePlans = service.servicePlans()
+				//no servicePlan mean public service
+				if(servicePlans === null || servicePlans.length === 0){
+					tenantResponse.apis.push(serviceOutputInfo(service))
+					return 
+				}
+				//is this user registered with this tenant? 
+				if(!user.accountPlans.has(tenant.name)) return
+				//assume there is only one service plan for now
+				if (servicePlans.length > 1) debugger
+				//is this service visible? 
+				if(servicePlans[0].visible === false) return	
+				
+				//does the user have the right access
+				let userAccess = user.accountPlans.get(tenant.name)
+				let serviceAccess = servicePlans[0].system_name
+			   if(serviceAccess === "gc-internal" && userAccess.gcInternal === true){
+					tenantResponse.apis.push(serviceOutputInfo(service))
+					return
+				}
+				if(serviceAccess === `${tenant.name}-internal` && userAccess.depInternal === true){
+					tenantResponse.apis.push(serviceOutputInfo(service))
+					return
+				}
+				return
+			})
+			response.push(tenantResponse)
+	   })
+		return JSON.stringify(response)
+        /*return {
             name: tenant.name,
             maintainers: {
                 fn: language === 'fr' ? "Equipe du magasin API" : "GC API Store Team",
@@ -87,15 +133,15 @@ const tenantsManager = (function() {
             },
             description: tenant.tenantDescription(language),
             apis: [],
-            authenticatedUser: userEmail
-        }
+//            authenticatedUser: userEmail
+        }*/
     }
 
     tenantToApiInfo = function(tenant, language) {
         return {
             name: tenant.name,
             description: tenant.tenantDescription(language),
-            maintainers: tenant.maintainers(language), 
+            maintainers: tenant.maintainers(language),
             apis: tenant.apiDescriptions(language)
         }
     }
@@ -138,19 +184,23 @@ const tenantsManager = (function() {
             language
         }) {
             if (userEmail === null) {
-		        let answer = JSON.stringify(
+                let answer = JSON.stringify(
                     tenants.map(t => tenantToApiInfo(t, language)))
-            	return answer
-            } 
+                return answer
+            }
             //if there is an email associated with the request
             let user = new UserAccount(userEmail)
             return Promise.all(tenants.map(tenant => user.getPlans(tenant)))
-            .then(x => resolve(x))
-/*            return Promise.all(tenants.map(tenant => tenant.getUserApiInfo(userEmail)))
-                  .then(function(result){
-                        return JSON.stringify(tenants.map(tenant => tenantToUserPlans(tenant, userEmail, language)))
-						})*/
-            
+                .then(function(result){
+						 return JSON.stringify({da:"da"})})
+
+
+//						 userApiInfoResponse(result, user, language)})
+            /*            return Promise.all(tenants.map(tenant => tenant.getUserApiInfo(userEmail)))
+                              .then(function(result){
+                                    return JSON.stringify(tenants.map(tenant => tenantToUserPlans(tenant, userEmail, language)))
+            						})*/
+
         },
 
         getUserInfo: async function({
