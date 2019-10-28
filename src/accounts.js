@@ -3,6 +3,11 @@ const moment = require('moment');
 
 const accounts = (function() {
     return {
+        UserAccount: class {
+            constructor(email){
+                this.email = email
+            }
+        },
         Account: class {
             constructor(accountID, email) {
                 this.accountID = accountID
@@ -12,6 +17,11 @@ const accounts = (function() {
     }
 })()
 
+
+
+accounts.UserAccount.prototype.getPlans = function(tenant){
+    console.log('here')
+}
 accounts.Account.prototype.setBasicAccountInfo = function(accountInfo){
 	this.links = accountInfo.links
         this.uniqueAccountID = accountInfo.unique_account_id || null

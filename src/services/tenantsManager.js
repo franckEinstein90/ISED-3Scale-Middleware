@@ -1,8 +1,9 @@
 "use strict";
 
 const utils = require('@src/utils').utils
-const t = require('@src/tenants/apiInfo').tenants;
+const t = require('@src/responses').tenants
 const cache = require('memory-cache')
+const UserAccount = require('@src/accounts').accounts.UserAccount
 
 const tenantsManager = (function() {
 
@@ -50,13 +51,20 @@ const tenantsManager = (function() {
             if (tenant.accounts.has(userEmail)) {
                 tenant.accounts.get(userEmail).applications.forEach(
                     application => {
-                        application.links.push(newLink(tenant, application))
-                        application.apiname = getApiName({
+                        let appClone = {
+                            name: application.name, 
+                            state: application.state, 
+                            created_at: application.created_at, 
+                            user_key: application.user_key, 
+                            links: application.links 
+                        } 
+                        appClone.links.push(newLink(tenant, application))
+                        appClone.apiname = getApiName({
                             tenant,
                             serviceID: application.service_id,
                             language
                         })
-                        apps.push(application)
+                        apps.push(appClone)
                     }
                 )
             }
@@ -135,10 +143,13 @@ const tenantsManager = (function() {
             	return answer
             } 
             //if there is an email associated with the request
-           return Promise.all(tenants.map(tenant => tenant.getUserApiInfo(userEmail)))
+            let user = new UserAccount(userEmail)
+            return Promise.all(tenants.map(tenant => user.getPlans(tenant)))
+            .then(x => resolve(x))
+/*            return Promise.all(tenants.map(tenant => tenant.getUserApiInfo(userEmail)))
                   .then(function(result){
                         return JSON.stringify(tenants.map(tenant => tenantToUserPlans(tenant, userEmail, language)))
-						})
+						})*/
             
         },
 

@@ -4,6 +4,8 @@ const log = require('@src/utils').utils.log
 const tenantServices = require('@src/tenants/tenantServices').tenantServices
 
 tenants.Tenant.prototype.updateServices = async function(serviceArray) {
+    this.userGCInternal = false
+    this.userTenantInternal = false
     let resultArray
     if (serviceArray === tenants.codes.serviceUpdateError) {
         log(`Error updating services for ${this.name}`)

@@ -48,9 +48,15 @@ tenants.Tenant.prototype.getTenantSubscriptionKeys = function(userAccount) {
 
 
 tenants.Tenant.prototype.getServiceList = function() {
-    let apiCall = this.accountAdminBaseURL.services
+    let apiCall = [`https://${this.adminDomain}/admin/api/`, 
+                    `services.json?access_token=${this.accessToken}`].join('')
+
     let processGood = function(body){
-        return JSON.parse(body).services
+        if(validator.isJSON(body)) {
+            let apis = JSON.parse(body).services
+            return apis
+        }
+        return tenants.codes.serviceUpdateError
     }
 	return alwaysResolve(apiCall, {good:processGood,  bad:tenants.codes.serviceUpdateError})
 }

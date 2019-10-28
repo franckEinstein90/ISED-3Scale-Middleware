@@ -101,7 +101,10 @@ tenantServices.Service.prototype.addDocumentationSet = function(docObj) {
 }
 
 tenantServices.Service.prototype.hasBillingualDoc = function(){
-    return (this.documentation.size === 2) //one french, one english
+    if (this.documentation.size >= 2){
+        return true
+    } //one french, one english
+    return false
 }
 
 tenantServices.Service.prototype.updateFeatureInfo = async function(){
