@@ -49,7 +49,7 @@ const tenantServices = (function() {
 })()
 
 tenantServices.Service.prototype.outputAPIDescription = function(language) {
-		let documentationHandle = `${this.system_name.toLowerCase()}-${language}`
+	   let documentationHandle = `${this.system_name.toLowerCase()}-${language}`
       //service.system_name is used to link the french and the english versions
       //of the documentation. We only display the API and its associated information
       //if both linguistic versions are present

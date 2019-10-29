@@ -19,7 +19,7 @@ router.get('/userinfo.json',
 router.get('/api.json', 
 	async function(req, res, next) {
 		res.header("Content-Type", "application/json; charset=utf-8")
-		res.send(tenantsManager.getApiInfo(validate(req)))
+		res.send(await tenantsManager.getApiInfo(validate(req)))
 	});
 
 

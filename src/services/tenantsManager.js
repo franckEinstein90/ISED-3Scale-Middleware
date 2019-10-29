@@ -8,7 +8,7 @@ const UserAccount = require('@src/accounts').accounts.UserAccount
 const tenantsManager = (function() {
 
     let env, applicationAPIURI, tenants,
-        outputUserInfoResponse,
+        userInfoResponse,
         apiReqResponse, tenantToUserPlans, tenantToApiInfo,
         userApiInfoResponse, getApiName
 
@@ -30,7 +30,7 @@ const tenantsManager = (function() {
         return serviceID
     }
 
-    outputUserInfoResponse = function(userEmail, language) {
+    userInfoResponse = function(userEmail, language) {
         let outputJSON, apps, newLink
 
         outputJSON = {
@@ -116,7 +116,7 @@ const tenantsManager = (function() {
 					return
 				}
 				if(serviceAccess === `${tenant.name}-internal` && userAccess.depInternal === true){
-					tenantResponse.apis.push(serviceOutputInfo(service))
+					tenantResponse.apis.push(service.outputAPIDescription(language))
 					return
 				}
 				return
@@ -184,24 +184,16 @@ const tenantsManager = (function() {
             language
         }) {
             if (userEmail === null) {
-                let answer = JSON.stringify(
-                    tenants.map(t => tenantToApiInfo(t, language)))
-                return answer
+                return JSON.stringify(tenants.map(t => tenantToApiInfo(t, language)))
             }
             //if there is an email associated with the request
             let user = new UserAccount(userEmail)
-            return Promise.all(tenants.map(tenant => user.getPlans(tenant)))
+            let planUpdatePromises  = tenants.map(tenant => user.getPlans(tenant))
+            return Promise.all(planUpdatePromises)
                 .then(function(result){
-						 return JSON.stringify({da:"da"})})
-
-
-//						 userApiInfoResponse(result, user, language)})
-            /*            return Promise.all(tenants.map(tenant => tenant.getUserApiInfo(userEmail)))
-                              .then(function(result){
-                                    return JSON.stringify(tenants.map(tenant => tenantToUserPlans(tenant, userEmail, language)))
-            						})*/
-
-        },
+                    return  userApiInfoResponse(result, user, language)
+                })
+            },
 
         getUserInfo: async function({
             userEmail,
@@ -210,7 +202,7 @@ const tenantsManager = (function() {
 
             return Promise.all(tenants.map(tenant => tenant.getUserInfo(userEmail)))
                 .then(function(results) {
-                    return outputUserInfoResponse(userEmail, language)
+                    return userInfoResponse(userEmail, language)
                 })
         }
     }

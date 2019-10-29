@@ -27,7 +27,6 @@ accounts.UserAccount.prototype.processAccountPlanFeatures =
 			gcInternal: false, 
 			depInternal: false
 		}
-		debugger
 		if(Array.isArray(accountPlanFeatures)){
 			accountPlanFeatures.forEach(
 				feature => {
@@ -85,7 +84,7 @@ accounts.UserAccount.prototype.getPlans = async function(tenant) {
     }
     return new Promise((resolve, reject) => {
 		tenant.getUserPlans(this.email)
-/*        .then(processResults)
+        .then(processResults)
         .then(plans => {
             if (plans) return this.addPlans(tenant, plans)
             return null
@@ -94,8 +93,7 @@ accounts.UserAccount.prototype.getPlans = async function(tenant) {
             if (accountPlanID === null) return null
             return this.getAccountPlanFeatures(tenant, accountPlanID)
         })
-		  .then(planFeatures => this.processAccountPlanFeatures(tenant, planFeatures))
-		  .then(x => resolve(x))*/
+		.then(planFeatures => resolve(this.processAccountPlanFeatures(tenant, planFeatures)))
 	 })
 }
 
