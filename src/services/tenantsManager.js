@@ -78,63 +78,45 @@ const tenantsManager = (function() {
     }
 
     userApiInfoResponse = function(requestResult, user, language) {
-		let response, serviceOutputInfo
-			 response = [], 
-			 serviceOutputInfo = function(service){
-				return {
-					name: service.name
-				}
-			 }
+		let response = []
 
 		tenants.forEach( tenant => {
 			let tenantResponse = {
 				name: tenant.name, 
-				apis: []
+                description: tenant.tenantDescription(language),
+                maintainers: {
+                    fn: language === 'fr' ? "Equipe du magasin API" : "GC API Store Team",
+                    email: "ic.api_store-magasin_des_apis.ic@canada.ca",
+                    url: "https://api.canada.ca"
+                },
+                apis: [], 
+                authenticatedUser: user.email, 
+                
 			}
 			tenant.services.forEach((service, serviceID) => {
 				//does this service have a set of bilingual definitions
 				if(!service.hasBillingualDoc()) return
 				//do the service plans match? 
-				let servicePlans = service.servicePlans()
-				//no servicePlan mean public service
-				if(servicePlans === null || servicePlans.length === 0){
-					tenantResponse.apis.push(serviceOutputInfo(service))
+                let servicePlanAccess = service.servicePlanAccess()
+                let apiDescription = service.outputAPIDescription(language)
+                //no servicePlan mean public service
+                if (servicePlanAccess.public === true){
+					tenantResponse.apis.push(apiDescription)
 					return 
 				}
-				//is this user registered with this tenant? 
-				if(!user.accountPlans.has(tenant.name)) return
-				//assume there is only one service plan for now
-				if (servicePlans.length > 1) debugger
-				//is this service visible? 
-				if(servicePlans[0].visible === false) return	
-				
-				//does the user have the right access
+				//If this user isn't registered with this tenant, AND the service isn't public
+                if(!user.accountPlans.has(tenant.name)) return
 				let userAccess = user.accountPlans.get(tenant.name)
-				let serviceAccess = servicePlans[0].system_name
-			   if(serviceAccess === "gc-internal" && userAccess.gcInternal === true){
-					tenantResponse.apis.push(serviceOutputInfo(service))
+                
+                if((servicePlanAccess.gcInternal && userAccess.gcInternal) || (servicePlanAccess.depInternal  && userAccess.depInternal)) {
+					tenantResponse.apis.push(apiDescription)
 					return
 				}
-				if(serviceAccess === `${tenant.name}-internal` && userAccess.depInternal === true){
-					tenantResponse.apis.push(service.outputAPIDescription(language))
-					return
-				}
-				return
-			})
-			response.push(tenantResponse)
-	   })
+                return
+            })
+            response.push(tenantResponse)
+        })
 		return JSON.stringify(response)
-        /*return {
-            name: tenant.name,
-            maintainers: {
-                fn: language === 'fr' ? "Equipe du magasin API" : "GC API Store Team",
-                email: "ic.api_store-magasin_des_apis.ic@canada.ca",
-                url: "https://api.canada.ca"
-            },
-            description: tenant.tenantDescription(language),
-            apis: [],
-//            authenticatedUser: userEmail
-        }*/
     }
 
     tenantToApiInfo = function(tenant, language) {
@@ -151,7 +133,7 @@ const tenantsManager = (function() {
         },
 
 
-        //called by cron job, updates all 
+        //Called by cron job, updates all 
         //tenant information in memory
         updateTenantInformation: async function() {
             return Promise.all(tenants.map(t => t.getApiInfo()))

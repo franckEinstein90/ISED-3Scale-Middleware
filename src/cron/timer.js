@@ -3,10 +3,11 @@
 const tenantsManager = require('@services/tenantsManager').tenantsManager
 const log = require('@src/utils').utils.log
 const cache = require('memory-cache')
+const codes = require('@src/tenants').tenants.codes
 
 const cacheManage = (function() {
 
-    let cacheRefreshMinutes = 5
+    let fetchRefresh = 5
 
     let defaultKey = (tenant, service) =>{ 
         return {
@@ -30,10 +31,24 @@ const cacheManage = (function() {
            cache.put(key, value, 1500 * 60000)
        }
     }
+
     let checkResults = function(updateResults){
-        console.log(`Updating Tenant Information`)
+        //goes back and flags + fix errors
+        updateResults.forEach(
+            updateResult => {
+                if (updateResult !== codes.tenantUpdateOk){
+                    debugger
+                }
+            }
+        )
+        console.log(`Successfully Updated Tenant Information`)
     }
+
     return {
+        setRefreshTime: function(timeInMinutes){
+            fetchRefresh = timeInMinutes
+        }, 
+
         cronUpdate: function() {
             if (this.runningMinutes === undefined) {
                 this.runningMinutes = 0
@@ -41,16 +56,14 @@ const cacheManage = (function() {
             log('----------------------------------------------------------------------')
             log(`app has been running for ${this.runningMinutes} minutes`)
             if (this.lastRefresh === undefined || 
-                this.lastRefresh >= cacheRefreshMinutes) {
+                this.lastRefresh >= fetchRefresh) {
                 this.lastRefresh = 0
-             try{
-                tenantsManager.updateTenantInformation()
-                .then(results => checkResults(results))
-            }catch(err){
-                console.log(err)
-                debugger
-            }
-                
+                try{
+                    tenantsManager.updateTenantInformation()
+                    .then(results => checkResults(results))
+                }catch(err){
+                    console.log(err)
+                }
             }
             this.runningMinutes += 1
             this.lastRefresh += 1

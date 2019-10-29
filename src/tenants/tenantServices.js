@@ -54,8 +54,9 @@ tenantServices.Service.prototype.outputAPIDescription = function(language) {
       //of the documentation. We only display the API and its associated information
       //if both linguistic versions are present
       if (this.documentation.has(documentationHandle)) {
-			let docInfo, swaggerBody, apiDescription
+		let docInfo, swaggerBody, apiDescription
          docInfo = this.documentation.get(documentationHandle)
+         if(!(validator.isJSON(docInfo.body))) return
          swaggerBody = JSON.parse(docInfo.body)
          apiDescription = {
          	name: swaggerBody.info.title,
@@ -93,7 +94,7 @@ tenantServices.Service.prototype.updateDefinition = function(defObj) {
 
 tenantServices.Service.prototype.addDocumentationSet = function(docObj) {
     try {
-        this.documentation.set(docObj.system_name, docObj)
+        this.documentation.set(docObj.system_name.toLowerCase(), docObj)
         return tenantServices.updateOk(this.id)
     } catch (err) {
         return tenantServices.updateNotOk(this.id, err)
@@ -125,13 +126,25 @@ tenantServices.Service.prototype.updateFeatureInfo = async function(){
    return alwaysResolve(apiCall, {good: processGoodResponse, bad})
 }
 
-tenantServices.Service.prototype.servicePlans = function(){
-	//return null if the plan doesn't have a service plan
-	//returns the service plans otherwise
-	if('features' in this){
-		return this.features.filter(feature => feature.scope === 'service_plan')
-	}
-	return null
+tenantServices.Service.prototype.servicePlanAccess = function(){
+    let servicePlanAccess = {
+        public: true, 
+        gcInternal: true, 
+        depInternal: true
+    }
+    //if no service plans, returns all access (public api)
+    if(! ('features' in this)) return servicePlanAccess
+    let servicePlanFeatures = this.features.filter(feature => feature.scope === 'service_plan')
+    if(servicePlanFeatures.length === 0) return servicePlanAccess
+    servicePlanAccess.public = false
+    servicePlanAccess.gcInternal = false
+    servicePlanAccess.depInternal = false
+    servicePlanFeatures.forEach(
+        serviceFeature => {
+            if(serviceFeature.system_name === 'gc-internal') servicePlanAccess.gcInternal = true
+            if(serviceFeature.system_name === `${this.tenant.name}-internal`) servicePlanAccess.depInternal = true
+        })
+	return servicePlanAccess
 }
 
 tenantServices.ServiceRegister.prototype.length = function() {

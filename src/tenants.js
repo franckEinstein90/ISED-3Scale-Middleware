@@ -85,9 +85,6 @@ const tenants = (function() {
 
 
 
-
-
-
 tenants.Tenant.prototype.getAccountPlan = function(planInfo, userEmail) {
     if (this.name === "ised-isde") debugger
     //creates a new account object for userEmail 
@@ -112,30 +109,6 @@ tenants.Tenant.prototype.getAccountPlan = function(planInfo, userEmail) {
     //k
 }
 
-tenants.Tenant.prototype.checkAccountPlanFeatures = async function(userEmail, accountPlan) {
-    //fetches and process the features of all the plans this
-    let processPlanFeatures = function(features) {
-        console.log(features)
-    }
-    if (accountPlan === null) return null
-    if (this.name === "ised-isde") debugger
-    let planID = accountPlan.id[0]
-    this.getTenantPlanFeatures(planID)
-        .then(features => processPlanFeatures(features))
-
-    //account has access to
-    console.log('here')
-    /*	let verifyPlanIDForUser = function(planID){
-    		console.log("here")
-    	}
-    	if(this.accounts.has(userEmail)){
-    		let planIDs = this.accounts.get(userEmail).plans
-    	   let planFeatures = planIDs.map(planID => this.getTenantPlanFeatures(planID))
-    	   Promise.all(planFeatures)
-    			  .then(x => verifyPlanIDForUser(x))
-    						 //.plans.map(this.getTenantPlanFeatures)
-    	}	*/
-}
 
 tenants.Tenant.prototype.getUserApiInfo = async function(userEmail) {
 
@@ -143,11 +116,6 @@ tenants.Tenant.prototype.getUserApiInfo = async function(userEmail) {
         this.getUserPlans(userEmail)
             .then(result => this.getAccountPlan(result, userEmail))
             .then(accountPlan => this.checkAccountPlanFeatures(userEmail, accountPlan))
-            /* console.log(result)
-                if ((typeof(result) === 'object') && ('id' in result)) {
-                    this.accounts.set(userEmail, result)
-                }
-            }*/
             .then(x => resolve(x))
     })
 

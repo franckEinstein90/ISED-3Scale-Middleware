@@ -30,9 +30,10 @@ let initISEDMiddleWare = async function() {
     tenantsManager.onReady(JSONData)
 	 //initial data fetching on loading
 	 tenantsManager.updateTenantInformation()
-	 .then(checkFetchResults)
-    //timer.cronUpdate() //initial call to populate tenant info
-   // cronJob.schedule('* * * * *', timer.cronUpdate)
+     .then(checkFetchResults)
+     //set up info fetch cycle
+     timer.setRefreshTime(1)
+     cronJob.schedule('* * * * *', timer.cronUpdate)
 }
 
 initISEDMiddleWare()

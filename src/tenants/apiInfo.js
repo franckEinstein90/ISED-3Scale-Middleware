@@ -43,9 +43,17 @@ tenants.Tenant.prototype.updateServiceFeatures = async function(featureDescripti
 }
 
 tenants.Tenant.prototype.validateAPIs = async function(serviceUpdateResults) {
+    //Check that the results of the service updates have returned ok
+    if(
+        serviceUpdateResults[0] !== tenants.codes.serviceUpdateOK ||
+        serviceUpdateResults[1] !== tenants.codes.activeDocsUpdateOK
+    ){
+        debugger //error to recocever from
+        return tenants.codes.serviceUpdateError
+    }
     let reportResult = function(resultArray) {
         let okUpdates = resultArray.filter(feature => feature === tenantServices.codes.updateServiceFeaturesOk)
-        if (okUpdates.length = resultArray.length) return tenants.codes.tenantUpdateOk
+        if (okUpdates.length === resultArray.length) return tenants.codes.tenantUpdateOk
         return tenants.codes.tenantUpdateNotOk
     }
     this.visibleServices.length = 0
@@ -60,6 +68,8 @@ tenants.Tenant.prototype.validateAPIs = async function(serviceUpdateResults) {
 
 
 tenants.Tenant.prototype.getApiInfo = async function() {
+    //called once per cron cycles
+    //fetches information necessary to process all requests
 
     let promiseArray, serviceListingPromise, activeDocsPromise
     this.visibleServices = []
