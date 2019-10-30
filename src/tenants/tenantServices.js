@@ -150,9 +150,11 @@ tenantServices.Service.prototype.servicePlanAccess = function(){
 tenantServices.ServiceRegister.prototype.length = function() {
     return this.serviceIDs.length
 }
+
 tenantServices.ServiceRegister.prototype.mapIDs = function(callback) {
     return this.serviceIDs.map(callback)
 }
+
 tenantServices.ServiceRegister.prototype.forEachServiceID = function(callback) {
     this.serviceIDs.forEach(callback)
 }
@@ -174,7 +176,8 @@ tenantServices.ServiceRegister.prototype.addServiceDocs = function(docObj) {
     return service.addDocumentationSet(docObj.api_doc)
 }
 
-tenantServices.ServiceRegister.prototype.addServiceDefinition = function(serviceDefinitionObject) {
+tenantServices.ServiceRegister.prototype.updateServiceDefinition = 
+	function(serviceDefinitionObject, updateReport) {
 
     let serviceID, service
     serviceID = serviceDefinitionObject.id
@@ -186,8 +189,8 @@ tenantServices.ServiceRegister.prototype.addServiceDefinition = function(service
     } //now it is
 
     service = this.register.get(serviceID)
-    let serviceUpdate = service.updateDefinition(serviceDefinitionObject)
-    return serviceUpdate
+   // let serviceUpdate = service.updateDefinition(serviceDefinitionObject)
+   // return serviceUpdate
 }
 
 tenantServices.ServiceRegister.prototype.addServiceFeatures = async function(features) {

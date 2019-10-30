@@ -58,7 +58,10 @@ tenants.Tenant.prototype.getServiceList = function() {
         }
         return tenants.codes.serviceUpdateError
     }
-	return alwaysResolve(apiCall, {good:processGood,  bad:tenants.codes.serviceUpdateError})
+    return alwaysResolve(apiCall, {
+	    	good:processGood,  
+		bad:tenants.codes.serviceUpdateError
+    })
 }
 
 tenants.Tenant.prototype.getActiveDocsList = function() {

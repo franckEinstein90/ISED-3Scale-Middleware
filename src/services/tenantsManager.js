@@ -136,7 +136,7 @@ const tenantsManager = (function() {
         //Called by cron job, updates all 
         //tenant information in memory
         updateTenantInformation: async function() {
-            return Promise.all(tenants.map(t => t.getApiInfo()))
+            return Promise.all(tenants.map(t => t.updateApiInfo()))
         },
 
         languages: {
