@@ -3,6 +3,7 @@
 const log = require('@src/utils').utils.log
 const validator = require('validator')
 const alwaysResolve= require('@src/utils').utils.alwaysResolve
+const errors = require('@errors').errors
 
 const tenantServices = (function() {
 
@@ -178,19 +179,23 @@ tenantServices.ServiceRegister.prototype.addServiceDocs = function(docObj) {
 
 tenantServices.ServiceRegister.prototype.updateServiceDefinition = 
 	function(serviceDefinitionObject, updateReport) {
-
-    let serviceID, service
+    //receives the result of a service definition fetch
+    //and updates or create a new service object 
+    //in this tenant service register
+    let serviceID, serviceObject 
     serviceID = serviceDefinitionObject.id
+    
 
     if (!this.register.has(serviceID)) { //this service is not registered
-        service = new tenantServices.Service(serviceID, this.tenant)
-        this.register.set(serviceID, service)
+        serviceObject = new tenantServices.Service(serviceID, this.tenant)
+        this.register.set(serviceID, serviceObject)
         this.serviceIDs.push(serviceID)
     } //now it is
 
-    service = this.register.get(serviceID)
-   // let serviceUpdate = service.updateDefinition(serviceDefinitionObject)
-   // return serviceUpdate
+    serviceObject = this.register.get(serviceID)
+    let serviceUpdate = serviceObject.updateDefinition(serviceDefinitionObject)
+    updateReport.reportUpdateService(serviceID, {updateTarget: "service definition update", updateResult: errors.codes.Ok})
+    return serviceUpdate
 }
 
 tenantServices.ServiceRegister.prototype.addServiceFeatures = async function(features) {

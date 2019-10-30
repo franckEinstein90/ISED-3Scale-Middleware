@@ -9,28 +9,28 @@ const TenantUpdateReport = require('@errors').errors.TenantUpdateReport
 
 tenants.Tenant.prototype.updateServiceDefinitions = async function( tenantServiceListFetchResult, updateReport ) {
     if (tenantServiceListFetchResult === tenants.codes.serviceUpdateError) {
-    /*    //there was an error fetching the list of services
+     //there was an error fetching the list of services
         debugger
         updateReport.serviceListFetchResult = errors.codes.NotOk
         log(`Error updating services for ${this.name}`)
-        return tenants.codes.serviceUpdateError*/
+        return updateReport 
     }
-//    updateReport.serviceListFetchResult = errors.codes.Ok
+    updateReport.serviceListFetchResult = errors.codes.Ok
     //flag the services that need to be removed from the list of registered services
- /*   let currentServiceIDs = tenantServiceListFetchResult.map(
+   let currentServiceIDs = tenantServiceListFetchResult.map(
         service => service.service.id
     )
     this.services.forEach(
         (service, serviceID) => {
             if (! currentServiceIDs.includes(serviceID) ) updateReport.servicesToRemove.push(serviceID)
-        })*/
+        })
 
     log(`updating ${tenantServiceListFetchResult.length} service definitions for ${this.name}`)
     let resultArray = tenantServiceListFetchResult.map(
         service => this.services.updateServiceDefinition(service.service, updateReport)
     )
     //returns the ids of the services that were added to the tenant
-    return tenants.codes.serviceUpdateOK
+    return updateReport 
 }
 
 tenants.Tenant.prototype.addDocs = async function(apiDocsInfo) {
