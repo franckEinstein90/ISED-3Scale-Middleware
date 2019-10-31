@@ -46,6 +46,7 @@ errors.TenantUpdateReport.prototype.reportUpdateService =
 	serviceUpdateReport[updateTarget]= updateResult
 		
 }
+
 module.exports = {
 	errors
 }

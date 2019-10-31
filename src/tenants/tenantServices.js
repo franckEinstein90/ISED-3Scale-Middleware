@@ -12,12 +12,14 @@ const tenantServices = (function() {
             updateServiceFeaturesOk: "update service feature ok", 
             updateServiceFeaturesNotOk: "update service feature not ok"
         },
+
         updateOk: function(serviceID) {
             return {
                 serviceID: serviceID,
                 updated: 'ok'
             }
         },
+
         updateNotOk: function(serviceID, err) {
             return {
                 serviceID: serviceID,
@@ -25,6 +27,7 @@ const tenantServices = (function() {
                 err: err
             }
         },
+
         ServiceRegister: class {
             constructor(tenant) {
                 this.tenant = tenant
@@ -33,11 +36,19 @@ const tenantServices = (function() {
             }
         },
 
+		 ServiceDocumentation: class{
+			 	constructor(serviceID){
+					this.serviceID = serviceID
+					this.fr = null
+					this.en = null
+				}
+		  }, 
+
         Service: class {
             constructor(serviceID, tenant) {
                 this.id = serviceID
                 this.tenant = tenant
-                this.documentation = new Map()
+                this.documentation = new tenantServices.ServiceDocumentation(serviceID)
             }
         },
 
@@ -93,13 +104,21 @@ tenantServices.Service.prototype.updateDefinition = function(defObj) {
     }
 }
 
-tenantServices.Service.prototype.addDocumentationSet = function(docObj) {
-    try {
-        this.documentation.set(docObj.system_name.toLowerCase(), docObj)
+tenantServices.Service.prototype.addDocumentationSet = function(docObj, updateReport) {
+	if(/\-fr$/.test(docObj.system_name)){
+		this.documentation.fr = docObj
+	}
+   else if(/\-en$/.test(docObj.system_name)){
+		this.documentation.en = docObj
+	}
+	else{
+		debugger
+	}
+   /*     this.documentation.set(docObj.system_name.toLowerCase(), docObj)
         return tenantServices.updateOk(this.id)
     } catch (err) {
         return tenantServices.updateNotOk(this.id, err)
-    }
+    }*/
 }
 
 tenantServices.Service.prototype.hasBillingualDoc = function(){
@@ -164,17 +183,20 @@ tenantServices.ServiceRegister.prototype.forEach = function(callback) {
     this.register.forEach(callback)
 }
 
-tenantServices.ServiceRegister.prototype.addServiceDocs = function(docObj) {
+tenantServices.ServiceRegister.prototype.updateServiceDocs 
+	= function(docObj, updateReport) {
     let createNewService, serviceID
+
     serviceID = docObj.api_doc.service_id
     createNewService = _ => new tenantServices.Service(serviceID, this.tenant)
-    if (!this.register.has(serviceID)) {
+
+    if (!this.register.has(serviceID)) { //register service if it isn't yet
         let newService = createNewService()
         this.register.set(serviceID, newService)
         this.serviceIDs.push(serviceID)
     }
     let service = this.register.get(serviceID)
-    return service.addDocumentationSet(docObj.api_doc)
+    return service.addDocumentationSet(docObj.api_doc, updateReport)
 }
 
 tenantServices.ServiceRegister.prototype.updateServiceDefinition = 
@@ -193,9 +215,13 @@ tenantServices.ServiceRegister.prototype.updateServiceDefinition =
     } //now it is
 
     serviceObject = this.register.get(serviceID)
-    let serviceUpdate = serviceObject.updateDefinition(serviceDefinitionObject)
-    updateReport.reportUpdateService(serviceID, {updateTarget: "service definition update", updateResult: errors.codes.Ok})
-    return serviceUpdate
+	 serviceObject.updateDefinition(serviceDefinitionObject)
+
+    updateReport.reportUpdateService(serviceID, 
+		 { 
+			 updateTarget: "service definition update", 
+			 updateResult: errors.codes.Ok
+		 })
 }
 
 tenantServices.ServiceRegister.prototype.addServiceFeatures = async function(features) {
