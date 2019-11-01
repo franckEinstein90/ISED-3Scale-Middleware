@@ -48,7 +48,8 @@ const tenantServices = (function() {
             constructor(serviceID, tenant) {
                 this.id = serviceID
                 this.tenant = tenant
-                this.documentation = new tenantServices.ServiceDocumentation(serviceID)
+                this.documentation = new Map()
+                //tenantServices.ServiceDocumentation(serviceID)
             }
         },
 
@@ -105,20 +106,23 @@ tenantServices.Service.prototype.updateDefinition = function(defObj) {
 }
 
 tenantServices.Service.prototype.addDocumentationSet = function(docObj, updateReport) {
+    let updateTarget = null
 	if(/\-fr$/.test(docObj.system_name)){
-		this.documentation.fr = docObj
+        //French documentation		
+        updateTarget = "French Documentation Update"
 	}
    else if(/\-en$/.test(docObj.system_name)){
-		this.documentation.en = docObj
+        //English documentation		this.documentation.en = docObj
+        updateTarget = "English Documentation Update"
 	}
 	else{
-		debugger
+        //if this is neither English nor French documentation
+        //return
+        return
 	}
-   /*     this.documentation.set(docObj.system_name.toLowerCase(), docObj)
-        return tenantServices.updateOk(this.id)
-    } catch (err) {
-        return tenantServices.updateNotOk(this.id, err)
-    }*/
+   this.documentation.set(docObj.system_name.toLowerCase(), docObj)
+   updateReport.reportUpdateService(this.id, {updateTarget, updateResult: errors.codes.Ok})
+    
 }
 
 tenantServices.Service.prototype.hasBillingualDoc = function(){

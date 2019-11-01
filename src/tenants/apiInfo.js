@@ -11,11 +11,10 @@ tenants.Tenant.prototype.updateServiceDefinitions =
 	async function( tenantServiceListFetchResult, updateReport ) {
 
    if (tenantServiceListFetchResult === tenants.codes.serviceUpdateError) {
-     //there was an error fetching the list of services
-        debugger
+     		//there was an error fetching the list of services
         updateReport.serviceListFetchResult = errors.codes.NotOk
         log(`Error updating services for ${this.name}`)
-        return updateReport 
+        return 
     }
     updateReport.serviceListFetchResult = errors.codes.Ok
     //flag the services that need to be removed from the list of registered services
@@ -33,21 +32,22 @@ tenants.Tenant.prototype.updateServiceDefinitions =
     )
 }
 
-tenants.Tenant.prototype.addDocs = 	
-	async function( apiDocsInfo, updateReport ) {
+tenants.Tenant.prototype.addDocs = async function( apiDocsInfo, updateReport ) {
 
-   if (apiDocsInfo === tenants.codes.activeDocsUpdateError) {
-//		updateReport.
+   if (apiDocsInfo === tenants.codes.activeDocsUpdateError || 
+ 			!Array.isArray(apiDocsInfo)) 
+	 {
+		//there was an error fetching the list of api docs			   
+		updateReport.docListFetchResult = errors.codes.NotOk
       log(`error getting apiDocs`)
-      return apiDocsInfo
+      return 
     }
 
-    if (!Array.isArray(apiDocsInfo)) {
-        return tenants.codes.activeDocsUpdateError
-    }
+	 updateReport.docListFetchResult = errors.codes.Ok
     log(`updating doc info for ${this.name}`)
     apiDocsInfo.forEach(
-        apiDocObject => this.services.updateServiceDocs(apiDocObject, updateReport))
+        apiDocObject => this.services.updateServiceDocs(apiDocObject, updateReport)
+	 )
 }
 
 tenants.Tenant.prototype.updateServiceFeatures = 
@@ -64,14 +64,18 @@ tenants.Tenant.prototype.updateServiceFeatures =
     console.log(featureDescription)
 }
 
-tenants.Tenant.prototype.validateAPIs = async function(updateResults) {
+tenants.Tenant.prototype.validateAPIs = async function(updateReport) {
 	//This method gets called after all the fetches to 
 	//get the service documentation and definitions have made and
 	//resolved. It validate only the apis that have been 
 	//correctly updated and for which there is a set of 
-	//billingual documentation
+    //billingual documentation
+    let apiValidationsNeeded = updateReport.updatedServices.filter(
+        updateReport => updateReport.EnglishDocOK() && updateReport.FrenchDocOK() && 
+        updateReport.ServiceDefOK()
+    )
 	debugger
-	let apiValidatePromises = []
+/*	let apiValidatePromises = []
 
 	//validate the apis for which the updates have gone well
 	 updateResults.forEach(
@@ -80,7 +84,7 @@ tenants.Tenant.prototype.validateAPIs = async function(updateResults) {
 				 debugger
 			 }
 		 })
-	debugger
+	debugger*/
 /*
     let reportResult = function(resultArray) {
         let okUpdates = resultArray.filter(feature => feature === tenantServices.codes.updateServiceFeaturesOk)
@@ -115,8 +119,8 @@ tenants.Tenant.prototype.updateApiInfo = async function() {
     })
 
     //fulfills both promises in paralell
-    return Promise.all([serviceListingPromise, activeDocsPromise])
-        .then(updateResult => this.validateAPIs(updateResult))
+    return Promise.all([serviceListingPromise , activeDocsPromise])
+        .then(_ => this.validateAPIs(updateReport))
 }
 
 module.exports = {

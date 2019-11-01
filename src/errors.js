@@ -1,9 +1,13 @@
 "use strict"; 
 
 const errors = (function(){
-	
+
+
+
 	return{
 		codes: {
+			EnglishDoc: "English Document Update", 
+			FrenchDoc: "French Document Update", 
 			NotOk: "Not Ok", 
 			Ok: "Ok"
 		}, 
@@ -17,8 +21,9 @@ const errors = (function(){
 			constructor(tenantName){
 				this.tenantName = tenantName
 				this.serviceListFetchResult = null
-				this.servicesToRemove = [], 
-				this.updatedServices = []
+				this.docListFetchResult = null
+				this.servicesToRemove = [] 
+				this.updatedServices = new Map() 
 			}
 		}, 
 		errorHandler: function(err){
@@ -28,23 +33,34 @@ const errors = (function(){
 	
 })() 
 
+
+errors.TenantUpdateReport.prototype.PropertyOk = function(serviceID, propertyName){
+	if(this.updatedServices.has(serviceID)){
+		let updateServiceReport = this.updatedServices.get(serviceID)
+		if(propertyName in updateServiceReport){
+			if(updateServiceReport[propertyName] === true) return true
+		}
+	}
+	return false
+}
+
+errors.TenantUpdateReport.prototype.englishDocOk =	function(serviceID){
+	return this.PropertyOk(serviceID, errors.codes.EnglishDoc)
+}
+
 errors.TenantUpdateReport.prototype.reportUpdateService = 
 	function(serviceID, {updateTarget, updateResult}){
 
-	let serviceUpdateReport = this.updatedServices.find(
-		updateReport => updateReport.id === serviceID
-	)
-	//if there wasn't already an update report for that 
+   //if there wasn't already an update report for that 
    //service, create a new one
-	if (serviceUpdateReport === undefined){
-		serviceUpdateReport = {
-			id: serviceID
-		}
-		this.updatedServices.push(serviceUpdateReport)
+	if(!this.updatedServices.has(serviceID)){
+		this.updatedServices.set(serviceID, {
+
+		})
 	}
+	let serviceUpdateReport = this.updatedServices.get(serviceID)
 	//now add the update report unit to the object
 	serviceUpdateReport[updateTarget]= updateResult
-		
 }
 
 module.exports = {
