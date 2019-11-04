@@ -1,16 +1,6 @@
 require('module-alias/register')
 
 
-const {fork} = require('child_process')
-const fetchUpdateAPI = fork('fetchUpdate.js')
-
-fetchUpdateAPI.send('start')
-
-fetchUpdateAPI.on('message', msg => {
-	console.log(msg)
-})
-
-
 const createError = require('http-errors')
 const express = require('express')
 const path = require('path')
