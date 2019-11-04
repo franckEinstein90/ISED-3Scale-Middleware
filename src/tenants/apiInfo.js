@@ -11,7 +11,7 @@ tenants.Tenant.prototype.updateServiceDefinitions =
 	async function( tenantServiceListFetchResult, updateReport ) {
 
    if (tenantServiceListFetchResult === tenants.codes.serviceUpdateError) {
-     		//there was an error fetching the list of services
+     	//there was an error fetching the list of services
         updateReport.serviceListFetchResult = errors.codes.NotOk
         log(`Error updating services for ${this.name}`)
         return 
@@ -38,20 +38,18 @@ tenants.Tenant.prototype.addDocs = async function( apiDocsInfo, updateReport ) {
  			!Array.isArray(apiDocsInfo)) 
 	 {
 		//there was an error fetching the list of api docs			   
-		updateReport.docListFetchResult = errors.codes.NotOk
-      log(`error getting apiDocs`)
-      return 
+	    updateReport.docListFetchResult = errors.codes.NotOk
+        log(`error getting apiDocs`)
+        return 
     }
-
-	 updateReport.docListFetchResult = errors.codes.Ok
+	updateReport.docListFetchResult = errors.codes.Ok
     log(`updating doc info for ${this.name}`)
     apiDocsInfo.forEach(
         apiDocObject => this.services.updateServiceDocs(apiDocObject, updateReport)
 	 )
 }
 
-tenants.Tenant.prototype.updateServiceFeatures = 
-	async function(featureDescriptions) {
+tenants.Tenant.prototype.updateServiceFeatures = async function(featureDescriptions) {
     if (Array.isArray(featureDescriptions)) {
         if (featureDescriptions.length !== this.visibleServices.length) {
             console.log('problem')
@@ -65,40 +63,24 @@ tenants.Tenant.prototype.updateServiceFeatures =
 }
 
 tenants.Tenant.prototype.validateAPIs = async function(updateReport) {
-	//This method gets called after all the fetches to 
-	//get the service documentation and definitions have made and
-	//resolved. It validate only the apis that have been 
-	//correctly updated and for which there is a set of 
-    //billingual documentation
-    let apiValidationsNeeded = updateReport.updatedServices.filter(
-        updateReport => updateReport.EnglishDocOK() && updateReport.FrenchDocOK() && 
-        updateReport.ServiceDefOK()
-    )
-	debugger
-/*	let apiValidatePromises = []
+    let servicesToUpdate, reportResults, thisTenant 
+    thisTenant = this 
 
-	//validate the apis for which the updates have gone well
-	 updateResults.forEach(
-		 serviceUpdateReport => {
-			 if (serviceUpdateReport.okToValidate()){ //if the update went ok
-				 debugger
-			 }
-		 })
-	debugger*/
-/*
-    let reportResult = function(resultArray) {
-        let okUpdates = resultArray.filter(feature => feature === tenantServices.codes.updateServiceFeaturesOk)
-        if (okUpdates.length === resultArray.length) return tenants.codes.tenantUpdateOk
-        return tenants.codes.tenantUpdateNotOk
+    reportResults = function(apiFetchResult){
+        return {
+            tenant: thisTenant.name, 
+            updateResult: errors.codes.Ok
+        }
     }
-    this.visibleServices.length = 0
-    this.services.forEach((service, id) => {
-        if (service.hasBillingualDoc()) this.visibleServices.push(service)
-    })
-    if (this.visibleServices.length === 0) return tenants.codes.tenantUpdateOk
-    let promiseArray = this.visibleServices.map(service => service.updateFeatureInfo())*/
-    return Promise.all(promiseArray)
-        .then(reportResult)
+
+    servicesToUpdate = [] 
+    updateReport.filterAllOk().forEach(
+            serviceID => servicesToUpdate.push(this.services.register.get(serviceID))
+    )
+
+   let promiseArray = servicesToUpdate.map(service => service.updateFeatureInfo())
+   return Promise.all(promiseArray)
+            .then(reportResults)
 }
 
 
@@ -107,15 +89,14 @@ tenants.Tenant.prototype.updateApiInfo = async function() {
     //fetches information necessary to process all requests
     let serviceListingPromise, activeDocsPromise, updateReport
     updateReport = new TenantUpdateReport(this.name)
-    //first, 
     serviceListingPromise = new Promise((resolve, reject) => {
         this.getServiceList()
-            .then(services => resolve(this.updateServiceDefinitions(services, updateReport)))
+        .then(services => resolve(this.updateServiceDefinitions(services, updateReport)))
     })
 
     activeDocsPromise = new Promise((resolve, reject) => {
         this.getActiveDocsList()
-            .then(activeDocs => resolve(this.addDocs(activeDocs, updateReport)))
+        .then(activeDocs => resolve(this.addDocs(activeDocs, updateReport)))
     })
 
     //fulfills both promises in paralell

@@ -6,6 +6,7 @@ const errors = (function(){
 
 	return{
 		codes: {
+			ServiceDefinitionUpdate: "Service Definition Update", 
 			EnglishDoc: "English Document Update", 
 			FrenchDoc: "French Document Update", 
 			NotOk: "Not Ok", 
@@ -33,23 +34,40 @@ const errors = (function(){
 	
 })() 
 
-
 errors.TenantUpdateReport.prototype.PropertyOk = function(serviceID, propertyName){
 	if(this.updatedServices.has(serviceID)){
 		let updateServiceReport = this.updatedServices.get(serviceID)
 		if(propertyName in updateServiceReport){
-			if(updateServiceReport[propertyName] === true) return true
+			if(updateServiceReport[propertyName] === errors.codes.Ok) return true
 		}
 	}
 	return false
 }
 
-errors.TenantUpdateReport.prototype.englishDocOk =	function(serviceID){
+errors.TenantUpdateReport.prototype.englishDocOk = function(serviceID){
 	return this.PropertyOk(serviceID, errors.codes.EnglishDoc)
 }
 
-errors.TenantUpdateReport.prototype.reportUpdateService = 
-	function(serviceID, {updateTarget, updateResult}){
+errors.TenantUpdateReport.prototype.filterAllOk = function(){
+	//returns an array of services filtered as: 
+	//EnglishDoc OK, FrenchDoc OK,
+	let servicesToDisplay = []
+	this.updatedServices.forEach(
+		( serviceReport, serviceID ) => {
+			if(
+					this.PropertyOk(serviceID, errors.codes.ServiceDefinitionUpdate) &&
+					this.PropertyOk(serviceID, errors.codes.EnglishDoc) &&
+					this.PropertyOk(serviceID, errors.codes.FrenchDoc)
+				){
+				servicesToDisplay.push(serviceID)
+			}
+		})
+	return servicesToDisplay
+}
+
+
+
+errors.TenantUpdateReport.prototype.reportUpdateService = function(serviceID, {updateTarget, updateResult}){
 
    //if there wasn't already an update report for that 
    //service, create a new one

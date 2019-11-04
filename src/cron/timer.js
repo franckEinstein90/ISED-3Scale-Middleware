@@ -4,6 +4,7 @@ const tenantsManager = require('@services/tenantsManager').tenantsManager
 const log = require('@src/utils').utils.log
 const cache = require('memory-cache')
 const codes = require('@src/tenants').tenants.codes
+const errors = require('@errors').errors
 
 const cacheManage = (function() {
 
@@ -35,9 +36,10 @@ const cacheManage = (function() {
     let checkResults = function(updateResults){
         //goes back and flags + fix errors
         updateResults.forEach(
-            updateResult => {
-                if (updateResult !== codes.tenantUpdateOk){
+            updateReport => {
+                if (updateReport.updateResult !== errors.codes.Ok){
                     debugger
+                    //recover from error
                 }
             }
         )

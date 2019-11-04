@@ -34,22 +34,19 @@ let initISEDMiddleWare = async function() {
     let JSONData, checkFetchResults
 	JSONData = config.get('master')
 
-/*	 checkFetchResults = function(fetchResults){
-		console.log('finished fetching tenant information')
-		let updateErrors = fetchResults.filter(
-			fetchRes => fetchRes !== "tenant successfully updated")
-		if (updateErrors.length > 0) debugger
+	 checkFetchResults = function(fetchResults){
+        console.log('finished fetching tenant information')
 		console.log('ready to receive requests')
 		return 1
 	 }
-*/
+
      tenantsManager.onReady(JSONData)
      //initial data fetching on loading
      tenantsManager.updateTenantInformation()
      .then(checkFetchResults)
      //set up info fetch cycle
- //    timer.setRefreshTime(1)
-  //   cronJob.schedule('* * * * *', timer.cronUpdate)
+     timer.setRefreshTime(1)
+     cronJob.schedule('* * * * *', timer.cronUpdate)
 }
 
 initISEDMiddleWare()

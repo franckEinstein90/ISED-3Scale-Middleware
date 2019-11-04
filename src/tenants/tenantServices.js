@@ -2,14 +2,14 @@
 
 const log = require('@src/utils').utils.log
 const validator = require('validator')
-const alwaysResolve= require('@src/utils').utils.alwaysResolve
+const alwaysResolve = require('@src/utils').utils.alwaysResolve
 const errors = require('@errors').errors
 
 const tenantServices = (function() {
 
     return {
         codes: {
-            updateServiceFeaturesOk: "update service feature ok", 
+            updateServiceFeaturesOk: "update service feature ok",
             updateServiceFeaturesNotOk: "update service feature not ok"
         },
 
@@ -36,13 +36,13 @@ const tenantServices = (function() {
             }
         },
 
-		 ServiceDocumentation: class{
-			 	constructor(serviceID){
-					this.serviceID = serviceID
-					this.fr = null
-					this.en = null
-				}
-		  }, 
+        ServiceDocumentation: class {
+            constructor(serviceID) {
+                this.serviceID = serviceID
+                this.fr = null
+                this.en = null
+            }
+        },
 
         Service: class {
             constructor(serviceID, tenant) {
@@ -62,33 +62,34 @@ const tenantServices = (function() {
 })()
 
 tenantServices.Service.prototype.outputAPIDescription = function(language) {
-	   let documentationHandle = `${this.system_name.toLowerCase()}-${language}`
-      //service.system_name is used to link the french and the english versions
-      //of the documentation. We only display the API and its associated information
-      //if both linguistic versions are present
-      if (this.documentation.has(documentationHandle)) {
-		let docInfo, swaggerBody, apiDescription
-         docInfo = this.documentation.get(documentationHandle)
-         if(!(validator.isJSON(docInfo.body))) return
-         swaggerBody = JSON.parse(docInfo.body)
-         apiDescription = {
-         	name: swaggerBody.info.title,
+    let documentationHandle = `${this.system_name.toLowerCase()}-${language}`
+    //service.system_name is used to link the french and the english versions
+    //of the documentation. We only display the API and its associated information
+    //if both linguistic versions are present
+    if (this.documentation.has(documentationHandle)) {
+        let docInfo, swaggerBody, apiDescription
+        docInfo = this.documentation.get(documentationHandle)
+        if (!(validator.isJSON(docInfo.body))) return
+        swaggerBody = JSON.parse(docInfo.body)
+        apiDescription = {
+            name: swaggerBody.info.title,
             description: swaggerBody.info.description,
             baseURL: `https://${swaggerBody.host}${swaggerBody.basePath}`,
-            humanURL: [`https://${this.tenant.name}`, 
-								(this.tenant.env === "dev"?".dev":""), 
-								`.api.canada.ca/${language}`, 
-								`/detail?api=${this.system_name}`].join('')	
-         }
-         if (swaggerBody.info.contact) {
-         	apiDescription.contact = {
-            	FN: swaggerBody.info.contact.name,
-               email: swaggerBody.info.contact.email
+            humanURL: [`https://${this.tenant.name}`,
+                (this.tenant.env === "dev" ? ".dev" : ""),
+                `.api.canada.ca/${language}`,
+                `/detail?api=${this.system_name}`
+            ].join('')
+        }
+        if (swaggerBody.info.contact) {
+            apiDescription.contact = {
+                FN: swaggerBody.info.contact.name,
+                email: swaggerBody.info.contact.email
             }
-         }
-			return apiDescription 
-		}
-		return null
+        }
+        return apiDescription
+    }
+    return null
 }
 
 tenantServices.Service.prototype.updateDefinition = function(defObj) {
@@ -107,68 +108,77 @@ tenantServices.Service.prototype.updateDefinition = function(defObj) {
 
 tenantServices.Service.prototype.addDocumentationSet = function(docObj, updateReport) {
     let updateTarget = null
-	if(/\-fr$/.test(docObj.system_name)){
+    if (/\-fr$/.test(docObj.system_name)) {
         //French documentation		
-        updateTarget = "French Documentation Update"
-	}
-   else if(/\-en$/.test(docObj.system_name)){
-        //English documentation		this.documentation.en = docObj
-        updateTarget = "English Documentation Update"
-	}
-	else{
-        //if this is neither English nor French documentation
-        //return
+        updateTarget = errors.codes.FrenchDoc
+    } else if (/\-en$/.test(docObj.system_name)) {
+        //English documentation		
+        updateTarget = errors.codes.EnglishDoc
+    } else {
+        //neither English nor French documentation
         return
-	}
-   this.documentation.set(docObj.system_name.toLowerCase(), docObj)
-   updateReport.reportUpdateService(this.id, {updateTarget, updateResult: errors.codes.Ok})
-    
+    }
+    this.documentation.set(docObj.system_name.toLowerCase(), docObj)
+    updateReport.reportUpdateService(this.id, {
+        updateTarget,
+        updateResult: errors.codes.Ok
+    })
+
 }
 
-tenantServices.Service.prototype.hasBillingualDoc = function(){
-    if (this.documentation.size >= 2){
+tenantServices.Service.prototype.hasBillingualDoc = function() {
+    if (this.documentation.size >= 2) {
         return true
     } //one french, one english
     return false
 }
 
-tenantServices.Service.prototype.updateFeatureInfo = async function(){
+tenantServices.Service.prototype.updateFeatureInfo = async function() {
     let thisServiceID, that, bad
     bad = tenantServices.codes.updateServiceFeaturesNotOk
     thisServiceID = this.id
     that = this
-    let apiCall = [`${this.tenant.baseURL}services/${thisServiceID}/`, 
-                    `features.json?access_token=${this.tenant.accessToken}`].join('')
+    let apiCall = [`${this.tenant.baseURL}services/${thisServiceID}/`,
+        `features.json?access_token=${this.tenant.accessToken}`
+    ].join('')
+
     let processGoodResponse = function(body) {
-            if(validator.isJSON(body)){
-                let features = JSON.parse(body).features
-                that.features = features.map(obj => obj.feature)
-                return tenantServices.codes.updateServiceFeaturesOk 
+        if (validator.isJSON(body)) {
+            let features = JSON.parse(body).features
+            that.features = features.map(obj => obj.feature)
+            return {
+                serviceID: thisServiceID,
+                features,
+                featureUpdateResult: errors.codes.Ok
             }
-            return bad
         }
-   return alwaysResolve(apiCall, {good: processGoodResponse, bad})
+        return bad
+    }
+    return alwaysResolve(apiCall, {
+        good: processGoodResponse,
+        bad
+    })
 }
 
-tenantServices.Service.prototype.servicePlanAccess = function(){
+tenantServices.Service.prototype.servicePlanAccess = function() {
     let servicePlanAccess = {
-        public: true, 
-        gcInternal: true, 
+        public: true,
+        gcInternal: true,
         depInternal: true
     }
     //if no service plans, returns all access (public api)
-    if(! ('features' in this)) return servicePlanAccess
+    if (!('features' in this)) return servicePlanAccess
     let servicePlanFeatures = this.features.filter(feature => feature.scope === 'service_plan')
-    if(servicePlanFeatures.length === 0) return servicePlanAccess
+    if (servicePlanFeatures.length === 0) return servicePlanAccess
     servicePlanAccess.public = false
     servicePlanAccess.gcInternal = false
     servicePlanAccess.depInternal = false
     servicePlanFeatures.forEach(
         serviceFeature => {
-            if(serviceFeature.system_name === 'gc-internal') servicePlanAccess.gcInternal = true
-            if(serviceFeature.system_name === `${this.tenant.name}-internal`) servicePlanAccess.depInternal = true
+            if (serviceFeature.system_name === 'gc-internal') servicePlanAccess.gcInternal = true
+            if (serviceFeature.system_name === `${this.tenant.name}-internal`) servicePlanAccess.depInternal = true
         })
-	return servicePlanAccess
+    return servicePlanAccess
 }
 
 tenantServices.ServiceRegister.prototype.length = function() {
@@ -187,8 +197,7 @@ tenantServices.ServiceRegister.prototype.forEach = function(callback) {
     this.register.forEach(callback)
 }
 
-tenantServices.ServiceRegister.prototype.updateServiceDocs 
-	= function(docObj, updateReport) {
+tenantServices.ServiceRegister.prototype.updateServiceDocs = function(docObj, updateReport) {
     let createNewService, serviceID
 
     serviceID = docObj.api_doc.service_id
@@ -203,30 +212,29 @@ tenantServices.ServiceRegister.prototype.updateServiceDocs
     return service.addDocumentationSet(docObj.api_doc, updateReport)
 }
 
-tenantServices.ServiceRegister.prototype.updateServiceDefinition = 
-	function(serviceDefinitionObject, updateReport) {
-    //receives the result of a service definition fetch
-    //and updates or create a new service object 
-    //in this tenant service register
-    let serviceID, serviceObject 
-    serviceID = serviceDefinitionObject.id
-    
+tenantServices.ServiceRegister.prototype.updateServiceDefinition =
+    function(serviceDefinitionObject, updateReport) {
+        //receives the result of a service definition fetch
+        //and updates or create a new service object 
+        //in this tenant service register
+        let serviceID, serviceObject
+        serviceID = serviceDefinitionObject.id
 
-    if (!this.register.has(serviceID)) { //this service is not registered
-        serviceObject = new tenantServices.Service(serviceID, this.tenant)
-        this.register.set(serviceID, serviceObject)
-        this.serviceIDs.push(serviceID)
-    } //now it is
 
-    serviceObject = this.register.get(serviceID)
-	 serviceObject.updateDefinition(serviceDefinitionObject)
+        if (!this.register.has(serviceID)) { //this service is not registered
+            serviceObject = new tenantServices.Service(serviceID, this.tenant)
+            this.register.set(serviceID, serviceObject)
+            this.serviceIDs.push(serviceID)
+        } //now it is
 
-    updateReport.reportUpdateService(serviceID, 
-		 { 
-			 updateTarget: "service definition update", 
-			 updateResult: errors.codes.Ok
-		 })
-}
+        serviceObject = this.register.get(serviceID)
+        serviceObject.updateDefinition(serviceDefinitionObject)
+
+        updateReport.reportUpdateService(serviceID, {
+            updateTarget: errors.codes.ServiceDefinitionUpdate,
+            updateResult: errors.codes.Ok
+        })
+    }
 
 tenantServices.ServiceRegister.prototype.addServiceFeatures = async function(features) {
     if (this.register.has(features.service)) {
