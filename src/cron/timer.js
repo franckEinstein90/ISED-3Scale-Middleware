@@ -38,7 +38,6 @@ const cacheManage = (function() {
         updateResults.forEach(
             updateReport => {
                 if (updateReport.updateResult !== errors.codes.Ok){
-                    debugger
                     //recover from error
                 }
             }
