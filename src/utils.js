@@ -38,13 +38,13 @@ const utils = (function() {
             console.log(str)
         }, 
 
-		  langMsg: function(language, {fr, en}){
-				if(language === langCodes.fr) return fr
-			   if(language === langCodes.en) return en
-			   throw "non recognized error code"
-          }, 
+		langMsg: function(language, {fr, en}){
+			if(language === langCodes.fr) return fr
+			if(language === langCodes.en) return en
+			throw "non recognized error code"
+        }, 
 
-          alwaysResolve: function(apiCall, {good, bad}){
+        alwaysResolve: function(apiCall, {good, bad}){
             return new Promise((resolve, reject) => {
                 request(apiCall, function(err, response, body){
                     if(err) return resolve(bad)

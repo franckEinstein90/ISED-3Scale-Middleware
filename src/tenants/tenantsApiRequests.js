@@ -70,6 +70,7 @@ tenants.Tenant.prototype.getActiveDocsList = function() {
        if(validator.isJSON(body)){
             return JSON.parse(body).api_docs
        }else{
+           debugger
            return tenants.codes.activeDocsUpdateError
        }
    }

@@ -34,8 +34,7 @@ tenants.Tenant.prototype.updateServiceDefinitions =
 
 tenants.Tenant.prototype.addDocs = async function( apiDocsInfo, updateReport ) {
 
-   if (apiDocsInfo === tenants.codes.activeDocsUpdateError || 
- 			!Array.isArray(apiDocsInfo)) 
+   if (apiDocsInfo === tenants.codes.activeDocsUpdateError || !Array.isArray(apiDocsInfo)) 
 	 {
 		//there was an error fetching the list of api docs			   
 	    updateReport.docListFetchResult = errors.codes.NotOk

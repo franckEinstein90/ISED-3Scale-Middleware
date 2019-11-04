@@ -83,8 +83,6 @@ const tenants = (function() {
 })()
 
 
-
-
 tenants.Tenant.prototype.getAccountPlan = function(planInfo, userEmail) {
     if (this.name === "ised-isde") debugger
     //creates a new account object for userEmail 
