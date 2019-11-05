@@ -13,10 +13,14 @@ const validate = require('./queryManager').query.validate
 
 router.get('/userinfo.json', 
 	async function(req, res, next) {
-		let requestorIP = req.ip
-		accessLog.log('info', `userinfo request from ip[${req.ip}] received ${req._startTime}`)
+		let logMessage, callArgs
+		logMessage = {
+			message: `userinfo request from ip[${req.ip}] received ${req._startTime}`
+		}
+		callArgs = validate(req, logMessage)
+		accessLog.log('info', logMessage.message)
 		res.header("Content-Type", "application/json; charset=utf-8")
-		res.send(await tenantsManager.getUserInfo(validate(req)))
+		res.send(await tenantsManager.getUserInfo(callArgs))
 	});
 
 router.get('/api.json', 

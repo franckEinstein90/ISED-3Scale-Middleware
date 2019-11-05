@@ -1,8 +1,0 @@
-{"level":"info","message":"hello world"}
-{"level":"info","message":"request userinfo.json"}
-{"level":"info","message":"new userinfo.json request at %d"}
-{"level":"info","message":"new userinfo.json request at %d"}
-{"level":"info","message":"new userinfo.json from ip[::1]"}
-{"level":"info","message":"new userinfo.json from ip[::1] received at Tue Nov 05 2019 13:47:31 GMT-0500 (Eastern Standard Time)"}
-{"level":"info","message":"new userinfo.json from ip[::1] received Tue Nov 05 2019 13:48:35 GMT-0500 (Eastern Standard Time)"}
-{"level":"info","message":"userinfo request from ip[::1] received Tue Nov 05 2019 13:49:25 GMT-0500 (Eastern Standard Time)"}
