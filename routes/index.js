@@ -9,15 +9,15 @@ const assert = require('chai').assert
 const accessLog = require('@src/utils').utils.accessLog
 
 const tenantsManager = require('@services/tenantsManager').tenantsManager
-const validate = require('./queryManager').query.validate
+const queryManager = require('./queryManager').queryManager
 
 router.get('/userinfo.json', 
 	async function(req, res, next) {
 		let logMessage, callArgs
 		logMessage = {
-			message: `userinfo request from ip[${req.ip}] received ${req._startTime}`
+			message: `userinfo request ${queryManager.requestLogMessage(req)} `
 		}
-		callArgs = validate(req, logMessage)
+		callArgs = queryManager.validate(req, logMessage)
 		accessLog.log('info', logMessage.message)
 		res.header("Content-Type", "application/json; charset=utf-8")
 		res.send(await tenantsManager.getUserInfo(callArgs))
@@ -25,8 +25,13 @@ router.get('/userinfo.json',
 
 router.get('/api.json', 
 	async function(req, res, next) {
+		let logMessage = {
+			message: `api.json request ${queryManager.requestLogMessage(req)}`
+		}
+		let callArgs = queryManager.validate(req, logMessage)
+		accessLog.log('info', logMessage.message)
 		res.header("Content-Type", "application/json; charset=utf-8")
-		res.send(await tenantsManager.getApiInfo(validate(req)))
+		res.send(await tenantsManager.getApiInfo(callArgs))
 	});
 
 

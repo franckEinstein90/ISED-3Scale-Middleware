@@ -5,10 +5,14 @@
 "use strict";
 
 const validator = require('validator')
+const accessLog = require('@src/utils').utils.accessLog 
 
-const query = (function() {
+const queryManager = (function() {
+	
     return {
-
+		  requestLogMessage: function(req){
+			 	return `[ip: ${req.ip}] [received: ${req._startTime}]`
+		  }, 
         validate: function(req, logMessage) {
             //if not valid, simply return null objects
             let userEmail = req.query.email
@@ -40,5 +44,5 @@ const query = (function() {
 })();
 
 module.exports = {
-    query
+    queryManager
 }
