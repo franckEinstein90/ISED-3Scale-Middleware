@@ -1,5 +1,19 @@
-require('module-alias/register')
+/******************************************************************************
+ * HEADER goes here
+ *
+ * ****************************************************************************/
+"use strict"; 
+require('module-alias/register') //used for to create @tags for requires - should be the first line of this file
 
+//initiate winston logger
+const winston = require('winston')
+const appLogger = winston.createLogger({
+	format: winston.format.json(), 
+	transports: [
+		new winston.transports.Console(), 
+		new winston.transports.File({ filename: 'info.log' })
+	]
+}); 
 
 const createError = require('http-errors')
 const express = require('express')
@@ -9,22 +23,22 @@ const logger = require('morgan')
 const config = require('config')
 
 
+
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 
 const utils = require('@src/utils.js').utils
 const tenantsManager = require('@services/tenantsManager').tenantsManager 
 
-
-
 const cronJob = require('node-cron')
 const timer = require('@src/cron/timer.js').cacheManage
 
 let initISEDMiddleWare = async function() {
     let JSONData, checkFetchResults
-	JSONData = config.get('master')
 
-	 checkFetchResults = function(fetchResults){
+	appLogger.log('info', 'Initializing application')
+	JSONData = config.get('master')
+	checkFetchResults = function(fetchResults){
         console.log('finished fetching tenant information')
 		console.log('ready to receive requests')
 		return 1

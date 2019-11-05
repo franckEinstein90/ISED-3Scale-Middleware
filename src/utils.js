@@ -2,22 +2,35 @@
 const fs = require('fs')
 const path = require('path')
 const request = require('request')
+const winston = require('winston')
+
 
 const utils = (function() {
 
-	 let langCodes, envCodes, runningEnv;
+    let langCodes, envCodes, requestLogger
 
-	 langCodes = {
-		 fr: "fr", 
-		 en: "en"
-	 }
-	 envCodes = {
-		 dev: "dev", 
-		 prod: "prod"
-	 }
+    requestLogger = winston.createLogger({
+	    format: winston.format.combine(
+		    winston.format.json(), 
+		    winston.format.splat()
+	    ),
+	    transports: [
+		    new winston.transports.File({filename: 'logs/access.log'})
+		]
+    })
+
+    langCodes = {
+        fr: "fr",
+        en: "en"
+    }
+    envCodes = {
+        dev: "dev",
+        prod: "prod"
+    }
+
+
     return {
-		  runningEnv(){
-		  }, 
+	runningEnv: function() {},
         readConfigFile: function() {
             //used for testing
             console.log(__dirname)
@@ -34,24 +47,31 @@ const utils = (function() {
             }
         },
 
+	accessLog: requestLogger, 
+
         log: function(str) {
             console.log(str)
-        }, 
+        },
 
-		langMsg: function(language, {fr, en}){
-			if(language === langCodes.fr) return fr
-			if(language === langCodes.en) return en
-			throw "non recognized error code"
-        }, 
+        langMsg: function(language, {
+            fr,
+            en
+        }) {
+            if (language === langCodes.fr) return fr
+            if (language === langCodes.en) return en
+            throw "non recognized error code"
+        },
 
-        alwaysResolve: function(apiCall, {good, bad}){
+        alwaysResolve: function(apiCall, {
+            good,
+            bad
+        }) {
             return new Promise((resolve, reject) => {
-                request(apiCall, function(err, response, body){
-                    if(err) return resolve(bad)
-                    if(response && response.statusCode === 200 && response.statusMessage === "OK"){
-                        resolve(good(body))	
-                    }
-                    else{
+                request(apiCall, function(err, response, body) {
+                    if (err) return resolve(bad)
+                    if (response && response.statusCode === 200 && response.statusMessage === "OK") {
+                        resolve(good(body))
+                    } else {
                         return resolve(bad)
                     }
                 })

@@ -72,7 +72,7 @@ const tenants = (function() {
                 this.accountAdminBaseURL = {
                     accounts: `https://${this.adminDomain}/admin/api/accounts/`,
                     services: `https://${this.adminDomain}/admin/api/services.json?access_token=${this.accessToken}`,
-                    activeDocs: `${this.baseURL}/active_docs.json?access_token=${this.accessToken}`,
+                    activeDocs: `${this.baseURL}active_docs.json?access_token=${this.accessToken}`,
                     userAccount: email => `${this.baseURL}accounts/find.json?access_token=${this.accessToken}&email=${encodeURIComponent(email)}`,
                     userPlans: email => `${this.baseURL}accounts/find?access_token=${this.accessToken}&email=${encodeURIComponent(email)}`
                 }

@@ -1,6 +1,7 @@
 "use strict";
 
 const validator = require('validator')
+const error = require('@errors').errors
 const request = require('request')
 const tenants = require('@src/tenants').tenants
 const parseXML = require('xml2js').parseString
@@ -70,7 +71,7 @@ tenants.Tenant.prototype.getActiveDocsList = function() {
        if(validator.isJSON(body)){
             return JSON.parse(body).api_docs
        }else{
-           debugger
+           //logError  
            return tenants.codes.activeDocsUpdateError
        }
    }

@@ -6,12 +6,15 @@ const path = require('path')
 const express = require('express')
 const router = express.Router()
 const assert = require('chai').assert
+const accessLog = require('@src/utils').utils.accessLog
 
 const tenantsManager = require('@services/tenantsManager').tenantsManager
 const validate = require('./queryManager').query.validate
 
 router.get('/userinfo.json', 
 	async function(req, res, next) {
+		let requestorIP = req.ip
+		accessLog.log('info', `userinfo request from ip[${req.ip}] received ${req._startTime}`)
 		res.header("Content-Type", "application/json; charset=utf-8")
 		res.send(await tenantsManager.getUserInfo(validate(req)))
 	});

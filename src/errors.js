@@ -26,6 +26,9 @@ const errors = (function(){
 				this.servicesToRemove = [] 
 				this.updatedServices = new Map() 
 			}
+		},
+		log: function(errDescription){
+
 		}, 
 		errorHandler: function(err){
 			console.log('went to error handler')
