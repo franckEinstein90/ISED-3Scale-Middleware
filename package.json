@@ -12,6 +12,7 @@
     "@errors": "src/errors.js"
   },
   "dependencies": {
+    "appversion": "^1.7.1",
     "async": "^3.1.0",
     "chai": "^4.2.0",
     "config": "^3.2.2",

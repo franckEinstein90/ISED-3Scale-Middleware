@@ -26,6 +26,7 @@ tenants.Tenant.prototype.getAccountInfoPromise = function(clientEmail) {
 tenants.Tenant.prototype.getTenantSubscriptionKeys = function(userAccount) {
     if (userAccount === null) return null
 
+                    //accounts: `https://${this.adminDomain}/admin/api/accounts/`,
     let apiCall = [this.accountAdminBaseURL.accounts,
         userAccount.accountID,
         `/applications.json?access_token=${this.accessToken}`

@@ -8,7 +8,22 @@ const accounts = (function() {
         UserAccount: class {
             constructor(email) {
                 this.email = email
+                this.tenantAccountPlans = new Map() //(tenant name x account plan)
                 this.accountPlans = new Map()
+            }
+        },
+        TenantAccountPlan: class {
+            constructor(tenant, planInfo) {
+                //planinfo is formatted as per 
+                //the result of the xml api fetch call
+                Object.getOwnPropertyNames(planInfo).forEach(
+                    propertyName => {
+                        if (propertyName !== '$') {
+                            Object.defineProperty(this, propertyName, {
+                                value: planInfo[propertyName][0]
+                        })
+                    }
+                })
             }
         },
         Account: class {
@@ -21,25 +36,26 @@ const accounts = (function() {
 })()
 
 
-accounts.UserAccount.prototype.processAccountPlanFeatures = 
-	function(tenant, accountPlanFeatures) {
-		let accessRights = {
-			gcInternal: false, 
-			depInternal: false
-		}
-		if(Array.isArray(accountPlanFeatures)){
-			accountPlanFeatures.forEach(
-				feature => {
-					if(feature.feature.system_name === "gc-internal"){
-						accessRights.gcInternal = true
-					}
-					if(feature.feature.system_name === `${tenant.name}-internal`){
-						accessRights.depInternal = true
-					}
-				})
-		}
-		this.accountPlans.set(tenant.name, accessRights)
-}
+accounts.UserAccount.prototype.processAccountPlanFeatures =
+    function(tenant, accountPlanFeatures) {
+        let accessRights = {
+            gcInternal: false,
+            depInternal: false
+        }
+        if (Array.isArray(accountPlanFeatures)) {
+            accountPlanFeatures.forEach(
+                feature => {
+                    if (feature.feature.system_name === "gc-internal") {
+                        accessRights.gcInternal = true
+                    }
+                    if (feature.feature.system_name === `${tenant.name}-internal`) {
+                        accessRights.depInternal = true
+                    }
+                })
+        }
+        this.accountPlans.set(tenant.name, accessRights)
+    }
+
 accounts.UserAccount.prototype.getAccountPlanFeatures = function(tenant, planID) {
     //this user has an account plan for this tenant
     //now fetching the features of the plan
@@ -59,15 +75,27 @@ accounts.UserAccount.prototype.getAccountPlanFeatures = function(tenant, planID)
 }
 
 
-accounts.UserAccount.prototype.addPlans = async function(tenant, plans) {
+accounts.UserAccount.prototype.addTenantAccountPlan = async function(tenant, plans) {
+    if (plans === null) return null
+
     let tenantPlans = plans.plans[0].plan
+
     if (tenantPlans === undefined) {
-        debugger
+        return null
     }
+
     let accountPlan = tenantPlans.filter(
         plan => plan.type[0] === "account_plan"
     )
-    return accountPlan[0].id[0]
+
+    if (accountPlan.length >= 1) {
+        this.tenantAccountPlans.set(
+            tenant.name,
+            new accounts.TenantAccountPlan(tenant, accountPlan[0]))
+
+        return accountPlan[0].id[0]
+    }
+    return null
 }
 
 accounts.UserAccount.prototype.getPlans = async function(tenant) {
@@ -83,18 +111,15 @@ accounts.UserAccount.prototype.getPlans = async function(tenant) {
         debugger //shouldn't happen
     }
     return new Promise((resolve, reject) => {
-		tenant.getUserPlans(this.email)
-        .then(processResults)
-        .then(plans => {
-            if (plans) return this.addPlans(tenant, plans)
-            return null
-        })
-        .then(accountPlanID => {
-            if (accountPlanID === null) return null
-            return this.getAccountPlanFeatures(tenant, accountPlanID)
-        })
-		.then(planFeatures => resolve(this.processAccountPlanFeatures(tenant, planFeatures)))
-	 })
+        tenant.getUserPlans(this.email)
+            .then(processResults)
+            .then(plans => this.addTenantAccountPlan(tenant, plans))
+            .then(accountPlanID => {
+                if (accountPlanID === null) return null
+                return this.getAccountPlanFeatures(tenant, accountPlanID)
+            })
+            .then(planFeatures => resolve(this.processAccountPlanFeatures(tenant, planFeatures)))
+    })
 }
 
 accounts.Account.prototype.setBasicAccountInfo = function(accountInfo) {

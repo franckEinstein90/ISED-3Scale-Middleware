@@ -64,14 +64,14 @@ const tenantsManager = (function() {
                             serviceID: application.service_id,
                             language
                         })
-                        apps.push(appClone)
+                        apps.push({application: appClone})
                     }
                 )
             }
             return {
                 name: tenant.name,
                 description: tenant.tenantDescription(language),
-                applications: apps
+                applications: {applications:apps}
             }
         })
         return JSON.stringify(outputJSON)
