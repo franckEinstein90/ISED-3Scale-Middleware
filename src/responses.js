@@ -1,9 +1,10 @@
-require('@src/tenants/apiInfo')
-const tenants = require('@src/tenants/userInfo').tenants
+const tenants = require('@src/tenants/apiInfo').tenants
 
-const response = function(){
+const responses = function(){
 
-
+	return{
+		
+	}
 }
 
 module.exports = {

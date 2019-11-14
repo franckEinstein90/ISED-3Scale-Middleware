@@ -49,7 +49,7 @@ let initISEDMiddleWare = async function() {
      tenantsManager.updateTenantInformation()
      .then(checkFetchResults)
      //set up info fetch cycle
-     timer.setRefreshTime(5) //refresh information every 5 minutes
+     timer.setRefreshTime(1) //refresh information every 5 minutes
      cronJob.schedule('* * * * *', timer.cronUpdate)
 }
 

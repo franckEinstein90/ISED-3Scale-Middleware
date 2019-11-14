@@ -29,7 +29,7 @@ const utils = (function() {
     }
 
 
-    return {
+   return {
 	runningEnv: function() {},
         readConfigFile: function() {
             //used for testing

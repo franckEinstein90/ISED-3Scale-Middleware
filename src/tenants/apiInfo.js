@@ -1,7 +1,7 @@
 "use strict"
 
 const tenants = require('@src/tenants/tenantsApiRequests').tenants
-const tenantServices = require('@src/tenants/tenantServices').tenantServices
+const tenantServices = require('@src/services').services
 
 const log = require('@src/utils').utils.log
 const errors = require('@errors').errors
@@ -23,7 +23,9 @@ tenants.Tenant.prototype.updateServiceDefinitions =
     )
     this.services.forEach(
         (service, serviceID) => {
-            if (! currentServiceIDs.includes(serviceID) ) updateReport.servicesToRemove.push(serviceID)
+            if (! currentServiceIDs.includes(serviceID) ) {
+                updateReport.servicesToRemove.push(serviceID)
+            }
         })
 
     log(`updating ${tenantServiceListFetchResult.length} service definitions for ${this.name}`)

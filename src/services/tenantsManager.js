@@ -7,74 +7,60 @@ const UserAccount = require('@src/accounts').accounts.UserAccount
 
 const tenantsManager = (function() {
 
-    let env, applicationAPIURI, tenants,
-        userInfoResponse,
-        apiReqResponse, tenantToUserPlans, tenantToApiInfo,
-        userApiInfoResponse, getApiName
+    let env,  tenants, userInfoResponse,  tenantToApiInfo,
+        userApiInfoResponse , applicationAPIURI
 
     tenants = []
 
-    getApiName = function({
-        tenant,
-        serviceID,
-        language
-    }) {
-        let cachedApiName, key
-        key = [tenant.name, serviceID, language].join('-')
-        console.log("checking this key: " + key)
-        cachedApiName = cache.get(key)
-        if (cachedApiName) return cachedApiName
-        key = [tenant.name, serviceID, "default"].join('-')
-        cachedApiName = cache.get(key)
-        if (cachedApiName) return cachedApiName
-        return serviceID
-    }
-
-    userInfoResponse = function(userEmail, language) {
-        let outputJSON, apps, newLink
-
-        outputJSON = {
-            userEmail: userEmail
-        }
-        newLink = function(tenant, application) {
-            let link = {
-                rel: "self_new",
-                href: [`https://${tenant.name}`,
-                    `${applicationAPIURI}${application.id}?`,
-                    `lang=${language}`
-                ].join('')
+    userInfoResponse = function(user, language) {
+       let JSONResponse = {
+           userEmail: user.email,
+           tenants: []
+       }
+       let applicationInfo = (application, service) => {
+           let serviceDocumentation = service.outputAPIDescription(language)
+           let links = application.links
+           links.push({
+            rel: "self_new", 
+            href: `https://${service.tenant.name}.dev.api.canada.ca/admin/applications/${application.id}?lang=${language}`
+           })
+           return {
+                application: {
+                name: application.name , 
+                state: application.state, 
+                created_at: application.created_at, 
+                user_key: application.user_key, 
+                links: links, 
+                apiName: serviceDocumentation.name 
+                }
             }
-            return link
-        }
-    outputJSON.tenants = tenants.map(function(tenant) {
-            apps = []
-            if (tenant.accounts.has(userEmail)) {
-                tenant.accounts.get(userEmail).applications.forEach(
-                    application => {
-                        let appClone = {
-                            name: application.name,
-                            state: application.state,
-                            created_at: application.created_at,
-                            user_key: application.user_key,
-                            links: application.links
-                        }
-                        appClone.links.push(newLink(tenant, application))
-                        appClone.apiname = getApiName({
-                            tenant,
-                            serviceID: application.service_id,
-                            language
-                        })
-                        apps.push({application: appClone})
+       }
+       let displayApplications = tenantAccount => {
+           let applications = []
+           let tenantServices = tenantAccount.tenant.services.register
+           tenantAccount.applications.forEach(
+               application => {
+                   let service = tenantServices.get(application.service_id)
+                   if(service.hasBillingualDoc()){
+                        applications.push(applicationInfo(application, service))
+                   }
+               }
+           )
+           return applications
+       }
+       user.tenantAccounts.forEach(
+           (tenantAccount, tenantName) => {
+                let tenant = tenants.find(tenant => tenant.name === tenantName)
+                let tenantInfo = {
+                    name: tenantName, 
+                    description: tenant.tenantDescription(language), 
+                    applications: {
+                        applications: displayApplications(tenantAccount)
                     }
-                )
-            }
-            return {
-                name: tenant.name,
-                description: tenant.tenantDescription(language),
-                applications: {applications:apps}
-            }
-        })
-        return JSON.stringify(outputJSON)
+                }
+                JSONResponse.tenants.push( tenantInfo  )
+           })
+        return JSON.stringify(JSONResponse)
     }
 
     userApiInfoResponse = function(requestResult, user, language) {
@@ -182,10 +168,10 @@ const tenantsManager = (function() {
             userEmail,
             language
         }) {
-
-            return Promise.all(tenants.map(tenant => tenant.getUserInfo(userEmail)))
+            let user = new UserAccount(userEmail)
+            return Promise.all(tenants.map(tenant => user.getSubscriptions(tenant)))
                 .then(function(results) {
-                    return userInfoResponse(userEmail, language)
+                    return userInfoResponse(user, language)
                 })
         }
     }

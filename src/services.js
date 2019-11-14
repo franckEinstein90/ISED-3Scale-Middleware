@@ -5,7 +5,7 @@ const validator = require('validator')
 const alwaysResolve = require('@src/utils').utils.alwaysResolve
 const errors = require('@errors').errors
 
-const tenantServices = (function() {
+const services = (function() {
 
     return {
         codes: {
@@ -61,7 +61,7 @@ const tenantServices = (function() {
     }
 })()
 
-tenantServices.Service.prototype.outputAPIDescription = function(language) {
+services.Service.prototype.outputAPIDescription = function(language) {
     let documentationHandle = `${this.system_name.toLowerCase()}-${language}`
     //service.system_name is used to link the french and the english versions
     //of the documentation. We only display the API and its associated information
@@ -92,26 +92,27 @@ tenantServices.Service.prototype.outputAPIDescription = function(language) {
     return null
 }
 
-tenantServices.Service.prototype.updateDefinition = function(defObj) {
+services.Service.prototype.updateDefinition = function(defObj) {
     try {
         if (typeof(defObj) === 'object' &&
             'id' in defObj &&
             defObj.id === this.id) {
 
             Object.assign(this, defObj)
-            return tenantServices.updateOk(this.id)
+            return services.updateOk(this.id)
         }
     } catch (err) {
-        return tenantServices.updateNotOk(this.id, err)
+        return services.updateNotOk(this.id, err)
     }
 }
 
-tenantServices.Service.prototype.addDocumentationSet = function(docObj, updateReport) {
+services.Service.prototype.addDocumentationSet = function(docObj, updateReport) {
     let updateTarget = null
-    if (/\-fr$/.test(docObj.system_name)) {
+
+    if (/\-fr$/i.test(docObj.system_name)) {
         //French documentation		
         updateTarget = errors.codes.FrenchDoc
-    } else if (/\-en$/.test(docObj.system_name)) {
+    } else if (/\-en$/i.test(docObj.system_name)) {
         //English documentation		
         updateTarget = errors.codes.EnglishDoc
     } else {
@@ -126,16 +127,16 @@ tenantServices.Service.prototype.addDocumentationSet = function(docObj, updateRe
 
 }
 
-tenantServices.Service.prototype.hasBillingualDoc = function() {
+services.Service.prototype.hasBillingualDoc = function() {
     if (this.documentation.size >= 2) {
         return true
     } //one french, one english
     return false
 }
 
-tenantServices.Service.prototype.updateFeatureInfo = async function() {
+services.Service.prototype.updateFeatureInfo = async function() {
     let thisServiceID, that, bad
-    bad = tenantServices.codes.updateServiceFeaturesNotOk
+    bad = services.codes.updateServiceFeaturesNotOk
     thisServiceID = this.id
     that = this
     let apiCall = [`${this.tenant.baseURL}services/${thisServiceID}/`,
@@ -160,7 +161,7 @@ tenantServices.Service.prototype.updateFeatureInfo = async function() {
     })
 }
 
-tenantServices.Service.prototype.servicePlanAccess = function() {
+services.Service.prototype.servicePlanAccess = function() {
     let servicePlanAccess = {
         public: true,
         gcInternal: true,
@@ -181,27 +182,27 @@ tenantServices.Service.prototype.servicePlanAccess = function() {
     return servicePlanAccess
 }
 
-tenantServices.ServiceRegister.prototype.length = function() {
+services.ServiceRegister.prototype.length = function() {
     return this.serviceIDs.length
 }
 
-tenantServices.ServiceRegister.prototype.mapIDs = function(callback) {
+services.ServiceRegister.prototype.mapIDs = function(callback) {
     return this.serviceIDs.map(callback)
 }
 
-tenantServices.ServiceRegister.prototype.forEachServiceID = function(callback) {
+services.ServiceRegister.prototype.forEachServiceID = function(callback) {
     this.serviceIDs.forEach(callback)
 }
 
-tenantServices.ServiceRegister.prototype.forEach = function(callback) {
+services.ServiceRegister.prototype.forEach = function(callback) {
     this.register.forEach(callback)
 }
 
-tenantServices.ServiceRegister.prototype.updateServiceDocs = function(docObj, updateReport) {
+services.ServiceRegister.prototype.updateServiceDocs = function(docObj, updateReport) {
     let createNewService, serviceID
 
     serviceID = docObj.api_doc.service_id
-    createNewService = _ => new tenantServices.Service(serviceID, this.tenant)
+    createNewService = _ => new services.Service(serviceID, this.tenant)
 
     if (!this.register.has(serviceID)) { //register service if it isn't yet
         let newService = createNewService()
@@ -212,7 +213,7 @@ tenantServices.ServiceRegister.prototype.updateServiceDocs = function(docObj, up
     return service.addDocumentationSet(docObj.api_doc, updateReport)
 }
 
-tenantServices.ServiceRegister.prototype.updateServiceDefinition =
+services.ServiceRegister.prototype.updateServiceDefinition =
     function(serviceDefinitionObject, updateReport) {
         //receives the result of a service definition fetch
         //and updates or create a new service object 
@@ -222,7 +223,7 @@ tenantServices.ServiceRegister.prototype.updateServiceDefinition =
 
 
         if (!this.register.has(serviceID)) { //this service is not registered
-            serviceObject = new tenantServices.Service(serviceID, this.tenant)
+            serviceObject = new services.Service(serviceID, this.tenant)
             this.register.set(serviceID, serviceObject)
             this.serviceIDs.push(serviceID)
         } //now it is
@@ -236,7 +237,7 @@ tenantServices.ServiceRegister.prototype.updateServiceDefinition =
         })
     }
 
-tenantServices.ServiceRegister.prototype.addServiceFeatures = async function(features) {
+services.ServiceRegister.prototype.addServiceFeatures = async function(features) {
     if (this.register.has(features.service)) {
         (this.register.get(features.service)).features = features.body.features
         this.serviceIDs.push(features.service)
@@ -244,5 +245,5 @@ tenantServices.ServiceRegister.prototype.addServiceFeatures = async function(fea
 }
 
 module.exports = {
-    tenantServices
+    services
 }

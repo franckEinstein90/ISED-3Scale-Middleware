@@ -8,7 +8,7 @@ const utils = require('@src/utils').utils
 const log = require('@src/utils').utils.log
 const errHandle = require('@errors').errors.errorHandler
 const accounts = require('@src/accounts').accounts
-const ServiceRegister = require('@src/tenants/tenantServices').tenantServices.ServiceRegister
+const ServiceRegister = require('@src/services').services.ServiceRegister
 
 const tenants = (function() {
 
@@ -70,10 +70,8 @@ const tenants = (function() {
                 this.accessToken = tenantJSONInfo.access_token
                 this.baseURL = `https://${this.adminDomain}/admin/api/`
                 this.accountAdminBaseURL = {
-                    accounts: `https://${this.adminDomain}/admin/api/accounts/`,
                     services: `https://${this.adminDomain}/admin/api/services.json?access_token=${this.accessToken}`,
                     activeDocs: `${this.baseURL}active_docs.json?access_token=${this.accessToken}`,
-                    userAccount: email => `${this.baseURL}accounts/find.json?access_token=${this.accessToken}&email=${encodeURIComponent(email)}`,
                     userPlans: email => `${this.baseURL}accounts/find?access_token=${this.accessToken}&email=${encodeURIComponent(email)}`
                 }
             }
