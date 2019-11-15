@@ -91,10 +91,11 @@ const tenantsManager = (function() {
 					return 
 				}
 				//If this user isn't registered with this tenant, AND the service isn't public
-                if(!user.accountPlans.has(tenant.name)) return
-				let userAccess = user.accountPlans.get(tenant.name)
-                
-                if((servicePlanAccess.gcInternal && userAccess.gcInternal) || (servicePlanAccess.depInternal  && userAccess.depInternal)) {
+                if(!user.tenantAccounts.has(tenant.name)) return
+				let tenantAccount = user.tenantAccounts.get(tenant.name)
+                let accessRights = tenantAccount.accountPlan.accessRights 
+                if( (servicePlanAccess.gcInternal && accessRights.ca_gov_wide) || 
+                    (servicePlanAccess.depInternal  && accessRights.dep_internal)) {
 					tenantResponse.apis.push(apiDescription)
 					return
 				}

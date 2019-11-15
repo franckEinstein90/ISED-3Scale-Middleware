@@ -24,19 +24,48 @@ const accounts = (function() {
     }
 })()
 
-
-
-accounts.UserAccount.prototype.processTenantAccountInfo = function(tenant, accountInfo){
-    if(accountInfo === null ) return null
-    if(typeof(accountInfo) === 'object' && 'account' in accountInfo) {
-        let tenantAccount = new accounts.TenantAccount({
-            tenant, 
-            id: accountInfo.account.id, 
-            createdAt: accountInfo.account.created_at})
-        this.tenantAccounts.set(tenant.name, tenantAccount)
-        return tenantAccount
+accounts.TenantAccount.prototype.getAccountPlan = async function(){
+    let processAccountPlan = accountPlanInfo =>{
+        if(accountPlanInfo === null) return null
+        let accountPlan = new Plan({
+            type: 'account_plan', 
+            id: accountPlanInfo.account_plan.id, 
+            state: accountPlanInfo.account_plan.state
+        })
+        return accountPlan
     }
-    return null 
+    return this.tenant.getUserAccountPlan(this)
+    .then(processAccountPlan)
+}
+
+
+accounts.UserAccount.prototype.getTenantAccountPlan = function(tenantAccount){
+    let processAccountPlan = accountPlan =>{
+        if(accountPlan === null){return null}
+        tenantAccount.accountPlan = accountPlan
+        return accountPlan
+    }
+    if(tenantAccount === null) return null
+    return  tenantAccount.getAccountPlan()
+            .then(processAccountPlan)
+}
+
+accounts.UserAccount.prototype.getTenantAccount = function(tenant){
+
+    let processAccountInfo = accountInfo => {
+        if(accountInfo === null ) return null
+        if(typeof(accountInfo) === 'object' && 'account' in accountInfo) {
+            let tenantAccount = new accounts.TenantAccount({
+                tenant, 
+                id: accountInfo.account.id, 
+                createdAt: accountInfo.account.created_at})
+            this.tenantAccounts.set(tenant.name, tenantAccount)
+            return tenantAccount
+        }
+        return null
+    }
+    return  tenant.getUserAccount(this.email)
+            .then(processAccountInfo)
 }
 
 accounts.UserAccount.prototype.getSubscriptions = async function(tenant){
@@ -57,22 +86,24 @@ accounts.UserAccount.prototype.getSubscriptions = async function(tenant){
     })
 }
 
+
 accounts.UserAccount.prototype.getAccountPlanFeatures = function(accountPlan, tenant) {
     //this user has an account plan for this tenant
     //now fetching the features of the plan
-    //to obtain access rights 
-    let apiCall = [tenant.baseURL,
+    //to obtain access rights
+    let apiCall, processGoodResponse 
+    if(accountPlan === null) return null
+    apiCall = [tenant.baseURL,
         `account_plans/${accountPlan.id}/features.json?`,
         `access_token=${tenant.accessToken}`
     ].join('')
-    let processGoodResponse = function(body) {
+
+    processGoodResponse = function(body) {
         if (validator.isJSON(body)) {
-		let featureArray = JSON.parse(body).features
-		featureArray.forEach(
-			feature => {
-				accountPlan.features.push(new Feature(feature.feature))
-			})
-	}
+		    let featureArray = JSON.parse(body).features
+            featureArray.forEach( f => accountPlan.addFeature(f.feature))
+            return accountPlan
+	    }
         return null
     }
     return alwaysResolve(apiCall, {
@@ -82,23 +113,13 @@ accounts.UserAccount.prototype.getAccountPlanFeatures = function(accountPlan, te
 }
 
 accounts.UserAccount.prototype.getPlans = async function(tenant){
-   let processAccountPlan = accountPlanInfo => {
-       console.log(this)
-       if(accountPlanInfo === null) return null
-       let tenantAccount = this.tenantAccounts.get(tenant.name)
-       let accountPlan = new Plan({
-           type: 'account_plan', 
-           id: accountPlanInfo.account_plan.id, 
-           state: accountPlanInfo.account_plan.state})
-       tenantAccount.accountPlan = accountPlan 
-       return accountPlan
-   }
+   let resolveAccessRight = accountPlan => {
+    debugger
+   } 
    return new Promise((resolve, reject) => {
-        tenant.getUserAccount(this.email)
-        .then(accountInfo => this.processTenantAccountInfo(tenant, accountInfo))
-        .then(tenantAccount => tenant.getUserAccountPlan(tenantAccount))
-        .then(processAccountPlan)
-        .then(accountPlan => this.getAccountPlanFeatures(accountPlan, tenant))
+        this.getTenantAccount(tenant)
+        .then(tenantAccount => this.getTenantAccountPlan(tenantAccount))
+        .then(accountPlan => resolve(this.getAccountPlanFeatures(accountPlan, tenant)))
    }) 
 }
 
