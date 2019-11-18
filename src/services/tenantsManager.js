@@ -106,14 +106,7 @@ const tenantsManager = (function() {
 		return JSON.stringify(response)
     }
 
-    tenantToApiInfo = function(tenant, language) {
-        return {
-            name: tenant.name,
-            description: tenant.tenantDescription(language),
-            maintainers: tenant.maintainers(language),
-            apis: tenant.apiDescriptions(language)
-        }
-    }
+  
     return {
         tenants: function() {
             return tenants
@@ -154,7 +147,7 @@ const tenantsManager = (function() {
             language
         }) {
             if (userEmail === null) {
-                return JSON.stringify(tenants.map(t => tenantToApiInfo(t, language)))
+                return JSON.stringify(tenants.map(t => t.apiJsonAnswer(language)))
             }
             //if there is an email associated with the request
             let user = new UserAccount(userEmail)

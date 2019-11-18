@@ -49,12 +49,17 @@ const services = (function() {
                 this.id = serviceID
                 this.tenant = tenant
                 this.documentation = new Map()
-                //tenantServices.ServiceDocumentation(serviceID)
             }
         },
 
         DocumentationSet: class {
             constructor(docObj) {
+                if('body' in docObj && validator.isJSON(docObj.body)){
+                    let swaggerInfo = JSON.parse(docObj.body)
+                    if ('x-api-store-tags' in swaggerInfo){
+                       this.tags = swaggerInfo["x-api-store-tags"]
+                    }
+                }
                 Object.assign(this, docObj)
             }
         }
@@ -71,6 +76,7 @@ services.Service.prototype.outputAPIDescription = function(language) {
         docInfo = this.documentation.get(documentationHandle)
         if (!(validator.isJSON(docInfo.body))) return
         swaggerBody = JSON.parse(docInfo.body)
+
         apiDescription = {
             name: swaggerBody.info.title,
             description: swaggerBody.info.description,
@@ -81,6 +87,14 @@ services.Service.prototype.outputAPIDescription = function(language) {
                 `/detail?api=${this.system_name}`
             ].join('')
         }
+        if('tags' in docInfo){
+            if(Array.isArray(docInfo.tags)){
+                apiDescription.tags = docInfo.tags
+            }
+            else{
+                apiDescription.tags = [docInfo.tags]
+            }
+        } 
         if (swaggerBody.info.contact) {
             apiDescription.contact = {
                 FN: swaggerBody.info.contact.name,
@@ -119,7 +133,7 @@ services.Service.prototype.addDocumentationSet = function(docObj, updateReport) 
         //neither English nor French documentation
         return
     }
-    this.documentation.set(docObj.system_name.toLowerCase(), docObj)
+    this.documentation.set(docObj.system_name.toLowerCase(), new services.DocumentationSet(docObj))
     updateReport.reportUpdateService(this.id, {
         updateTarget,
         updateResult: errors.codes.Ok
@@ -198,6 +212,13 @@ services.ServiceRegister.prototype.forEach = function(callback) {
     this.register.forEach(callback)
 }
 
+services.ServiceRegister.prototype.filter = function(servicePred){
+    let filtered = []
+    this.register.forEach(service => {
+        if (servicePred(service)) filtered.push(service)
+    })
+    return filtered
+}
 services.ServiceRegister.prototype.updateServiceDocs = function(docObj, updateReport) {
     let createNewService, serviceID
 

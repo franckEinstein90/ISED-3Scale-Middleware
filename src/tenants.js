@@ -46,19 +46,7 @@ const tenants = (function() {
                     return maintainerObject
                 }
 
-                this.apiDescriptions = function(language) {
-
-                    let listOfApis = []
-                    this.services.register.forEach(
-                        (service, serviceID) => {
-                            //checks if there is a valid set of documentation 
-                            //attached to this service
-                            let apiDesc = service.outputAPIDescription(language)
-                            if (apiDesc) listOfApis.push(apiDesc)
-                        }
-                    )
-                    return listOfApis
-                }
+                
                 this.adminDomain = tenantJSONInfo.admin_domain
                 this.domain = tenantJSONInfo.domain
                 this.tenantDescription = function(lang) {
@@ -80,6 +68,37 @@ const tenants = (function() {
 
 })()
 
+tenants.Tenant.prototype.apiJsonAnswer = function(language) {
+        return {
+            name: this.name,
+            description: this.tenantDescription(language),
+            maintainers: this.maintainers(language),
+            apis: this.publicAPIList(language)
+        }
+    }
+tenants.Tenant.prototype.publicAPIList = function(language) {
+    //returns an array of public services for this tenant
+    let billingualApis = 
+        this.services.filter(
+            service => service.documentation.size >= 2 
+        )
+    let returnedAPIs = billingualApis.filter(
+            service => {
+                if(!('features'in service)) return true
+                if(service.features.length === 0) return true
+                return false
+        })
+    let listOfApis = []
+    returnedAPIs.forEach(
+        service => {
+            //checks if there is a valid set of documentation 
+            //attached to this service
+            let apiDesc = service.outputAPIDescription(language)
+            if (apiDesc) listOfApis.push(apiDesc)
+        }
+    )
+    return listOfApis 
+}
 
 tenants.Tenant.prototype.getAccountPlan = function(planInfo, userEmail) {
     if (this.name === "ised-isde") debugger

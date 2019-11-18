@@ -78,8 +78,7 @@ accounts.UserAccount.prototype.getSubscriptions = async function(tenant){
     }
 
     return new Promise((resolve, reject)=>{
-        tenant.getUserAccount(this.email)
-		.then(accountInfo => this.processTenantAccountInfo(tenant, accountInfo))
+        this.getTenantAccount(tenant)
         .then(tenantAccount => tenant.getUserAccountSubscriptions(tenantAccount))
         .then(applicationArray => resolve(addAccountSubscriptions(applicationArray)))
         
