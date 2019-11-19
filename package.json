@@ -9,6 +9,7 @@
     "@src": "src",
     "@routes": "routes",
     "@services": "src/services",
+    "@server": "src/server", 
     "@errors": "src/errors.js"
   },
   "dependencies": {
@@ -29,6 +30,7 @@
     "node-cron": "^2.0.3",
     "request": "^2.88.0",
     "request-promise": "^4.2.4",
+    "socket.io": "^2.3.0",
     "unirest": "^0.6.0",
     "validator": "^11.1.0",
     "winston": "^3.2.1",

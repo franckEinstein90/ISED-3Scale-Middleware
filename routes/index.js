@@ -37,7 +37,7 @@ router.get('/api.json',
 
 /* GET home page. Used to test connection*/
 router.get('/', function(req, res, next) {
-	  res.render('index', { title: 'ISED-3Scale-Middleware' });
+	  res.render('index', { title: "<h1>API Tenants:</h1>" });
 });
 
 module.exports = router;

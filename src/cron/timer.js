@@ -5,6 +5,7 @@ const log = require('@src/utils').utils.log
 const cache = require('memory-cache')
 const codes = require('@src/tenants').tenants.codes
 const errors = require('@errors').errors
+const messages = require('@server/messages').messages
 
 const cacheManage = (function() {
 
@@ -34,15 +35,20 @@ const cacheManage = (function() {
     }
 
     let checkResults = function(updateResults){
+        if(updateResults === errors.codes.Ok){
+            //update went fine
+        }
+        else{
+            updateResults.forEach(
+                updateReport => {
+                    if (updateReport.updateResult !== errors.codes.Ok){
+                        //todo recovery
+                    }
+            })
+        }
         //goes back and flags + fix errors
-        updateResults.forEach(
-            updateReport => {
-                if (updateReport.updateResult !== errors.codes.Ok){
-                    //recover from error
-                }
-            }
-        )
         console.log(`Successfully Updated Tenant Information`)
+        messages.emitRefreshFront()
     }
 
     return {

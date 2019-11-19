@@ -64,9 +64,19 @@ tenants.Tenant.prototype.updateServiceFeatures = async function(featureDescripti
 }
 
 tenants.Tenant.prototype.validateAPIs = async function(updateReport) {
-    let servicesToUpdate, reportResults, thisTenant 
+    let servicesToUpdate, reportResults, thisTenant
     thisTenant = this 
-
+    let reportResult = {
+        tenant: this.name 
+    }
+    if(updateReport.docListFetchResult !== errors.codes.Ok){ 
+        //there was an error fetching the active documents
+       reportResult.activeDocsUpdate = errors.codes.NotOk 
+       return reportResult
+    }
+    else{
+        reportResult.activeDocsUpdate = errors.codes.Ok
+    }
     reportResults = function(apiFetchResult){
         return {
             tenant: thisTenant.name, 

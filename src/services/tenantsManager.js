@@ -1,14 +1,20 @@
-"use strict";
+/***************************************
+ * Franck Binard, ISED
+ * Canadian Gov. API Store middleware
+ ***************************************/
+
+
+"use strict"
 
 const utils = require('@src/utils').utils
 const t = require('@src/responses').tenants
-const cache = require('memory-cache')
 const UserAccount = require('@src/accounts').accounts.UserAccount
+const errors = require('@src/errors').errors
 
 const tenantsManager = (function() {
 
     let env,  tenants, userInfoResponse,  tenantToApiInfo,
-        userApiInfoResponse , applicationAPIURI
+    userApiInfoResponse , applicationAPIURI
 
     tenants = []
 
@@ -43,9 +49,7 @@ const tenantsManager = (function() {
                    let service = tenantServices.get(application.service_id)
                    if(service.hasBillingualDoc()){
                         applications.push(applicationInfo(application, service))
-                   }
-               }
-           )
+                   }})
            return applications
        }
        user.tenantAccounts.forEach(
@@ -116,8 +120,22 @@ const tenantsManager = (function() {
         //Called by cron job, updates all 
         //tenant information in memory
         updateTenantInformation: async function() {
+            let checkResults = updateResults =>{
+                let faultyUpdates = updateResults.filter(
+                    report => {
+                        if( ('updateResult' in report) && (report.updateResult === errors.codes.Ok)){
+                            return false
+                        }
+                        return true
+                    })
+                if (faultyUpdates.length === 0){ //no faulty updates
+                    return errors.codes.Ok 
+                } 
+                return faultyUpdates
+            }
             //updates service information for all tenants
             return Promise.all(tenants.map(t => t.updateApiInfo()))
+            .then(checkResults)
         },
 
         languages: {
@@ -126,8 +144,9 @@ const tenantsManager = (function() {
         },
 
         alive: function() {
-            tenants.forEach(tenant => console.log(tenant.name))
+            return tenants.map(tenant => tenant.name).join('<BR/>')
         },
+	    
         //on ready is run once at application startup
         onReady: function(dataJSON) {
             env = dataJSON.env

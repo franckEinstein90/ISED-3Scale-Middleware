@@ -19,7 +19,8 @@
 
       <div class="w3-bar w3-top w3-black w3-large" style="z-index:4">
       <button class="w3-bar-item w3-button w3-hide-large w3-hover-none w3-hover-text-light-grey" onclick="w3_open();"><i class="fa fa-bars"></i>  Menu</button>
-      <span class="w3-bar-item w3-right">{{title}}</span>
+		
+		<span class="w3-bar-item w3-right">GoC API Store Middleware</span>
       </div>
 
 
@@ -33,7 +34,6 @@
 <div class="w3-main" style="margin-left:160px;margin-top:43px;margin-right:10px">
 <!-- Header -->
   <header class="w3-container" style="padding-top:22px">
-    <h5><b>{{title}}</b></h5>
   </header>
      <div class="w3-panel">
      <div class="w3-row-padding" style="margin:0 -16px">
@@ -63,7 +63,7 @@ function w3_close() {
   overlayBg.style.display = "none";
 }
 </script>
-
+  <script src="/socket.io/socket.io.js"></script>
   <script src="/javascripts/bundle.js"></script>
   </body>
 </html>

@@ -4,7 +4,7 @@
  * ****************************************************************************/
 "use strict";
 
-require('module-alias/register') //used for to create @tags for requires - should be the first line of this file
+const errors = require('@src/errors').errors
 
 //initiate winston logger
 const winston = require('winston')
@@ -35,25 +35,38 @@ const tenantsManager = require('@services/tenantsManager').tenantsManager
 
 const cronJob = require('node-cron')
 const timer = require('@src/cron/timer.js').cacheManage
+const messages = require('@server/messages').messages
 
 let initISEDMiddleWare = async function() {
-    let JSONData, checkFetchResults
+    let JSONData, checkFetchResults, setTimerRefresh
 
     appLogger.log('info', 'Initializing application')
     JSONData = config.get('master')
+
     checkFetchResults = function(fetchResults) {
-        console.log('finished fetching tenant information')
+        if(fetchResults === errors.codes.Ok){ //errors getting tenant information
+            console.log('finished updating tenant')
+            return 1
+        }
+        else{
+            console.log('There were errors updating some of the tenants')
+            return 0
+        }
+    }
+    setTimerRefresh = function(){
+        messages.emitRefreshFront()
         console.log('ready to receive requests')
+        console.log('setting timer refresh')
+        timer.setRefreshTime(1) //refresh information every 5 minutes
+        cronJob.schedule('* * * * *', timer.cronUpdate)
         return 1
     }
-
     tenantsManager.onReady(JSONData)
     //initial data fetching on loading
     tenantsManager.updateTenantInformation()
         .then(checkFetchResults)
+        .then(setTimerRefresh)
     //set up info fetch cycle
-    timer.setRefreshTime(1) //refresh information every 5 minutes
-    cronJob.schedule('* * * * *', timer.cronUpdate)
 }
 
 initISEDMiddleWare()
@@ -99,7 +112,6 @@ let startServer = async function() {
 
 
 }
-
 
 startServer()
 module.exports = app;
