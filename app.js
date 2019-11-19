@@ -2,18 +2,21 @@
  * HEADER goes here
  *
  * ****************************************************************************/
-"use strict"; 
+"use strict";
+
 require('module-alias/register') //used for to create @tags for requires - should be the first line of this file
 
 //initiate winston logger
 const winston = require('winston')
 const appLogger = winston.createLogger({
-	format: winston.format.json(), 
-	transports: [
-		new winston.transports.Console(), 
-		new winston.transports.File({ filename: 'info.log' })
-	]
-}); 
+    format: winston.format.json(),
+    transports: [
+        new winston.transports.Console(),
+        new winston.transports.File({
+            filename: 'info.log'
+        })
+    ]
+});
 
 const createError = require('http-errors')
 const express = require('express')
@@ -28,7 +31,7 @@ const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 
 const utils = require('@src/utils.js').utils
-const tenantsManager = require('@services/tenantsManager').tenantsManager 
+const tenantsManager = require('@services/tenantsManager').tenantsManager
 
 const cronJob = require('node-cron')
 const timer = require('@src/cron/timer.js').cacheManage
@@ -36,32 +39,35 @@ const timer = require('@src/cron/timer.js').cacheManage
 let initISEDMiddleWare = async function() {
     let JSONData, checkFetchResults
 
-	appLogger.log('info', 'Initializing application')
-	JSONData = config.get('master')
-	checkFetchResults = function(fetchResults){
+    appLogger.log('info', 'Initializing application')
+    JSONData = config.get('master')
+    checkFetchResults = function(fetchResults) {
         console.log('finished fetching tenant information')
-		console.log('ready to receive requests')
-		return 1
-	 }
+        console.log('ready to receive requests')
+        return 1
+    }
 
-     tenantsManager.onReady(JSONData)
-     //initial data fetching on loading
-     tenantsManager.updateTenantInformation()
-     .then(checkFetchResults)
-     //set up info fetch cycle
-     timer.setRefreshTime(1) //refresh information every 5 minutes
-     cronJob.schedule('* * * * *', timer.cronUpdate)
+    tenantsManager.onReady(JSONData)
+    //initial data fetching on loading
+    tenantsManager.updateTenantInformation()
+        .then(checkFetchResults)
+    //set up info fetch cycle
+    timer.setRefreshTime(1) //refresh information every 5 minutes
+    cronJob.schedule('* * * * *', timer.cronUpdate)
 }
 
 initISEDMiddleWare()
 const app = express()
 
+
+let initViews = async function(){
+   // view engine setup
+	app.set('views', path.join(__dirname, 'views'));
+   app.set('view engine', 'hbs');
+}
+
 let startServer = async function() {
-
-    // view engine setup
-    app.set('views', path.join(__dirname, 'views'));
-    app.set('view engine', 'jade');
-
+	 initViews()
     app.use(logger('dev'));
     app.use(express.json());
     app.use(express.urlencoded({
