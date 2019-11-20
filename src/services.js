@@ -212,6 +212,13 @@ services.ServiceRegister.prototype.forEach = function(callback) {
     this.register.forEach(callback)
 }
 
+services.ServiceRegister.prototype.listServices = function(){
+	//returns a list of service description in an array
+	let result = []
+	this.forEach( (service, serviceID) => result.push(serviceID)) 
+	return result
+}
+
 services.ServiceRegister.prototype.filter = function(servicePred){
     let filtered = []
     this.register.forEach(service => {

@@ -46,9 +46,7 @@ const cacheManage = (function() {
                     }
             })
         }
-        //goes back and flags + fix errors
-        console.log(`Successfully Updated Tenant Information`)
-        messages.emitRefreshFront()
+       messages.emitRefreshFront()
     }
 
     return {

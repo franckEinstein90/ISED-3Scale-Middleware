@@ -35,7 +35,11 @@ const tenantsManager = require('@services/tenantsManager').tenantsManager
 
 const cronJob = require('node-cron')
 const timer = require('@src/cron/timer.js').cacheManage
+
 const messages = require('@server/messages').messages
+const statusCodes = require('@server/appStatus').statusCodes
+const appStatus = require('@server/appStatus').appStatus
+
 
 let initISEDMiddleWare = async function() {
     let JSONData, checkFetchResults, setTimerRefresh
@@ -44,8 +48,10 @@ let initISEDMiddleWare = async function() {
     JSONData = config.get('master')
 
     checkFetchResults = function(fetchResults) {
-        if(fetchResults === errors.codes.Ok){ //errors getting tenant information
+        if(fetchResults === errors.codes.Ok){ 
+            //initial fetch went ok 
             console.log('finished updating tenant')
+            appStatus.run() 
             return 1
         }
         else{
@@ -53,10 +59,14 @@ let initISEDMiddleWare = async function() {
             return 0
         }
     }
+
     setTimerRefresh = function(){
         messages.emitRefreshFront()
-        console.log('ready to receive requests')
-        console.log('setting timer refresh')
+
+        console.log('*******************************************')
+        console.log('App is running and ready to receive requests')
+        console.log('*******************************************')
+
         timer.setRefreshTime(1) //refresh information every 5 minutes
         cronJob.schedule('* * * * *', timer.cronUpdate)
         return 1
@@ -75,7 +85,7 @@ const app = express()
 
 let initViews = async function(){
    // view engine setup
-	app.set('views', path.join(__dirname, 'views'));
+   app.set('views', path.join(__dirname, 'views'));
    app.set('view engine', 'hbs');
 }
 

@@ -34,6 +34,7 @@ const tenants = (function() {
             constructor(tenantJSONInfo, env) {
                 this.env = env
                 this.name = tenantJSONInfo.name
+                this.lastUpdate = "not updated"
                 this.maintainers = function(lang) {
                     let maintainerObject = {
                         email: "ic.api_store-magasin_des_apis.ic@canada.ca",

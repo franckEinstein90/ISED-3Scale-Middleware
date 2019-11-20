@@ -77,12 +77,24 @@ tenants.Tenant.prototype.validateAPIs = async function(updateReport) {
     else{
         reportResult.activeDocsUpdate = errors.codes.Ok
     }
-    reportResults = function(apiFetchResult){
-        return {
-            tenant: thisTenant.name, 
-            updateResult: errors.codes.Ok
+    reportResults = apiFetchResult => {
+        let goodUpdates = apiFetchResult.filter(
+            fetchResult => {
+                return (typeof fetchResult === 'object' && 'featureUpdateResult' in fetchResult && fetchResult.featureUpdateResult === "Ok")
+            }
+        )
+        if(goodUpdates.length === apiFetchResult.length){
+            this.lastUpdate = new Date().toString()
         }
-    }
+
+        let result = {
+            tenant: this.name, 
+            lastUpdate: this.lastUpdate
+        }
+        
+        result.updateResult = errors.codes.Ok
+        return result
+   }
 
     servicesToUpdate = [] 
     updateReport.filterAllOk().forEach(

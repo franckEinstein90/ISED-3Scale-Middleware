@@ -1,7 +1,15 @@
-/***************************************
+/***********************************************************
  * Franck Binard, ISED
  * Canadian Gov. API Store middleware
- ***************************************/
+ * -------------------------------------
+ *  Module tenantsManager / server side
+ *
+ *  - manages a store of tenants
+ *  - replies to API requests userInfo.json and 
+ *    apiInfo.json
+ *  - updates the tenant and service information 
+ *  	on a schedule
+ **********************************************************/
 
 
 "use strict"
@@ -119,7 +127,18 @@ const tenantsManager = (function() {
 
         //Called by cron job, updates all 
         //tenant information in memory
-        updateTenantInformation: async function() {
+        updateTenantInformation: async function(listToUpdate) {
+            //listToUpdate is an optional argument
+            //when supplied the tenant manager only updates the tenants
+            //in that list
+            let tenantsToUpdate = null
+            if(typeof listToUpdate !== 'undefined'){
+                console.log('her')
+		debugger
+            }
+            else{
+                tenantsToUpdate = tenants
+            }
             let checkResults = updateResults =>{
                 let faultyUpdates = updateResults.filter(
                     report => {
@@ -134,7 +153,7 @@ const tenantsManager = (function() {
                 return faultyUpdates
             }
             //updates service information for all tenants
-            return Promise.all(tenants.map(t => t.updateApiInfo()))
+            return Promise.all(tenantsToUpdate.map(t => t.updateApiInfo()))
             .then(checkResults)
         },
 

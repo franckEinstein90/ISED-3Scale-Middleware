@@ -2,14 +2,14 @@
  * Franck Binard, ISED
  * Canadian Gov. API Store middleware
  ***************************************/
-const path = require('path')
 const express = require('express')
 const router = express.Router()
-const assert = require('chai').assert
 const accessLog = require('@src/utils').utils.accessLog
-
 const tenantsManager = require('@services/tenantsManager').tenantsManager
 const queryManager = require('./queryManager').queryManager
+
+const messages = require('@server/messages').messages
+const appStatus = require('@server/appStatus').appStatus
 
 router.get('/userinfo.json', 
 	async function(req, res, next) {
@@ -37,7 +37,17 @@ router.get('/api.json',
 
 /* GET home page. Used to test connection*/
 router.get('/', function(req, res, next) {
-	  res.render('index', { title: "<h1>API Tenants:</h1>" });
-});
+	let pageData = {
+		title: "GoC API Store middleware", 
+		state: 'initializing' , 
+		tenants: messages.tenantInfo() 
+	}
+
+	if(appStatus.isRunning()){
+		pageData.state = 'running'
+	}
+
+	res.render('index', pageData)
+})
 
 module.exports = router;
