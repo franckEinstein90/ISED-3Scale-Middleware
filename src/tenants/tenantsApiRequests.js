@@ -1,8 +1,7 @@
 "use strict";
 
 const validator = require('validator')
-const error = require('@errors').errors
-const request = require('request')
+const errors = require('@errors').errors
 const tenants = require('@src/tenants').tenants
 const parseXML = require('xml2js').parseString
 const alwaysResolve= require('@src/utils').utils.alwaysResolve
@@ -68,34 +67,41 @@ tenants.Tenant.prototype.getUserAccountSubscriptions = function(tenantAccount) {
 }
 
 
-tenants.Tenant.prototype.getServiceList = function() {
+tenants.Tenant.prototype.getServiceList = function( tenantUpdateReport = null ) {
+
     let apiCall = [`https://${this.adminDomain}/admin/api/`, 
                     `services.json?access_token=${this.accessToken}`].join('')
 
-    let processGood = function(body){
+    let bad = tenants.codes.serviceUpdateError
+    let good = function(body){
         if(validator.isJSON(body)) {
             let apis = JSON.parse(body).services
+            if(tenantUpdateReport) {
+                tenantUpdateReport.serviceListUpdate = errors.codes.Ok
+            }
             return apis
         }
-        return tenants.codes.serviceUpdateError
+        return bad
     }
-    return alwaysResolve(apiCall, {
-	    	good:processGood,  
-		bad:tenants.codes.serviceUpdateError
-    })
+
+    return alwaysResolve(apiCall, {good, bad})
 }
 
-tenants.Tenant.prototype.getActiveDocsList = function() {
+tenants.Tenant.prototype.getActiveDocsList = function(tenantUpdateReport = null) {
    let apiCall = this.accountAdminBaseURL.activeDocs
+   let bad = tenants.codes.activeDocsUpdateError 
    let processGoodResponse = function(body){
        if(validator.isJSON(body)){
-            return JSON.parse(body).api_docs
-       }else{
-           //logError  
-           return tenants.codes.activeDocsUpdateError
+           let apiDocs = JSON.parse(body).api_docs
+           if(tenantUpdateReport){
+                tenantUpdateReport.activeDocsUpdate = errors.codes.Ok
+           }
+          return apiDocs 
        }
-   }
-   return alwaysResolve(apiCall, {good: processGoodResponse,  bad: tenants.codes.activeDocsUpdateError})
+       return bad //couldn't parse response
+    }
+   
+   return alwaysResolve(apiCall, {good: processGoodResponse,  bad})
 }
 
 tenants.Tenant.prototype.getUserPlans = function(tenantAccount) {

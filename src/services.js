@@ -148,9 +148,8 @@ services.Service.prototype.hasBillingualDoc = function() {
     return false
 }
 
-services.Service.prototype.updateFeatureInfo = async function() {
-    let thisServiceID, that, bad
-    bad = services.codes.updateServiceFeaturesNotOk
+services.Service.prototype.updateFeatureInfo = async function(serviceUpdateReport = null) {
+    let thisServiceID, that
     thisServiceID = this.id
     that = this
     let apiCall = [`${this.tenant.baseURL}services/${thisServiceID}/`,
@@ -159,20 +158,15 @@ services.Service.prototype.updateFeatureInfo = async function() {
 
     let processGoodResponse = function(body) {
         if (validator.isJSON(body)) {
+            if(serviceUpdateReport) {
+                serviceUpdateReport.featuresUpdate = errors.codes.Ok
+            }
             let features = JSON.parse(body).features
             that.features = features.map(obj => obj.feature)
-            return {
-                serviceID: thisServiceID,
-                features,
-                featureUpdateResult: errors.codes.Ok
-            }
         }
-        return bad
+        return serviceUpdateReport 
     }
-    return alwaysResolve(apiCall, {
-        good: processGoodResponse,
-        bad
-    })
+    return alwaysResolve(apiCall, {good: processGoodResponse, bad: serviceUpdateReport })
 }
 
 services.Service.prototype.servicePlanAccess = function() {

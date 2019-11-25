@@ -2,8 +2,8 @@
  * Franck Binard, ISED
  * Canadian Gov. API Store middleware
  ***************************************/
-
 "use strict";
+
 const utils = require('@src/utils').utils
 const log = require('@src/utils').utils.log
 const errHandle = require('@errors').errors.errorHandler
@@ -77,6 +77,7 @@ tenants.Tenant.prototype.apiJsonAnswer = function(language) {
             apis: this.publicAPIList(language)
         }
     }
+
 tenants.Tenant.prototype.publicAPIList = function(language) {
     //returns an array of public services for this tenant
     let billingualApis = 
@@ -102,9 +103,6 @@ tenants.Tenant.prototype.publicAPIList = function(language) {
 }
 
 tenants.Tenant.prototype.getAccountPlan = function(planInfo, userEmail) {
-    if (this.name === "ised-isde") debugger
-    //creates a new account object for userEmail 
-    // and associates it with its plan ids
     let accountID, newAccount, planIDs
     if (planInfo === null) return null
     accountID = planInfo.account.id[0]

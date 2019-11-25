@@ -7,16 +7,11 @@ const log = require('@src/utils').utils.log
 const errors = require('@errors').errors
 const TenantUpdateReport = require('@errors').errors.TenantUpdateReport
 
-tenants.Tenant.prototype.updateServiceDefinitions = 
-	async function( tenantServiceListFetchResult, updateReport ) {
-
-   if (tenantServiceListFetchResult === tenants.codes.serviceUpdateError) {
-     	//there was an error fetching the list of services
-        updateReport.serviceListFetchResult = errors.codes.NotOk
-        log(`Error updating services for ${this.name}`)
-        return 
+tenants.Tenant.prototype.updateServiceDefinitions = async function( tenantServiceListFetchResult, tenantUpdateReport ) {
+   //if the service list update generated an error, return here
+    if(tenantUpdateReport.serviceListUpdate !== errors.codes.Ok) {
+       return 
     }
-    updateReport.serviceListFetchResult = errors.codes.Ok
     //flag the services that need to be removed from the list of registered services
     let currentServiceIDs = tenantServiceListFetchResult.map(
         service => service.service.id
@@ -30,21 +25,13 @@ tenants.Tenant.prototype.updateServiceDefinitions =
 
     log(`updating ${tenantServiceListFetchResult.length} service definitions for ${this.name}`)
     tenantServiceListFetchResult.forEach(
-        service => this.services.updateServiceDefinition(service.service, updateReport)
+        service => this.services.updateServiceDefinition(service.service, tenantUpdateReport)
     )
 }
 
 tenants.Tenant.prototype.addDocs = async function( apiDocsInfo, updateReport ) {
-
-   if (apiDocsInfo === tenants.codes.activeDocsUpdateError || !Array.isArray(apiDocsInfo)) 
-	 {
-		//there was an error fetching the list of api docs			   
-	    updateReport.docListFetchResult = errors.codes.NotOk
-        log(`error getting apiDocs`)
-        return 
-    }
-	updateReport.docListFetchResult = errors.codes.Ok
-    log(`updating doc info for ${this.name}`)
+    //if the document fetch operation resulted in an error, return here
+    if(updateReport.activeDocsUpdate !== errors.codes.Ok) return 
     apiDocsInfo.forEach(
         apiDocObject => this.services.updateServiceDocs(apiDocObject, updateReport)
 	 )
@@ -63,68 +50,54 @@ tenants.Tenant.prototype.updateServiceFeatures = async function(featureDescripti
     console.log(featureDescription)
 }
 
-tenants.Tenant.prototype.validateAPIs = async function(updateReport) {
-    let servicesToUpdate, reportResults, thisTenant
-    thisTenant = this 
-    let reportResult = {
-        tenant: this.name 
+tenants.Tenant.prototype.validateAPIs = async function(tenantUpdateReport) {
+    let servicesToUpdate, reportResults
+    if(tenantUpdateReport.activeDocsUpdate !== errors.codes.Ok || tenantUpdateReport.serviceListUpdate !== errors.codes.Ok){
+        return tenantUpdateReport //update Failed
     }
-    if(updateReport.docListFetchResult !== errors.codes.Ok){ 
-        //there was an error fetching the active documents
-       reportResult.activeDocsUpdate = errors.codes.NotOk 
-       return reportResult
-    }
-    else{
-        reportResult.activeDocsUpdate = errors.codes.Ok
-    }
-    reportResults = apiFetchResult => {
-        let goodUpdates = apiFetchResult.filter(
-            fetchResult => {
-                return (typeof fetchResult === 'object' && 'featureUpdateResult' in fetchResult && fetchResult.featureUpdateResult === "Ok")
-            }
-        )
-        if(goodUpdates.length === apiFetchResult.length){
-            this.lastUpdate = new Date().toString()
-        }
-
-        let result = {
-            tenant: this.name, 
-            lastUpdate: this.lastUpdate
-        }
-        
-        result.updateResult = errors.codes.Ok
-        return result
+   reportResults = serviceUpdateReports => {
+        tenantUpdateReport.serviceUpdates = serviceUpdateReports
+        return tenantUpdateReport
    }
 
     servicesToUpdate = [] 
-    updateReport.filterAllOk().forEach(
+    tenantUpdateReport.filterAllOk().forEach(
             serviceID => servicesToUpdate.push(this.services.register.get(serviceID))
     )
-
-   let promiseArray = servicesToUpdate.map(service => service.updateFeatureInfo())
+    let tenantName = this.name
+    let promiseArray = servicesToUpdate.map(service => {
+       let serviceUpdateReport = new errors.ServiceUpdateReport(tenantName, service.id)
+       return service.updateFeatureInfo(serviceUpdateReport)
+   })
    return Promise.all(promiseArray)
             .then(reportResults)
 }
 
 
 tenants.Tenant.prototype.updateApiInfo = async function() {
-    //called once per cron cycles
-    //fetches information necessary to process all requests
-    let serviceListingPromise, activeDocsPromise, updateReport
-    updateReport = new TenantUpdateReport(this.name)
+    //called once per cron cycles 
+    //1. fetches information necessary to process all requests
+    //2. returns an updateReport
+    let serviceListingPromise, activeDocsPromise
+
+    let tenantUpdateReport = new TenantUpdateReport(this.name)
     serviceListingPromise = new Promise((resolve, reject) => {
-        this.getServiceList()
-        .then(services => resolve(this.updateServiceDefinitions(services, updateReport)))
+        this.getServiceList(tenantUpdateReport)
+        .then(services => resolve(
+		    this.updateServiceDefinitions(services,tenantUpdateReport)
+	    ))
     })
 
     activeDocsPromise = new Promise((resolve, reject) => {
-        this.getActiveDocsList()
-        .then(activeDocs => resolve(this.addDocs(activeDocs, updateReport)))
+        this.getActiveDocsList(tenantUpdateReport)
+        .then(activeDocs => resolve(
+            this.addDocs(activeDocs, tenantUpdateReport)
+        ))
     })
 
     //fulfills both promises in paralell
     return Promise.all([serviceListingPromise , activeDocsPromise])
-        .then(_ => this.validateAPIs(updateReport))
+        .then(_ => this.validateAPIs(tenantUpdateReport))
 }
 
 module.exports = {

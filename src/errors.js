@@ -1,8 +1,24 @@
-"use strict"; 
+/***********************************************************
+ * Franck Binard, ISED
+ * Canadian Gov. API Store middleware
+ * -------------------------------------
+ *  Module errors / server side
+ *
+ *  includes error handlers and reporting objects 
+ **********************************************************/
 
+"use strict"
+
+
+const moment = require('moment')
 const errors = (function(){
 
-
+	class UpdateReport{
+		 	constructor(){
+				this.beginUpdateTime = moment()
+			}
+	} 
+	
 
 	return{
 		codes: {
@@ -18,18 +34,30 @@ const errors = (function(){
 				this.name = "ISEDMidWare Error"
 			}
 		},
-		TenantUpdateReport: class {
+		TenantUpdateReport: class extends UpdateReport{
 			constructor(tenantName){
+				super()
 				this.tenantName = tenantName
-				this.serviceListFetchResult = null
-				this.docListFetchResult = null
+				this.serviceListUpdate = errors.codes.NotOk 
+				this.activeDocsUpdate = errors.codes.NotOk
+				this.servicesUpdates = errors.codes.NotOk
 				this.servicesToRemove = [] 
 				this.updatedServices = new Map() 
 			}
 		},
+
+		ServiceUpdateReport: class extends UpdateReport{
+			constructor(tenantName, serviceID){
+				super()
+				this.id = `${tenantName}_${serviceID}`
+				this.featuresUpdate = errors.codes.NotOk
+			}
+		}, 
+
 		log: function(errDescription){
 
 		}, 
+
 		errorHandler: function(err){
 			console.log('went to error handler')
 		}
