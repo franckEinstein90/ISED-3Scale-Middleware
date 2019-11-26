@@ -16,6 +16,8 @@ const errors = (function(){
 	class UpdateReport{
 		 	constructor(){
 				this.beginUpdateTime = moment()
+				this.updateSuccess = errors.codes.NotOk
+				this.endUpdateTime = null 
 			}
 	} 
 	
@@ -28,17 +30,21 @@ const errors = (function(){
 			NotOk: "Not Ok", 
 			Ok: "Ok"
 		}, 
+
 		AppError: class extends Error{
 			constructor(args){
 				super(args)
 				this.name = "ISEDMidWare Error"
 			}
 		},
+
 		TenantUpdateReport: class extends UpdateReport{
 			constructor(tenantName){
 				super()
 				this.tenantName = tenantName
-				this.serviceListUpdate = errors.codes.NotOk 
+			
+				//success of fetching list of service for tenant
+				this.serviceListFetch = errors.codes.NotOk 
 				this.activeDocsUpdate = errors.codes.NotOk
 				this.servicesUpdates = errors.codes.NotOk
 				this.servicesToRemove = [] 
@@ -64,6 +70,14 @@ const errors = (function(){
 	}
 	
 })() 
+
+errors.TenantUpdateReport.prototype.updateOk = function( ){
+	//returns true if all necessary fields of the update turned out ok
+	return (
+			  this.serviceListFetch === errors.codes.Ok &&
+			  this.activeDocsUpdate === errors.codes.Ok )
+
+}
 
 errors.TenantUpdateReport.prototype.PropertyOk = function(serviceID, propertyName){
 	if(this.updatedServices.has(serviceID)){
@@ -95,8 +109,6 @@ errors.TenantUpdateReport.prototype.filterAllOk = function(){
 		})
 	return servicesToDisplay
 }
-
-
 
 errors.TenantUpdateReport.prototype.reportUpdateService = function(serviceID, {updateTarget, updateResult}){
 

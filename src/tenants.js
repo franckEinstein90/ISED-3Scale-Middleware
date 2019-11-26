@@ -1,8 +1,15 @@
-/***************************************
+/***********************************************************
  * Franck Binard, ISED
  * Canadian Gov. API Store middleware
- ***************************************/
-"use strict";
+ * -------------------------------------
+ *  Module tenants.js
+ *
+ *  class definition and implementation for Tenant 
+ **********************************************************/
+
+
+"use strict"
+
 
 const utils = require('@src/utils').utils
 const log = require('@src/utils').utils.log
@@ -34,7 +41,7 @@ const tenants = (function() {
             constructor(tenantJSONInfo, env) {
                 this.env = env
                 this.name = tenantJSONInfo.name
-                this.lastUpdate = "not updated"
+                this.lastUpdateTime = "not updated"
                 this.maintainers = function(lang) {
                     let maintainerObject = {
                         email: "ic.api_store-magasin_des_apis.ic@canada.ca",

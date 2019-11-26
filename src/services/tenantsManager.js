@@ -18,19 +18,22 @@ const utils = require('@src/utils').utils
 const t = require('@src/responses').tenants
 const UserAccount = require('@src/accounts').accounts.UserAccount
 const errors = require('@src/errors').errors
+const moment = require('moment')
 
 const tenantsManager = (function() {
 
-    let env,  tenants, userInfoResponse,  tenantToApiInfo,
+    let env,  userInfoResponse,  tenantToApiInfo,
     userApiInfoResponse , applicationAPIURI
 
-    tenants = []
+    let tenants = []
+    let updateRegister = new Map() 
 
     userInfoResponse = function(user, language) {
        let JSONResponse = {
            userEmail: user.email,
            tenants: []
        }
+
        let applicationInfo = (application, service) => {
            let serviceDocumentation = service.outputAPIDescription(language)
            let links = application.links
@@ -120,41 +123,66 @@ const tenantsManager = (function() {
 
   
     return {
+
+        onReady: function(dataJSON) {
+        		//on ready is run once at application startup
+            env = dataJSON.env
+            applicationAPIURI = (env === "dev" ? ".dev" : "") + ".api.canada.ca/admin/applications/"
+            //construct tenant instances from dataJSON
+            dataJSON.tenants.forEach(tenantInfo => {
+                if (tenantInfo.visible) {
+                    let newTenant = new t.Tenant(tenantInfo, env)
+                    tenants.push(newTenant)
+                }
+            })
+            tenants.sort((t1, t2) => t1.name.localeCompare(t2.name))
+            //set up index by name
+            tenants.forEach( tenant => updateRegister.set(tenant.name, null))
+        },
+
         tenants: function() {
             return tenants
         },
 
+        lastTenantUpdate: function(tenantName){
+            //returns the last updated time of a tenant
+            if(updateRegister.has(tenantName)){
+                if(updateRegister.get(tenantName) !== null){
+                    return updateRegister.get(tenantName).format('MMM Do YYYY, h:mm:ss a')
+                }
+            }
+            return "Not updated yet"
+        }, 
+        
+        updateTenantInformation: async function( listToUpdate = null ) {
+            //Called by cron job, updates all 
+            //tenant information in memory
+            
+            //if listToUpdate specified, tenant manager 
+            //only updates specified tenants
+            let tenantsToUpdate = null         
+			if(listToUpdate) {
+                tenantsToUpdate = listToUpdate.map(tName => tenants.find(t => t.name === tName)) 
+            }
+            else {
+                tenantsToUpdate = /*all*/ tenants
+            }
 
-        //Called by cron job, updates all 
-        //tenant information in memory
-        updateTenantInformation: async function(listToUpdate) {
-            //listToUpdate is an optional argument
-            //when supplied the tenant manager only updates the tenants
-            //in that list
-            let tenantsToUpdate = null
-            if(typeof listToUpdate !== 'undefined'){
-                console.log('her')
-		debugger
-            }
-            else{
-                tenantsToUpdate = tenants
-            }
-            let checkResults = updateResults =>{
-                let faultyUpdates = updateResults.filter(
-                    report => {
-                        if( ('updateResult' in report) && (report.updateResult === errors.codes.Ok)){
-                            return false
-                        }
-                        return true
-                    })
-                if (faultyUpdates.length === 0){ //no faulty updates
-                    return errors.codes.Ok 
-                } 
-                return faultyUpdates
-            }
-            //updates service information for all tenants
+			let registerUpdatedTenants = (tenantsUpdateReport) => {
+				tenantsUpdateReport.forEach(
+					updateReport => {
+						let currentTime = moment()
+						updateReport.endUpdateTime = currentTime 
+						if( updateReport.updateOk() ){
+							updateReport.updateSuccess = errors.codes.Ok
+                            updateRegister.set( updateReport.tenantName, currentTime )
+						}
+				})
+			    return tenantsUpdateReport
+			}
+				
             return Promise.all(tenantsToUpdate.map(t => t.updateApiInfo()))
-            .then(checkResults)
+					 	 .then(registerUpdatedTenants)
         },
 
         languages: {
@@ -166,20 +194,6 @@ const tenantsManager = (function() {
             return tenants.map(tenant => tenant.name).join('<BR/>')
         },
 	    
-        //on ready is run once at application startup
-        onReady: function(dataJSON) {
-            env = dataJSON.env
-            applicationAPIURI = (env === "dev" ? ".dev" : "") + ".api.canada.ca/admin/applications/"
-            //construct tenant instances from dataJSON
-            dataJSON.tenants.forEach(tenantInfo => {
-                if (tenantInfo.visible) {
-                    let newTenant = new t.Tenant(tenantInfo, env)
-                    tenants.push(newTenant)
-                }
-            })
-            tenants.sort((t1, t2) => t1.name.localeCompare(t2.name))
-        },
-
         getApiInfo: function({
             userEmail,
             language

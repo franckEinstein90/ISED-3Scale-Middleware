@@ -77,7 +77,7 @@ tenants.Tenant.prototype.getServiceList = function( tenantUpdateReport = null ) 
         if(validator.isJSON(body)) {
             let apis = JSON.parse(body).services
             if(tenantUpdateReport) {
-                tenantUpdateReport.serviceListUpdate = errors.codes.Ok
+                tenantUpdateReport.serviceListFetch = errors.codes.Ok
             }
             return apis
         }

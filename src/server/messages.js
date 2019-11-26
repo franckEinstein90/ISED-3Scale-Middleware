@@ -22,7 +22,7 @@ const messages = (function(){
            return tenantsManager.tenants().map( t => {
                 return {
                     name: t.name, 
-                    lastUpdate: t.lastUpdate, 
+                    lastUpdate: tenantsManager.lastTenantUpdate(t.name), 
                     services: t.services.listServices() 
                 }
         	})

@@ -35,18 +35,18 @@ const cacheManage = (function() {
     }
 
     let checkResults = function(updateResults){
-        if(updateResults === errors.codes.Ok){
-            //update went fine
-        }
-        else{
-            updateResults.forEach(
+        let updateErrors = []
+        updateResults.forEach(
                 updateReport => {
-                    if (updateReport.updateResult !== errors.codes.Ok){
-                        //todo recovery
+                    if( !updateReport.updateOk() ){ //flag update errors
+                        updateErrors.push(updateReport.tenantName)
                     }
-            })
-        }
+           })
        messages.emitRefreshFront()
+       if(updateErrors.length > 0){ //if there were errors, go back and fix
+           return tenantsManager.updateTenantInformation( updateErrors )
+                    .then(checkResults)
+       }
     }
 
     return {

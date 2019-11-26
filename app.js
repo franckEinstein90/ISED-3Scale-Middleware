@@ -42,25 +42,34 @@ const appStatus = require('@server/appStatus').appStatus
 
 
 let initISEDMiddleWare = async function() {
-    let JSONData, checkFetchResults, setTimerRefresh
+    let JSONData, setTimerRefresh
 
     appLogger.log('info', 'Initializing application')
     JSONData = config.get('master')
 
-    checkFetchResults = function(fetchResults) {
-        if(fetchResults === errors.codes.Ok){ 
-            //initial fetch went ok 
-            console.log('finished updating tenant')
-            appStatus.run() 
-            return 1
-        }
-        else{
-            console.log('There were errors updating some of the tenants')
-            return 0
-        }
-    }
+
+	 //function to detect and correct api errors
+    let correctFetchErrors =  (tenantsUpdateReport) => {
+        let tenantUpdateErrors = [] //ist of tenants for which there was an error during the update
+		tenantsUpdateReport.forEach (
+
+			tenantReport => {
+				if ( tenantReport.updateOk() ){
+                    return errors.codes.Ok
+				}
+				else{
+                    console.log(`There was an error updating ${tenantReport.tenantName}, recovering`)
+                    tenantUpdateErrors.push(tenantReport.tenantName)
+                }
+            })
+            if (tenantUpdateErrors.length > 0){
+                return tenantsManager.updateTenantInformation(tenantUpdateErrors)
+                .then(correctFetchErrors)
+            }
+	 }
 
     setTimerRefresh = function(){
+        appStatus.run() //the app is ready to answer requests
         messages.emitRefreshFront()
 
         console.log('*******************************************')
@@ -71,10 +80,11 @@ let initISEDMiddleWare = async function() {
         cronJob.schedule('* * * * *', timer.cronUpdate)
         return 1
     }
+
     tenantsManager.onReady(JSONData)
     //initial data fetching on loading
     tenantsManager.updateTenantInformation()
-        .then(checkFetchResults)
+        .then(correctFetchErrors)
         .then(setTimerRefresh)
     //set up info fetch cycle
 }

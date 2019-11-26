@@ -9,7 +9,7 @@ const TenantUpdateReport = require('@errors').errors.TenantUpdateReport
 
 tenants.Tenant.prototype.updateServiceDefinitions = async function( tenantServiceListFetchResult, tenantUpdateReport ) {
    //if the service list update generated an error, return here
-    if(tenantUpdateReport.serviceListUpdate !== errors.codes.Ok) {
+    if(tenantUpdateReport.serviceListFetch !== errors.codes.Ok) {
        return 
     }
     //flag the services that need to be removed from the list of registered services
@@ -52,7 +52,8 @@ tenants.Tenant.prototype.updateServiceFeatures = async function(featureDescripti
 
 tenants.Tenant.prototype.validateAPIs = async function(tenantUpdateReport) {
     let servicesToUpdate, reportResults
-    if(tenantUpdateReport.activeDocsUpdate !== errors.codes.Ok || tenantUpdateReport.serviceListUpdate !== errors.codes.Ok){
+    //if either the service list fetch or the active doc fetch returned errors 
+    if(tenantUpdateReport.activeDocsUpdate !== errors.codes.Ok || tenantUpdateReport.serviceListFetch !== errors.codes.Ok){
         return tenantUpdateReport //update Failed
     }
    reportResults = serviceUpdateReports => {
