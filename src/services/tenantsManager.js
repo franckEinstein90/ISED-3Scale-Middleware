@@ -173,8 +173,7 @@ const tenantsManager = (function() {
 					updateReport => {
 						let currentTime = moment()
 						updateReport.endUpdateTime = currentTime 
-						if( updateReport.updateOk() ){
-							updateReport.updateSuccess = errors.codes.Ok
+						if( updateReport.updateSuccess === errors.codes.Ok){
                             updateRegister.set( updateReport.tenantName, currentTime )
 						}
 				})

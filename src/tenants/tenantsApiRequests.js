@@ -73,11 +73,12 @@ tenants.Tenant.prototype.getServiceList = function( tenantUpdateReport = null ) 
                     `services.json?access_token=${this.accessToken}`].join('')
 
     let bad = tenants.codes.serviceUpdateError
+
     let good = function(body){
         if(validator.isJSON(body)) {
             let apis = JSON.parse(body).services
             if(tenantUpdateReport) {
-                tenantUpdateReport.serviceListFetch = errors.codes.Ok
+                tenantUpdateReport.fetches.serviceList = errors.codes.Ok
             }
             return apis
         }
@@ -89,14 +90,16 @@ tenants.Tenant.prototype.getServiceList = function( tenantUpdateReport = null ) 
 
 tenants.Tenant.prototype.getActiveDocsList = function(tenantUpdateReport = null) {
    let apiCall = this.accountAdminBaseURL.activeDocs
+
    let bad = tenants.codes.activeDocsUpdateError 
+
    let processGoodResponse = function(body){
        if(validator.isJSON(body)){
            let apiDocs = JSON.parse(body).api_docs
            if(tenantUpdateReport){
-                tenantUpdateReport.activeDocsUpdate = errors.codes.Ok
+                tenantUpdateReport.fetches.activeDocs = errors.codes.Ok
            }
-          return apiDocs 
+           return apiDocs 
        }
        return bad //couldn't parse response
     }

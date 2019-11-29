@@ -120,24 +120,20 @@ services.Service.prototype.updateDefinition = function(defObj) {
     }
 }
 
-services.Service.prototype.addDocumentationSet = function(docObj, updateReport) {
-    let updateTarget = null
+services.Service.prototype.addDocumentationSet = function(docObj, tenantUpdateReport) {
 
+    let serviceReport = tenantUpdateReport.serviceReport( this.id )
     if (/\-fr$/i.test(docObj.system_name)) {
         //French documentation		
-        updateTarget = errors.codes.FrenchDoc
+        serviceReport.languageUpdate.french = errors.codes.Ok
     } else if (/\-en$/i.test(docObj.system_name)) {
         //English documentation		
-        updateTarget = errors.codes.EnglishDoc
+        serviceReport.languageUpdate.english = errors.codes.Ok
     } else {
         //neither English nor French documentation
         return
     }
     this.documentation.set(docObj.system_name.toLowerCase(), new services.DocumentationSet(docObj))
-    updateReport.reportUpdateService(this.id, {
-        updateTarget,
-        updateResult: errors.codes.Ok
-    })
 
 }
 
@@ -220,17 +216,19 @@ services.ServiceRegister.prototype.filter = function(servicePred){
     })
     return filtered
 }
+
 services.ServiceRegister.prototype.updateServiceDocs = function(docObj, updateReport) {
-    let createNewService, serviceID
 
-    serviceID = docObj.api_doc.service_id
-    createNewService = _ => new services.Service(serviceID, this.tenant)
+    let serviceID = docObj.api_doc.service_id
 
-    if (!this.register.has(serviceID)) { //register service if it isn't yet
-        let newService = createNewService()
-        this.register.set(serviceID, newService)
+    if (!this.register.has(serviceID)) { 
+		  //register service if it isn't yet
+        this.register.set(
+					 serviceID, 
+					 new services.Service(serviceID, this.tenant) )
         this.serviceIDs.push(serviceID)
     }
+
     let service = this.register.get(serviceID)
     return service.addDocumentationSet(docObj.api_doc, updateReport)
 }
@@ -253,10 +251,8 @@ services.ServiceRegister.prototype.updateServiceDefinition =
         serviceObject = this.register.get(serviceID)
         serviceObject.updateDefinition(serviceDefinitionObject)
 
-        updateReport.reportUpdateService(serviceID, {
-            updateTarget: errors.codes.ServiceDefinitionUpdate,
-            updateResult: errors.codes.Ok
-        })
+        let serviceUpdateReport = updateReport.serviceReport(serviceID)
+        serviceUpdateReport.serviceDefinitionUpdate = errors.codes.Ok
     }
 
 services.ServiceRegister.prototype.addServiceFeatures = async function(features) {
