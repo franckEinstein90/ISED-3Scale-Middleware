@@ -1,4 +1,13 @@
-"use strict";
+/***********************************************************
+ * Franck Binard, ISED
+ * Canadian Gov. API Store middleware
+ * -------------------------------------
+ *  Module services.js
+ *
+ *  class definition and implementation for services 
+ **********************************************************/
+
+"use strict"
 
 const log = require('@src/utils').utils.log
 const validator = require('validator')

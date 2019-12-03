@@ -1,4 +1,15 @@
-"use strict";
+/***********************************************************
+ * Franck Binard, ISED
+ * Canadian Gov. API Store middleware
+ * 2019-2020
+ * -------------------------------------
+ *  Module utils.js
+ *
+ **********************************************************/
+
+
+"use strict"
+
 const fs = require('fs')
 const path = require('path')
 const request = require('request')
@@ -23,6 +34,7 @@ const utils = (function() {
         fr: "fr",
         en: "en"
     }
+
     envCodes = {
         dev: "dev",
         prod: "prod"
@@ -31,6 +43,7 @@ const utils = (function() {
 
    return {
 	runningEnv: function() {},
+
         readConfigFile: function() {
             //used for testing
             console.log(__dirname)

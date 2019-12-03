@@ -10,7 +10,8 @@
     "@routes": "routes",
     "@services": "src/services",
     "@server": "src/server", 
-    "@errors": "src/errors.js"
+    "@errors": "src/errors.js", 
+	 "@users": "src/users"
   },
   "dependencies": {
     "appversion": "^1.7.1",

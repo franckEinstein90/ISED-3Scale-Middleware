@@ -1,4 +1,16 @@
-"use strict";
+/***********************************************************
+ * Franck Binard, ISED
+ * Canadian Gov. API Store middleware
+ * 2019-2020
+ * -------------------------------------
+ *
+ *  Module tenantsApiRequests.js
+ *  contains functions that call 3Scale API to fetch
+ *  tenant related information
+ **********************************************************/
+
+
+"use strict"
 
 const validator = require('validator')
 const errors = require('@errors').errors
@@ -6,9 +18,8 @@ const tenants = require('@src/tenants').tenants
 const parseXML = require('xml2js').parseString
 const alwaysResolve= require('@src/utils').utils.alwaysResolve
 const Application = require('@src/applications').applications.Application
+
 /***********************API Requests******************************* */
-
-
 tenants.Tenant.prototype.getUserAccount = function(clientEmail){
 	let apiCall = [
 		`https://${this.adminDomain}/admin/api/`, 
