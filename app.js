@@ -39,18 +39,24 @@ const timer = require('@src/cron/timer.js').cacheManage
 const messages = require('@server/messages').messages
 const statusCodes = require('@server/appStatus').statusCodes
 const appStatus = require('@server/appStatus').appStatus
+const appVariables = require('@server/appStatus').appVariables
+
 const users = require('@users/users').users
 
 
 
 let initISEDMiddleWare = async function() {
     appLogger.log('info', 'Initializing application')
-
-    //get keyCloakCredential
-    users.initKeyCloakCredentials()
-
-    let JSONData = config.get('master')
-	 //function to detect and correct api errors
+    let JSONAppData = config.get('master')
+    if( JSONAppData && typeof JSONAppData === 'object'){
+        appVariables.env = JSONAppData.env
+        users.onReady()
+    }
+    else {
+        throw "bad configuration file"
+    }
+	
+ //function to detect and correct api errors
     let correctFetchErrors =  (tenantsUpdateReport) => {
         let tenantUpdateErrors = [] //ist of tenants for which there was an error during the update
 		tenantsUpdateReport.forEach (
@@ -68,7 +74,7 @@ let initISEDMiddleWare = async function() {
                 return tenantsManager.updateTenantInformation(tenantUpdateErrors)
                 .then(correctFetchErrors)
             }
-	 }
+	}
 
     let setTimerRefresh = function(){
         appStatus.run() //the app is ready to answer requests
@@ -83,7 +89,7 @@ let initISEDMiddleWare = async function() {
         return 1
     }
 
-    tenantsManager.onReady(JSONData)
+    tenantsManager.onReady(JSONAppData)
     //initial data fetching on loading
     tenantsManager.updateTenantInformation()
         .then(correctFetchErrors)

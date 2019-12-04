@@ -9,7 +9,11 @@ const messages = require('@server/messages').messages
 
 const cacheManage = (function() {
 
-    let fetchRefresh = 5
+	 //frequency of tenant api info refresh
+    let tenantInfoRefresh = {
+				frequency : 5,  //minutes
+				lastRefresh: 0  //minutes
+	 }
 
     let defaultKey = (tenant, service) =>{ 
         return {
@@ -34,7 +38,7 @@ const cacheManage = (function() {
        }
     }
 
-    let checkResults = function(updateResults){
+    let checkResults = function( updateResults ){
         let updateErrors = []
         updateResults.forEach(
                 updateReport => {
@@ -49,30 +53,42 @@ const cacheManage = (function() {
        }
     }
 
+	 let updateTenants = function() {
+
+        if ( tenantInfoRefresh.lastRefresh >= tenantInfoRefresh.frequency ) {
+				tenantInfoRefresh.lastRefresh = 0
+		  }
+		
+		  try {
+      	   tenantsManager.updateTenantInformation()
+            .then(results => checkResults(results))
+
+       } catch(err){
+
+      		console.log(err)
+
+    	 }
+
+		 tenantInfoRefresh.lastRefresh += 1
+	 }
+
     return {
+
         setRefreshTime: function(timeInMinutes){
-            fetchRefresh = timeInMinutes
+            tenantInfoRefresh.frequency = timeInMinutes
         }, 
+
 
         cronUpdate: function() {
             if (this.runningMinutes === undefined) {
                 this.runningMinutes = 0
             }
+
             log('----------------------------------------------------------------------')
             log(`app has been running for ${this.runningMinutes} minutes`)
-            if (this.lastRefresh === undefined || 
-                this.lastRefresh >= fetchRefresh) {
-                this.lastRefresh = 0
-                try{
-                    tenantsManager.updateTenantInformation()
-                    .then(results => checkResults(results))
-                }catch(err){
-                    console.log(err)
-                }
-            }
-            this.runningMinutes += 1
-            this.lastRefresh += 1
-       },
+			updateTenants()
+			this.runningMinutes += 1
+		}
 
     }
 

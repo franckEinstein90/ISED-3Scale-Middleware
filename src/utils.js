@@ -44,12 +44,12 @@ const utils = (function() {
    return {
 	runningEnv: function() {},
 
-        readConfigFile: function() {
+        readConfigFile: function(fileName = 'default.json') {
             //used for testing
             console.log(__dirname)
             try {
                 let filePath, rawData;
-                filePath = path.normalize(__dirname + '/../config/default.json')
+                filePath = path.normalize(__dirname + `/../config/default.json`)
                 rawData = fs.readFileSync(filePath, {
                     encoding: 'utf-8'
                 })

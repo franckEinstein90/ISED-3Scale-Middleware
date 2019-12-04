@@ -5,13 +5,19 @@ const statusCodes = {
     running: "running" 
 }
 
+const appVariables = function(){
+    this.env = null
+}
+
 const appStatus = (function(){
     
    let currentState = statusCodes.init 
 
    return {
         state: currentState, 
-		isRunning: () => (currentState === statusCodes.running), 
+
+        isRunning: () => (currentState === statusCodes.running), 
+
         run: function(){
             currentState = statusCodes.running
         }
@@ -22,5 +28,6 @@ const appStatus = (function(){
 
 module.exports = {
     statusCodes, 
-    appStatus
+    appStatus, 
+    appVariables
 }
