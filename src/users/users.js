@@ -47,16 +47,73 @@ const users = (function(){
             })
         }, 
 
-        getUserList: function(authCredential){
-            console.log(authCredential)
+        getUserList: function(token){
+            let url ='https://sso-dev.ised-isde.canada.ca/auth/admin/realms/gcapi/users' 
+            let options ={
+                url, 
+                headers:{
+                    'Authorization': `Bearer ${token.access_token}`
+                }
+            }
+
             return new Promise((resolve, reject) => {
-
-                request.get('https://sso-dev.ised-isde.canada.ca/auth/admin/realms/gcapi/users')
-
-            })
+                request.get(options, function(error, response, body){
+                    if ( error ) return resolve( error )
+                    if ( validator.isJSON( body ) ){
+                        resolve(JSON.parse(body))
+                    }
+                    return resolve('invalid json response')
+                })
+           })
         }, 
 
-        User: class {
+
+    getUserProfile: function(token, email){
+            let url =`https://sso-dev.ised-isde.canada.ca/auth/admin/realms/gcapi/users?email=${encodeURIComponent(email)}`
+            let options ={
+                url, 
+                headers:{
+                    'Authorization': `Bearer ${token.access_token}`
+                }
+            }
+
+            return new Promise((resolve, reject) => {
+                request.get(options, function(error, response, body){
+                    if ( error ) return resolve( error )
+                    if ( validator.isJSON( body ) ){
+                        resolve(JSON.parse(body))
+                    }
+                    return resolve('invalid json response')
+                })
+           })
+    },
+
+	enforceOTP: function( token, userProfile ){
+        if( userProfile.disableableCredentialTypes.includes('otp') || userProfile.requiredActions.includes('CONFIGURE_TOTP') ) return
+        userProfile.requiredActions.push('CONFIGURE_TOTP')
+        return(users.updateUserProfile(token, userProfile))
+    }, 
+
+	updateUserProfile: function(token, userProfile){
+        let url =`https://sso-dev.ised-isde.canada.ca/auth/admin/realms/gcapi/users/${encodeURIComponent(userProfile.id)}`
+        let options ={
+            url, 
+            headers:{
+               'Authorization': `Bearer ${token.access_token}`, 
+                'content-type': 'application/json' 
+            }, 
+            body: JSON.stringify(userProfile)
+        }
+
+        return new Promise((resolve, reject) => {
+            request.put(options, function(error, response, body){
+
+            })
+        })
+
+	},
+
+   User: class {
             constructor(){
 
             }
