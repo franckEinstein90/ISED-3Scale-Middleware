@@ -67,8 +67,23 @@ const users = (function(){
            })
         }, 
 
+        enforceTwoFactorAuthentication: function( email ){
+            //given an email address, enforces 2-factor authenication for that user
+            let authToken = null
+            let adminUserName = config.get('keyCloakAdminUsername')
+            let adminPassword = config.get('keyCloakAdminPassword')
+        
+            let keyAuth = users.getKeyCloakCredentials(adminUserName, adminPassword)
+            .then(token => {
+                authToken = token
+                return users.getUserProfile(token, 'neuronfac+test@gmail.com')
+            })
+            .then(userProfile => {
+                return users.enforceOTP(authToken, userProfile[0])
+            })
+        },
 
-    getUserProfile: function(token, email){
+        getUserProfile: function(token, email){
             let url =`https://sso-dev.ised-isde.canada.ca/auth/admin/realms/gcapi/users?email=${encodeURIComponent(email)}`
             let options ={
                 url, 
@@ -86,32 +101,31 @@ const users = (function(){
                     return resolve('invalid json response')
                 })
            })
-    },
+        },
 
-	enforceOTP: function( token, userProfile ){
-        if( userProfile.disableableCredentialTypes.includes('otp') || userProfile.requiredActions.includes('CONFIGURE_TOTP') ) return
-        userProfile.requiredActions.push('CONFIGURE_TOTP')
-        return(users.updateUserProfile(token, userProfile))
-    }, 
+	    enforceOTP: function( token, userProfile ){
+           if( userProfile.disableableCredentialTypes.includes('otp') || userProfile.requiredActions.includes('CONFIGURE_TOTP') ) return
+           userProfile.requiredActions.push('CONFIGURE_TOTP')
+           return(users.updateUserProfile(token, userProfile))
+        }, 
 
-	updateUserProfile: function(token, userProfile){
-        let url =`https://sso-dev.ised-isde.canada.ca/auth/admin/realms/gcapi/users/${encodeURIComponent(userProfile.id)}`
-        let options ={
-            url, 
-            headers:{
-               'Authorization': `Bearer ${token.access_token}`, 
-                'content-type': 'application/json' 
-            }, 
-            body: JSON.stringify(userProfile)
-        }
+    	updateUserProfile: function(token, userProfile){
+            let url =`https://sso-dev.ised-isde.canada.ca/auth/admin/realms/gcapi/users/${encodeURIComponent(userProfile.id)}`
+            let options ={
+                url, 
+                headers:{
+                   'Authorization': `Bearer ${token.access_token}`, 
+                    'content-type': 'application/json' 
+                }, 
+                body: JSON.stringify(userProfile)
+            }
 
-        return new Promise((resolve, reject) => {
-            request.put(options, function(error, response, body){
-
+            return new Promise((resolve, reject) => {
+                request.put(options, function(error, response, body){
+                    //todo check action success
+                })
             })
-        })
-
-	},
+	    },
 
    User: class {
             constructor(){

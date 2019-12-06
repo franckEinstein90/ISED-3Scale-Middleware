@@ -44,9 +44,10 @@ const appVariables = require('@server/appStatus').appVariables
 const users = require('@users/users').users
 
 
-
 let initISEDMiddleWare = async function() {
     appLogger.log('info', 'Initializing application')
+    //test : users.enforceTwoFactorAuthentication('neuronfac@gmail.com')
+
     let JSONAppData = config.get('master')
     if( JSONAppData && typeof JSONAppData === 'object'){
         appVariables.env = JSONAppData.env
@@ -95,6 +96,10 @@ let initISEDMiddleWare = async function() {
         .then(correctFetchErrors)
         .then(setTimerRefresh)
     //set up info fetch cycle
+
+    //test admin accounts
+    let adminAccounts = tenantsManager.tenants()
+    adminAccounts[0].getUsers()
 }
 
 initISEDMiddleWare()

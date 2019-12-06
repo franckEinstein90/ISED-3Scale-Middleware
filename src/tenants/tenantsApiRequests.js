@@ -144,8 +144,54 @@ tenants.Tenant.prototype.getTenantPlanFeatures = function(planID){
    return alwaysResolve(apiCall, {good: processGoodResponse, bad: null})
 }
 
+tenants.Tenant.prototype.getAccountList = function(){
+    //returns array all accounts for that tenant
+    let apiCall = [ `https://${this.adminDomain}/admin/api/`, 
+                    `accounts.json?access_token=${this.accessToken}`].join('')
 
+    let bad = null
+    let processGoodResponse = function(body){
+       if(validator.isJSON(body)){
+            let accounts = JSON.parse(body)
+            if('accounts' in accounts) accounts = accounts.accounts
+            if(accounts !== undefined) return accounts
+            return body
+            //.accounts.map(obj => obj.account)
+        }
+        return bad //couldn't parse response
+    }
+                    
+    return alwaysResolve(apiCall, {good: processGoodResponse,  bad})
+}
 
+tenants.Tenant.prototype.getAccountUsers = function(accountID){
+    let apiCall = [ `https://${this.adminDomain}/admin/api/`, 
+                    `accounts/${accountID}/users.json?access_token=${this.accessToken}`].join('')
+
+    let bad = null
+    let processGoodResponse = function(body){
+       if(validator.isJSON(body)){
+           let users = JSON.parse(body)
+           return users
+        }
+        return bad //couldn't parse response
+    }
+                    
+    return alwaysResolve(apiCall, {good: processGoodResponse,  bad})
+}
+
+tenants.Tenant.prototype.getUsers = function(){
+    let accountList = 
+        this.getAccountList()
+        .then(x => 
+            {
+               let accountIDs = x.map(obj => obj.account.id) 
+               return Promise.all(accountIDs.map(accID => this.getAccountUsers(accID)))
+            })
+        .then( x => {
+            debugger
+            })
+}
 module.exports = {
     tenants
 }

@@ -11,8 +11,8 @@ users.onReady()
 
 describe('....', function(){
 	it('i...' , function(){
-        let keyAuth = users.getKeyCloakCredentials(
-        .then(x => users.getUserList(x.access_token))
+        let keyAuth = users.getKeyCloakCredentials()
+        .then(x => users.getUserList(x))
         .catch(x => console.log(x))
 	})
 })
