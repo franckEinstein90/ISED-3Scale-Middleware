@@ -95,20 +95,22 @@ let initISEDMiddleWare = async function() {
     tenantsManager.updateTenantInformation()
         .then(correctFetchErrors)
         .then(setTimerRefresh)
-    //set up info fetch cycle
 
-    //test admin accounts
-    let adminAccounts = tenantsManager.tenants()
-    adminAccounts[0].getUsers()
 }
 
 initISEDMiddleWare()
 const app = express()
 
-
+const hbs = require('express-handlebars')
 let initViews = async function(){
    // view engine setup
-   app.set('views', path.join(__dirname, 'views'));
+    app.engine('hbs', hbs({
+        extname: 'hbs', 
+        defaultLayout: 'main', 
+        layoutsDir: __dirname + '/views/layouts/', 
+        partialsDir: __dirname + '/views/partials/'
+    }))
+   //app.set('views', path.join(__dirname, 'views'));
    app.set('view engine', 'hbs');
 }
 

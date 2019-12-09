@@ -16,6 +16,8 @@ const appVariables = require('@server/appStatus').appVariables
 
 const users = (function(){
 
+    let keyCloakAdminUserName = null
+    let keyCloakAdminPassword = null
     let keyCloakAccessToken = null
     let ssoHostUrl =  null
 
@@ -25,16 +27,16 @@ const users = (function(){
             ssoHostUrl =    
                 ['https://sso', appVariables.env === "dev"?"-dev":"", 
                 '.ised-isde.canada.ca'].join('')
+            keyCloakAdminUserName = config.get('keyCloakAdminUsername')
+            keyCloakAdminPassword = config.get('keyCloakAdminPassword')
         }, 
         
-        getKeyCloakCredentials: function(adminUserName, adminPassword){
+        getKeyCloakCredentials: function( ){
 
-            let username = adminUserName 
-            let password = adminPassword 
             return new Promise((resolve, reject) => {
 
-                request.post('https://sso-dev.ised-isde.canada.ca/auth/realms/gcapi/protocol/openid-connect/token', 
-                    { form: {username, password, client_id:'admin-cli', grant_type:"password" }}, 
+                request.post(`${ssoHostUrl}/auth/realms/gcapi/protocol/openid-connect/token`, 
+                    { form: {username:keyCloakAdminUserName, password:keyCloakAdminPassword, client_id:'admin-cli', grant_type:"password" }}, 
                         function(err, httpResponse, body){
                             if(err) return resolve(err)
 
@@ -47,8 +49,14 @@ const users = (function(){
             })
         }, 
 
-        getUserList: function(token){
-            let url ='https://sso-dev.ised-isde.canada.ca/auth/admin/realms/gcapi/users' 
+        getUserList: function( searchString ){
+            return users.getKeyCloakCredentials()
+                .then(function(token) {
+                    return(users.getUserProfile(token, searchString))
+                })
+                
+            
+           /* let url ='https://sso-dev.ised-isde.canada.ca/auth/admin/realms/gcapi/users' 
             let options ={
                 url, 
                 headers:{
@@ -64,7 +72,7 @@ const users = (function(){
                     }
                     return resolve('invalid json response')
                 })
-           })
+           })*/
         }, 
 
         enforceTwoFactorAuthentication: function( email ){
@@ -84,7 +92,7 @@ const users = (function(){
         },
 
         getUserProfile: function(token, email){
-            let url =`https://sso-dev.ised-isde.canada.ca/auth/admin/realms/gcapi/users?email=${encodeURIComponent(email)}`
+            let url =`${ssoHostUrl}/auth/admin/realms/gcapi/users?email=${encodeURIComponent(email)}`
             let options ={
                 url, 
                 headers:{
