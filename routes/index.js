@@ -12,8 +12,7 @@ const messages = require('@server/messages').messages
 const appStatus = require('@server/appStatus').appStatus
 const users = require('@users/users').users
 
-router.get('/userinfo.json', 
-	async function(req, res, next) {
+router.get('/userinfo.json', async function(req, res, next) {
 		let logMessage, callArgs
 		logMessage = {
 			message: `userinfo request ${queryManager.requestLogMessage(req)} `
@@ -22,7 +21,7 @@ router.get('/userinfo.json',
 		accessLog.log('info', logMessage.message)
 		res.header("Content-Type", "application/json; charset=utf-8")
 		res.send(await tenantsManager.getUserInfo(callArgs))
-	});
+	})
 
 router.get('/api.json', async function(req, res, next) {
 		let logMessage = {
@@ -32,7 +31,8 @@ router.get('/api.json', async function(req, res, next) {
 		accessLog.log('info', logMessage.message)
 		res.header("Content-Type", "application/json; charset=utf-8")
 		res.send(await tenantsManager.getApiInfo(callArgs))
-	});
+	})
+
 
 
 /* GET home page. Used to test connection*/
@@ -57,4 +57,12 @@ router.get('/searchUser', async function(req, res, next){
 		res.send(x)
 	})
 })
+
+router.get('/getTenantAdmins', async function(req, res, next){
+	let tenantName = req.query.tenantName
+	let tenant = tenantsManager.getTenantByName(tenantName)
+	debugger
+})
+
+
 module.exports = router;

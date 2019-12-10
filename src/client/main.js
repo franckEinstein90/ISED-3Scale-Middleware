@@ -36,6 +36,8 @@ $(function(){
         let parameters = {search: $('#userEmail').val()}
         $.get('/searchUser', parameters, keyCloakUsers.showUsers)
     })
+
+  
 })
 
 

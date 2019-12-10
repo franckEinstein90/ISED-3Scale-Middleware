@@ -139,7 +139,10 @@ const tenantsManager = (function() {
             //set up index by name
             tenants.forEach( tenant => updateRegister.set(tenant.name, null))
         },
-
+        getTenantByName: function(tenantName){
+            let tenant = tenants.find(t => t.name === tenantName)
+            return tenant
+        }, 
         tenants: function() {
             return tenants
         },

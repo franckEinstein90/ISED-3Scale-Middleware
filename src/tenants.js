@@ -130,7 +130,6 @@ tenants.Tenant.prototype.getAccountPlan = function(planInfo, userEmail) {
     //k
 }
 
-
 tenants.Tenant.prototype.getUserApiInfo = async function(userEmail) {
 
     let accountPlans = new Promise((resolve, reject) => {
@@ -142,6 +141,9 @@ tenants.Tenant.prototype.getUserApiInfo = async function(userEmail) {
 
 }
 
+tenants.Tenant.prototype.getAdmins = async function(){
+    
+}
 
 
 module.exports = {

@@ -1,7 +1,12 @@
-/******************************************************************************
- * HEADER goes here
+/***********************************************************
+ * Franck Binard, ISED
+ * Canadian Gov. API Store middleware
+ * -------------------------------------
+ *  app.js
  *
- * ****************************************************************************/
+ *  class definition and implementation for the server setup
+ **********************************************************/
+
 "use strict"
 
 
@@ -129,10 +134,17 @@ let initViews = async function(){
 }
 
 const memoryStore = new session.MemoryStore()
-//const keycloak = new Keycloak({store: memoryStore })
+const keycloak = new Keycloak({store: memoryStore })
 
 let startServer = async function() {
     initViews()
+	 app.use(session({
+		 secret: 'fdafdsajfndas', 
+		 resave: false, 
+		 saveUninitialized: true, 
+		 store: memoryStore
+	 }))
+	 app.use(keycloak.middleware())
     app.use(logger('dev'));
     app.use(express.json());
     app.use(express.urlencoded({
