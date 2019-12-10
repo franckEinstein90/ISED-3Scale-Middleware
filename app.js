@@ -2,8 +2,13 @@
  * HEADER goes here
  *
  * ****************************************************************************/
-"use strict";
+"use strict"
 
+
+const features = {
+   testGetUser: 1
+} 
+ 
 const errors = require('@src/errors').errors
 
 //initiate winston logger
@@ -27,8 +32,8 @@ const config = require('config')
 
 
 
-const indexRouter = require('./routes/index');
-const usersRouter = require('./routes/users');
+const indexRouter = require('./routes/index')
+const usersRouter = require('./routes/users')
 
 const utils = require('@src/utils.js').utils
 const tenantsManager = require('@services/tenantsManager').tenantsManager
@@ -98,11 +103,18 @@ let initISEDMiddleWare = async function() {
     //set up info fetch cycle
 
     //test admin accounts
-    let adminAccounts = tenantsManager.tenants()
-    adminAccounts[0].getUsers()
+/*    let adminAccounts = tenantsManager.tenants()
+    adminAccounts[0].getUsers()*/
 }
 
-initISEDMiddleWare()
+let initAppFeatures = function(){
+
+    initISEDMiddleWare()
+        
+}
+
+initAppFeatures()
+
 const app = express()
 
 
