@@ -23,7 +23,7 @@ const messages = (function(){
                 return {
                     name: t.name, 
                     lastUpdate: tenantsManager.lastTenantUpdate(t.name), 
-                    services: t.services.listServices() 
+                    services: t.services.listServices()
                 }
         	})
     	},

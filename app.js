@@ -24,7 +24,11 @@ const appLogger = winston.createLogger({
 });
 
 const createError = require('http-errors')
+
+const Keycloak = require('keycloak-connect')
 const express = require('express')
+const session = require('express-session')
+
 const path = require('path')
 const cookieParser = require('cookie-parser')
 const logger = require('morgan')
@@ -62,7 +66,7 @@ let initISEDMiddleWare = async function() {
         throw "bad configuration file"
     }
 	
- //function to detect and correct api errors
+    //function to detect and correct api errors
     let correctFetchErrors =  (tenantsUpdateReport) => {
         let tenantUpdateErrors = [] //ist of tenants for which there was an error during the update
 		tenantsUpdateReport.forEach (
@@ -104,9 +108,7 @@ let initISEDMiddleWare = async function() {
 }
 
 let initAppFeatures = function(){
-
     initISEDMiddleWare()
-        
 }
 
 initAppFeatures()
@@ -126,8 +128,11 @@ let initViews = async function(){
    app.set('view engine', 'hbs');
 }
 
+const memoryStore = new session.MemoryStore()
+//const keycloak = new Keycloak({store: memoryStore })
+
 let startServer = async function() {
-	 initViews()
+    initViews()
     app.use(logger('dev'));
     app.use(express.json());
     app.use(express.urlencoded({

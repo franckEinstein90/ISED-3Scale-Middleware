@@ -22,19 +22,26 @@
 
      <div class="w3-container" ID="tenantCards">
 		{{#each tenants}}
-		<button onclick='openTenantPane("{{this.name}}Panel")' class="w3-button w3-block w3-left-align w3-green">{{this.name}}</button>
+		<button onclick='openTenantPane("{{this.name}}Panel")' class="w3-button w3-block w3-left-align w3-green">
+            {{this.name}}: &nbsp; Last Update: {{this.lastUpdate}}
+        </button>
 		<div id="{{this.name}}Panel" class="w3-hide w3-container w3-light-grey">
 			<div class="w3-card ws-margin-16" ID="{{this.name}}">
 
 			<div class="w3-container">
 				<p>Services: <UL>
 					{{#each services}}
-					<LI>{{this}}</li>
-					{{/each}}
+					<LI>
+                        ID:{{this.id}} 
+                        {{#if this.billingualDoc}}
+                            - has billingual documentation
+                        {{/if}}
+                    </li>
+                    {{/each}}
 				</UL></p>
 			</div>
 			<footer class="w3-container w3-blue">
-				<div class="w3-center w3-padding-16">Last Update: {{this.lastUpdate}}</div>
+				<div class="w3-center w3-padding-16"></div>
 			</footer>
 		</div>
 			

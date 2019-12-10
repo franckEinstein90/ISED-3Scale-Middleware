@@ -214,7 +214,11 @@ services.ServiceRegister.prototype.forEach = function(callback) {
 services.ServiceRegister.prototype.listServices = function(){
 	//returns a list of service description in an array
 	let result = []
-	this.forEach( (service, serviceID) => result.push(serviceID)) 
+	this.forEach( (service, serviceID) => {
+            result.push({
+                     id:serviceID,
+                     billingualDoc:service.hasBillingualDoc()})
+    })
 	return result
 }
 
