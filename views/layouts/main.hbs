@@ -26,10 +26,15 @@
 
 
 <!-- Sidebar/menu -->
-<nav class="w3-sidebar w3-collapse w3-white w3-animate-left" style="z-index:3;width:150px;" id="mySidebar">
+<nav    class="w3-sidebar w3-collapse w3-black w3-animate-left w3-center" 
+        style="z-index:3;width:150px;" id="mySidebar">
 
-  <button ID="manageUsersBtn" onclick="document.getElementById('id01').style.display='block'" 
-          class="w3-button w3-black">Manage Users</button>
+<a  ID="manageUsersBtn" onclick="document.getElementById('id01').style.display='block'" 
+    class="w3-bar-item w3-button w3-padding-large w3-hover-black">
+    <i class="fa fa-user w3-xxlarge"></i>
+    <p>USERS</p>
+  </a>
+
   {{> userMgtModal}}
 </nav>
 
