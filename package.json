@@ -9,9 +9,9 @@
     "@src": "src",
     "@routes": "routes",
     "@services": "src/services",
-    "@server": "src/server", 
-    "@errors": "src/errors.js", 
-	 "@users": "src/users"
+    "@server": "src/server",
+    "@errors": "src/errors.js",
+    "@users": "src/users"
   },
   "dependencies": {
     "appversion": "^1.7.1",
@@ -21,6 +21,7 @@
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
     "express": "~4.16.1",
+    "express-handlebars": "^3.1.0",
     "hbs": "^4.0.6",
     "http-errors": "~1.6.3",
     "jade": "~1.11.0",

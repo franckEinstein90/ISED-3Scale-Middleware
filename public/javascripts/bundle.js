@@ -8,6 +8,7 @@
  **********************************************************/
 
 "use strict"
+const keyCloakUsers = require('./showUsers').keyCloakUsers
 
 $(function(){
 
@@ -22,8 +23,48 @@ $(function(){
     socket.on('refresh page', function(tenants){
         location.reload(true)
     })
+    
+    let openTenantPane = function(paneID){
+        alert('opening' + paneID)
+    }
+
+    $('#manageUsersBtn').click(function(event){
+        $('#searchResults').empty()
+        document.getElementById('id01').style.display='block'
+    }) 
+
+
+    $("#searchUser").click(function(event){
+        event.preventDefault()
+        $('#searchResults').empty()
+        let parameters = {search: $('#userEmail').val()}
+        $.get('/searchUser', parameters, keyCloakUsers.showUsers)
+    })
 })
 
 
 
+},{"./showUsers":2}],2:[function(require,module,exports){
+"use strict"
+
+const keyCloakUsers = (function(){
+    let userProfiles = []
+
+    return {
+        showUsers:function(userData){
+            userProfiles = userData
+            userData.forEach(userProfile => {
+                let otpEnabled = userProfile.disableableCredentialTypes.includes('otp') || userProfile.requiredActions.includes('CONFIGURE_TOTP')
+                let emailVerified = `<td>${userProfile.emailVerified}</td>`
+                let otpVerified = `<td>${userProfile.disableableCredentialTypes.includes('otp')}</td>`
+                let enableOTP = `<td><input class="w3-check" type="checkbox" ${otpEnabled?'disabled':''}></td>`
+                $('#searchResults').append(`<tr><td>${userProfile.email}</td>${emailVerified}${otpVerified}${enableOTP}</tr>`)
+            })
+        }
+    }
+})()
+
+module.exports = {
+   keyCloakUsers 
+}
 },{}]},{},[1]);

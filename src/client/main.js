@@ -7,6 +7,7 @@
  **********************************************************/
 
 "use strict"
+const keyCloakUsers = require('./showUsers').keyCloakUsers
 
 $(function(){
 
@@ -20,6 +21,20 @@ $(function(){
 
     socket.on('refresh page', function(tenants){
         location.reload(true)
+    })
+    
+  
+    $('#manageUsersBtn').click(function(event){
+        $('#searchResults').empty()
+        document.getElementById('id01').style.display='block'
+    }) 
+
+
+    $("#searchUser").click(function(event){
+        event.preventDefault()
+        $('#searchResults').empty()
+        let parameters = {search: $('#userEmail').val()}
+        $.get('/searchUser', parameters, keyCloakUsers.showUsers)
     })
 })
 

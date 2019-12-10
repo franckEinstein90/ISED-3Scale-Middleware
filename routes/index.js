@@ -10,6 +10,7 @@ const queryManager = require('./queryManager').queryManager
 
 const messages = require('@server/messages').messages
 const appStatus = require('@server/appStatus').appStatus
+const users = require('@users/users').users
 
 router.get('/userinfo.json', 
 	async function(req, res, next) {
@@ -23,8 +24,7 @@ router.get('/userinfo.json',
 		res.send(await tenantsManager.getUserInfo(callArgs))
 	});
 
-router.get('/api.json', 
-	async function(req, res, next) {
+router.get('/api.json', async function(req, res, next) {
 		let logMessage = {
 			message: `api.json request ${queryManager.requestLogMessage(req)}`
 		}
@@ -50,4 +50,11 @@ router.get('/', function(req, res, next) {
 	res.render('index', pageData)
 })
 
+router.get('/searchUser', async function(req, res, next){
+	let emailSearchString = req.query.search
+	let returnData = users.getUserList(emailSearchString)
+	.then(x =>{
+		res.send(x)
+	})
+})
 module.exports = router;
