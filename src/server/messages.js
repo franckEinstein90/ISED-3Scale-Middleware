@@ -1,10 +1,10 @@
 /***********************************************************
  * Franck Binard, ISED
  * Canadian Gov. API Store middleware
- * -------------------------------------
+ * 2019-2029
+ * --------------------------------------------------------
  *  Module messages / server side
- *
- *  - passes messages between client and server 
+ *  passes messages between client and server 
  **********************************************************/
 
 "use strict"
@@ -14,9 +14,9 @@ const tenantsManager = require('@services/tenantsManager').tenantsManager
 const messages = (function(){
     let _io = null
 
-    
 
     return{
+
 	   tenantInfo: function(){
            //information on tenants passed to the front end
            return tenantsManager.tenants().map( t => {

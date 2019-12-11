@@ -9,18 +9,23 @@
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css">
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js"></script>
 
     <style>
     	html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
     </style>
 
+  <script>
+    
+  </script>
   <body class='w3-light-grey'>
 
 
       <div class="w3-bar w3-top w3-black w3-large" style="z-index:4">
       <button class="w3-bar-item w3-button w3-hide-large w3-hover-none w3-hover-text-light-grey" onclick="w3_open();">
         <i class="fa fa-bars"></i>  Menu</button>
-		<span class="w3-bar-item w3-right">GoC API Store Middleware</span>
+		<span class="w3-bar-item w3-right" ID='appStatus'>runningTime</span>
       </div>
 
 
@@ -31,11 +36,16 @@
 
 <a  ID="manageUsersBtn" onclick="document.getElementById('id01').style.display='block'" 
     class="w3-bar-item w3-button w3-padding-large w3-hover-black">
-    <i class="fa fa-user w3-xxlarge"></i>
+    <i class="fa fa-users w3-xxlarge"></i>
     <p>USERS</p>
   </a>
-
   {{> userMgtModal}}
+
+<a  class="w3-bar-item w3-button w3-padding-large w3-hover-black">
+    <i class="fa fa-cog w3-xxlarge"></i>
+    <p>SETTINGS</p>
+  </a>
+
 </nav>
 
 <!-- Overlay effect when opening sidebar on small screens -->

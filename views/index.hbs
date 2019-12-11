@@ -5,7 +5,7 @@
 
    <header class="w3-container" style="padding-top:22px">
      <div class="w3-panel">
-     <p>app status: <span id="appStatus">{{{state}}}</span></p>
+
      </div>
    </header>
 
@@ -19,72 +19,50 @@
   		}
     }
 
-	let openTenantTab = function(tenantName, tab){
-		if(tab ==='Users'){
-			document.getElementById(tenantName + 'Services').style.display = "none"
-			document.getElementById(tenantName + 'Users').style.display = "block"
-		}else if (tab === "Services"){
-			document.getElementById(tenantName + 'Services').style.display = "block"
-			document.getElementById(tenantName + 'Users').style.display = "none"
-	
-		}
-
+	let openTenantTab = function(evt, tenantName, tab){
+		let tabs = ['Services', 'Users', 'Accounts']
+		tabs.forEach(tabName => {
+			if(tabName === tab) {
+				document.getElementById(tenantName + tab).style.display = "block"
+				evt.currentTarget.className += ' w3-red'
+			}
+			else{
+				document.getElementById(tenantName + tabName).style.display = "none"
+				document.getElementById(tenantName + tabName + 'TabLink').className = document.getElementById(tenantName + tabName + 'TabLink').className.replace(" w3-red", '')
+			}
+		})
 	}
-  	let showAdmin = function(){
-        alert('e')
+
+	let displayUserList = function(userArray){
+		console.log('ye')
     }
+
+	let displayTenantAccounts = function(data, tenantName){
+		let accountsDataTableID = `${tenantName}AccountsTableData`
+		if ( $.fn.dataTable.isDataTable( `#${tenantName}AccountsTable`) ) {
+		}
+		else {
+			data.forEach(accountData => {
+				$(`#${accountsDataTableID}`).append(
+				`<tr><td>${accountData.id}</td><td>${accountData.org_name}</td></tr>`)
+			})
+			$(`#${tenantName}AccountsTable`).DataTable({
+        	})
+		}
+	}	
+
+	let getTenantAccounts = function(tenantName){
+        $.get('/getTenantAccounts', {tenantName}, data => displayTenantAccounts(data, tenantName))
+	}
     let getTenantAdmins = function(tenantName){
-        $.get('/getTenantAdmins', {tenantName}, showAdmin)
+        $.get('/getTenantAdmins', {tenantName}, displayUserList)
     }
 
 </script>
 
      <div class="w3-container" ID="tenantCards">
 		{{#each tenants}}
-
-		<button onclick='openTenantPane("{{this.name}}Panel")' 
-		class="w3-button w3-block w3-left-align w3-green">
-            	{{this.name}}: &nbsp; Last Update: {{this.lastUpdate}}
-		</button>
-
-		<div id="{{this.name}}Panel" class="w3-hide w3-container w3-light-grey">
-			<div class="w3-card ws-margin-16" ID="{{this.name}}">
-
-<div class="w3-bar w3-black">
-
-  <button class="w3-bar-item w3-button" onclick="openTenantTab('{{this.name}}', 'Services')">Services</button>
-  <button class="w3-bar-item w3-button" onclick="openTenantTab('{{this.name}}', 'Users')">Users</button>
-
-</div>
-
-</script>
-			<div class="w3-container" id='{{this.name}}Services'>
-				<p>Services: 
-				<UL>
-				{{#each services}}
-					<LI>
-                        ID:{{this.id}} 
-                        {{#if this.billingualDoc}}
-                            - has billingual documentation
-                        {{/if}}
-                    </li>
-                {{/each}}
-				</UL>
-				</p>
-			</div>
-
-			<div class="w3-container" id='{{this.name}}Users' style="display:none">
-			<button onclick="getTenantAdmins('{{this.name}}')">getAdmins</button>	
-			</div>
-
-			<footer class="w3-container w3-blue">
-			<div class="w3-center w3-padding-16"></div>
-			</footer>
-
-		</div>
-			
-		</div>
-	<br>	
+			{{>tenantCard}}
 		{{/each}}
 	 </div>
 </div>

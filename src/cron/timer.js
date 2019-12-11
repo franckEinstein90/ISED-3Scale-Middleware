@@ -9,13 +9,14 @@ const messages = require('@server/messages').messages
 
 const cacheManage = (function() {
 
-	 //frequency of tenant api info refresh
+    //frequency of tenant api info refresh
     let tenantInfoRefresh = {
-				frequency : 5,  //minutes
-				lastRefresh: 0  //minutes
-	 }
+        frequency: 5, //minutes
+        lastRefresh: 0 //minutes
+    }
+    let runningTimeMinutes = 0
 
-    let defaultKey = (tenant, service) =>{ 
+    let defaultKey = (tenant, service) => {
         return {
             key: `${tenant.name}-${service.serviceDefinition.id}-default`,
             value: service.serviceDefinition.name
@@ -27,68 +28,71 @@ const cacheManage = (function() {
             tenant => {
                 tenant.services.register.forEach(
                     (service, serviceID) => updateCache(defaultKey(tenant, service))
-                ) }
+                )
+            }
         )
         return 1;
     }
 
-    let updateCache = function ({key, value}) {
-       if(cache.get(key) === null) {
-           cache.put(key, value, 1500 * 60000)
-       }
+    let updateCache = function({
+        key,
+        value
+    }) {
+        if (cache.get(key) === null) {
+            cache.put(key, value, 1500 * 60000)
+        }
     }
 
-    let checkResults = function( updateResults ){
+    let checkResults = function(updateResults) {
         let updateErrors = []
         updateResults.forEach(
-                updateReport => {
-                    if( !updateReport.updateOk() ){ //flag update errors
-                        updateErrors.push(updateReport.tenantName)
-                    }
-           })
-       messages.emitRefreshFront()
-       if(updateErrors.length > 0){ //if there were errors, go back and fix
-           return tenantsManager.updateTenantInformation( updateErrors )
-                    .then(checkResults)
-       }
+            updateReport => {
+                if (!updateReport.updateOk()) { //flag update errors
+                    updateErrors.push(updateReport.tenantName)
+                }
+            })
+        messages.emitRefreshFront()
+        if (updateErrors.length > 0) { //if there were errors, go back and fix
+            return tenantsManager.updateTenantInformation(updateErrors)
+                .then(checkResults)
+        }
     }
 
-	 let updateTenants = function() {
+    let updateTenants = function() {
 
-        if ( tenantInfoRefresh.lastRefresh >= tenantInfoRefresh.frequency ) {
-				tenantInfoRefresh.lastRefresh = 0
-		  }
-		
-		  try {
-      	   tenantsManager.updateTenantInformation()
-            .then(results => checkResults(results))
-
-       } catch(err){
-
-      		console.log(err)
-
-    	 }
-
-		 tenantInfoRefresh.lastRefresh += 1
-	 }
+        if (tenantInfoRefresh.lastRefresh >= tenantInfoRefresh.frequency) {
+            tenantInfoRefresh.lastRefresh = 0
+            try {
+                tenantsManager.updateTenantInformation()
+                    .then(results => checkResults(results))
+            } catch (err) {
+                console.log(err)
+            }
+        }
+        tenantInfoRefresh.lastRefresh += 1
+    }
 
     return {
 
-        setRefreshTime: function(timeInMinutes){
-            tenantInfoRefresh.frequency = timeInMinutes
-        }, 
+        runningTime: function() {
+            return runningTimeMinutes
+        },
 
+        nextRefresh: function(){
+            return tenantInfoRefresh.frequency - tenantInfoRefresh.lastRefresh
+        },
+
+        setRefreshTime: function(timeInMinutes) {
+            tenantInfoRefresh.frequency = timeInMinutes
+        },
 
         cronUpdate: function() {
-            if (this.runningMinutes === undefined) {
-                this.runningMinutes = 0
-            }
 
+            runningTimeMinutes += 1
             log('----------------------------------------------------------------------')
-            log(`app has been running for ${this.runningMinutes} minutes`)
-			updateTenants()
-			this.runningMinutes += 1
-		}
+            log(`app has been running for ${runningTimeMinutes} minutes`)
+            updateTenants()
+        }
 
     }
 

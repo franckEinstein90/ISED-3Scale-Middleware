@@ -99,7 +99,7 @@ let initISEDMiddleWare = async function() {
         console.log('App is running and ready to receive requests')
         console.log('*******************************************')
 
-        timer.setRefreshTime(1) //refresh information every 5 minutes
+        timer.setRefreshTime(5) //refresh information every 5 minutes
         cronJob.schedule('* * * * *', timer.cronUpdate)
         return 1
     }

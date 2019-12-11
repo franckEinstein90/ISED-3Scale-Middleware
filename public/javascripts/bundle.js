@@ -9,10 +9,26 @@
 
 "use strict"
 const keyCloakUsers = require('./showUsers').keyCloakUsers
-
+const timer = (function(){
+    return {
+        eachMinute: function(){
+            $.get('/appStatus', {}, function(data){
+                $('#appStatus').text(
+                    [`ISED API Store Middleware - status ${data.state}`, 
+                     `online: ${data.runningTime} mins`, 
+                     `next refresh: ${data.nextTenantRefresh} mins`].join(' - ')
+                )
+            })
+        }
+    }
+})()
 $(function(){
 
     const socket = io()
+
+    //status msg in top nav
+    timer.eachMinute()
+    setInterval(timer.eachMinute, 10000)
 
     let appStatus = $('#appStatus').text()
 	
@@ -24,10 +40,7 @@ $(function(){
         location.reload(true)
     })
     
-    let openTenantPane = function(paneID){
-        alert('opening' + paneID)
-    }
-
+  
     $('#manageUsersBtn').click(function(event){
         $('#searchResults').empty()
         document.getElementById('id01').style.display='block'
@@ -40,6 +53,8 @@ $(function(){
         let parameters = {search: $('#userEmail').val()}
         $.get('/searchUser', parameters, keyCloakUsers.showUsers)
     })
+
+  
 })
 
 

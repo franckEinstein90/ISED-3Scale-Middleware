@@ -13,6 +13,7 @@ const log = require('@src/utils').utils.log
 const validator = require('validator')
 const alwaysResolve = require('@src/utils').utils.alwaysResolve
 const errors = require('@errors').errors
+const moment = require('moment')
 
 const services = (function() {
 
@@ -217,7 +218,11 @@ services.ServiceRegister.prototype.listServices = function(){
 	this.forEach( (service, serviceID) => {
             result.push({
                      id:serviceID,
-                     billingualDoc:service.hasBillingualDoc()})
+                     billingualDoc:service.hasBillingualDoc(), 
+                     created: moment(service.created_at).format('YY/M/D'), 
+                     updated: moment(service.updated_at).format('YY/M/D'), 
+                     name: service.name, 
+                     state: service.state})
     })
 	return result
 }

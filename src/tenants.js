@@ -141,8 +141,29 @@ tenants.Tenant.prototype.getUserApiInfo = async function(userEmail) {
 
 }
 
-tenants.Tenant.prototype.getAdmins = async function(){
-    
+tenants.Tenant.prototype.getAccounts = function(){
+    return new Promise((resolve, reject) => {
+        this.getAccountList()
+        .then(function(accountList){
+            resolve(accountList.map(accObj => accObj.account))
+        })
+    })
+}
+
+tenants.Tenant.prototype.getAdminUsers = async function(){
+   //returns the admin users for this tenant
+
+   let accountList = new Promise((resolve, reject) => {
+       this.getAccountList()
+       .then(x =>{
+           debugger
+       })
+   })
+   return [{
+       firstName: 'paul', 
+       lastName: 'Dewar', 
+       email: 'dfa@da.ca'
+   }]
 }
 
 
