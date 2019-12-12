@@ -79,13 +79,14 @@ router.get('/getTenantAccounts', async function(req, res, next){
 })
 
 
-router.get('/getTenantAdmins', async function(req, res, next){
+router.get('/getTenantUsers', async function(req, res, next){
 	let tenantName = req.query.tenantName
 	let tenant = tenantsManager.getTenantByName(tenantName)
-	let tenantAdminsData = tenant.getAdminUsers()
-	.then(x => {
-		res.send(x)
-	})
+	let userRoleFilter = req.query.role
+
+	tenant.getAdminUsers({userRoleFilter})
+	.then( x => { res.send(x) })
+
 })
 
 

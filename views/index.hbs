@@ -35,7 +35,7 @@
 
 	let displayUserList = function(userArray){
 		console.log('ye')
-    }
+    	}
 
 	let displayTenantAccounts = function(data, tenantName){
 		let accountsDataTableID = `${tenantName}AccountsTableData`
@@ -52,11 +52,16 @@
 	}	
 
 	let getTenantAccounts = function(tenantName){
-        $.get('/getTenantAccounts', {tenantName}, data => displayTenantAccounts(data, tenantName))
+	        $.get('/getTenantAccounts', {tenantName}, data => displayTenantAccounts(data, tenantName))
 	}
-    let getTenantAdmins = function(tenantName){
-        $.get('/getTenantAdmins', {tenantName}, displayUserList)
-    }
+
+	let getTenantAdmins = function(tenantName){
+        	$.get('/getTenantAdmins', {tenantName}, displayUserList)
+    	}
+
+	let getTenantUsers = function(tenantName){
+        	$.get('/getTenantUsers', {tenantName, role:'admin'}, displayUserList)
+	}
 
 </script>
 

@@ -5,6 +5,7 @@
  * -------------------------------------
  *
  *  Module tenantsApiRequests.js
+ *
  *  contains functions that call 3Scale API to fetch
  *  tenant related information
  **********************************************************/
@@ -16,7 +17,7 @@ const validator = require('validator')
 const errors = require('@errors').errors
 const tenants = require('@src/tenants').tenants
 const parseXML = require('xml2js').parseString
-const alwaysResolve= require('@src/utils').utils.alwaysResolve
+const alwaysResolve= require('@utils/alwaysResolve').alwaysResolve
 const Application = require('@src/applications').applications.Application
 
 /***********************API Requests******************************* */

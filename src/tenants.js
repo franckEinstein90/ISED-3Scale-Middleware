@@ -150,11 +150,11 @@ tenants.Tenant.prototype.getAccounts = function(){
     })
 }
 
-tenants.Tenant.prototype.getAdminUsers = async function(){
+tenants.Tenant.prototype.getAdminUsers = function( options ){
    //returns the admin users for this tenant
 
-   let accountList = new Promise((resolve, reject) => {
-       this.getAccountList()
+   return new Promise( (resolve, reject) => {
+       this.getAccounts()
        .then(x =>{
            debugger
        })
