@@ -1,5 +1,38 @@
+
 <form class="w3-container w3-card-4">
     <label class="w3-text-blue"><b>email pattern</b></label>
     <input class="w3-input w3-border" id="userEmail" type="text"></p>
-    <button class="w3-btn w3-blue" id="searchUser" >find</button></p>
+
+
+
+    <div class="w3-row">
+
+  <div class="w3-col m5 l5 w3-left-align">
+  <label class="w3-text-blue"><b>tenants</b></label>
+  <br/>
+	{{#each tenants}}
+        <input class="w3-check" id='{{this.name}}SearchSelect' type="checkbox">
+        <label class="w3-text-blue">{{this.name}}</label>
+        <br/>
+	{{/each}}
+  </div>
+
+  <div class="w3-col m5 l5 w3-left-align">
+        <input class="w3-check" type="checkbox" checked="checked">
+        <label class="w3-text-deep-orange">Provider Accounts</label>
+        <br/>
+        <input class="w3-check" type="checkbox">
+        <label class="w3-text-deep-orange">OTP Not Enabled</label>
+   <br/>
+</div>
+<br/>
+<p style='padding-top:15px'>
+    <div class="w3-row" style='margin:15,15,15,15'>
+        <br/>
+    <button class="w3-btn w3-blue w3-block" id="searchUser" >find</button>
+    </div>
+</p>
+
+</div>
+
 </form>

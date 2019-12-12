@@ -39,6 +39,7 @@ const tenants = (function() {
         Tenant: class {
 
             constructor(tenantJSONInfo, env) {
+                this.id = tenantJSONInfo.id
                 this.env = env
                 this.name = tenantJSONInfo.name
                 this.lastUpdateTime = "not updated"
@@ -146,6 +147,15 @@ tenants.Tenant.prototype.getAccounts = function(){
         this.getAccountList()
         .then(function(accountList){
             resolve(accountList.map(accObj => accObj.account))
+        })
+    })
+}
+
+tenants.Tenant.prototype.getProviderAccountUserList = function(){
+    return new Promise((resolve, reject) => {
+        this.getProviderAccountUsers()
+        .then(x =>{
+            debugger
         })
     })
 }

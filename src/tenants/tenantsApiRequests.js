@@ -181,6 +181,19 @@ tenants.Tenant.prototype.getAccountUsers = function(accountID){
     return alwaysResolve(apiCall, {good: processGoodResponse,  bad})
 }
 
+tenants.Tenant.prototype.getProviderAccountUsers = function(){
+    let apiCall = [ `https://${this.adminDomain}/admin/api/`, 
+                    `users.json?access_token=${this.accessToken}`].join('')
+    let bad = null
+    let good = function(body){
+        if(validator.isJSON(body)){
+            let users = JSON.parse(body)
+            return users
+        }
+        return bad
+    }
+    return alwaysResolve(apiCall, {good, bad})
+}
 tenants.Tenant.prototype.getUsers = function(){
     let accountList = 
         this.getAccountList()
@@ -193,6 +206,8 @@ tenants.Tenant.prototype.getUsers = function(){
             debugger
             })
 }
+
+
 module.exports = {
     tenants
 }

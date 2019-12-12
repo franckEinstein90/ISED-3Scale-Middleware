@@ -63,6 +63,14 @@ router.get('/appStatus', async function(req, res, next){
 
 router.get('/searchUser', async function(req, res, next){
 	let emailSearchString = req.query.search
+	let tenantsToSearch = ['on']
+	tenantsToSearch.forEach(function(tenantName){
+		let tenant = tenantsManager.getTenantByName(tenantName)
+		tenant.getProviderAccountUserList()
+		.then(x =>{
+			debugger
+		})
+	})
 	let returnData = users.getUserList(emailSearchString)
 	.then(x =>{
 		res.send(x)

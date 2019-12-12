@@ -21,7 +21,8 @@ const messages = (function(){
            //information on tenants passed to the front end
            return tenantsManager.tenants().map( t => {
                 return {
-                    name: t.name, 
+                    name: t.name,
+                    id: t.id,  
                     lastUpdate: tenantsManager.lastTenantUpdate(t.name), 
                     services: t.services.listServices()
                 }

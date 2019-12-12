@@ -1,20 +1,23 @@
 <div id="id01" class="w3-modal">
-    <div class="w3-modal-content w3-card-4">
+    <div class="w3-modal-content w3-card-4 w3-animate-zoom" style="max-width:1200px">
 
       <header class="w3-container w3-blue">
-        <h1>users</h1>
+        
+ <button class="w3-button w3-blue w3-xlarge w3-left" onclick="w3_open()">☰</button>
+        <h1>user management</h1>
       </header>
-
-
+      
       <div class="w3-container">
         <div class ='w3-row'>
 
-          <div class='w3-col w3-container m4 l4'>
+          <div class='w3-col w3-container m6 l6'>
           <span onclick="document.getElementById('id01').style.display='none'" class="w3-button w3-display-topright">&times;</span>
+
           {{>userSearchForm}}
+
           </div>
 
-          <div class='w3-col w3-container m8 l8'>
+          <div class='w3-col w3-container m6 l6'>
           {{>userListView}}
         </div>
         </div>
