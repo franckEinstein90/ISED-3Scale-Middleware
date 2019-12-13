@@ -6,12 +6,19 @@ const keyCloakUsers = (function(){
     return {
         showUsers:function(userData){
             userProfiles = userData
+            $('#userSelectionTable').empty()
             userData.forEach(userProfile => {
-                let otpEnabled = userProfile.disableableCredentialTypes.includes('otp') || userProfile.requiredActions.includes('CONFIGURE_TOTP')
-                let emailVerified = `<td>${userProfile.emailVerified}</td>`
-                let otpVerified = `<td>${userProfile.disableableCredentialTypes.includes('otp')}</td>`
-                let enableOTP = `<td><input class="w3-check" type="checkbox" ${otpEnabled?'disabled':''}></td>`
-                $('#searchResults').append(`<tr><td>${userProfile.email}</td>${emailVerified}${otpVerified}${enableOTP}</tr>`)
+                if('notFound' in userProfile){
+                    $('#userSelectionTable').append(`<tr><td>${userProfile.email}</td><td>No</td></tr>`)//${emailVerified}${otpVerified}${enableOTP}</tr>`)
+                }
+                if('id' in userProfile){
+                    let otpEnabled = userProfile.disableableCredentialTypes.includes('otp') || userProfile.requiredActions.includes('CONFIGURE_TOTP')
+                    let otpStatus = `<td>${otpEnabled?'Yes':'No'}</td>`
+                    let emailVerified = `<td>${userProfile.emailVerified}</td>`
+                    let otpVerified = `<td>${userProfile.disableableCredentialTypes.includes('otp')}</td>`
+                    let enableOTP = `<td><input class="w3-check enforceOTPCheck" value='${userProfile.email}' type="checkbox" ${otpEnabled?'disabled':''}></td>`
+                    $('#userSelectionTable').append(`<tr><td>${userProfile.email}</td><td>Yes</td>${otpStatus}${otpVerified}${enableOTP}</tr>`)
+                }
             })
         }
     }

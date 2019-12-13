@@ -70,6 +70,26 @@
 			{{>tenantCard}}
 		{{/each}}
 	 </div>
+
+	<div class="w3-content w3-justify w3-padding-64" id="userMgtSection">
+		<h2>Users</h2>
+		<table class='w3-table w3-striped w3-bordered'>
+			<thead> 
+			<tr>
+				<th>email</th><th>found?</th>
+				<th>otp enabled</th>
+				<th>otp completed</th><th>enforce otp?</th>
+			</tr>
+			</thead>
+				<tbody id="userSelectionTable">
+
+				</tbody>
+		</table>
+	</div>
+	<form>
+		<button id="userActions" class="w3-button w3-block">commit selected actions</button>
+	</form>
+
 </div>
 
 

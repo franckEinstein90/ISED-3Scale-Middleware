@@ -50,10 +50,22 @@ const users = (function(){
         }, 
 
         getUserList: function( searchString ){
+            
             return users.getKeyCloakCredentials()
                 .then(function(token) {
                     return(users.getUserProfile(token, searchString))
                 })
+		.then(x => {
+            if(x.length === 0){ //user not found
+                return {email:searchString, notFound:true}
+            }
+            else if(Array.isArray(x)){
+                    return x[0]
+                }
+            else{
+                return {email:searchString, error:true}
+            } 
+		})
                 
             
            /* let url ='https://sso-dev.ised-isde.canada.ca/auth/admin/realms/gcapi/users' 
@@ -76,18 +88,21 @@ const users = (function(){
         }, 
 
         enforceTwoFactorAuthentication: function( email ){
+            debugger
             //given an email address, enforces 2-factor authenication for that user
             let authToken = null
             let adminUserName = config.get('keyCloakAdminUsername')
             let adminPassword = config.get('keyCloakAdminPassword')
-        
-            let keyAuth = users.getKeyCloakCredentials(adminUserName, adminPassword)
-            .then(token => {
-                authToken = token
-                return users.getUserProfile(token, 'neuronfac+test@gmail.com')
-            })
-            .then(userProfile => {
-                return users.enforceOTP(authToken, userProfile[0])
+            return new Promise((resolve, reject) =>{
+                let keyAuth = users.getKeyCloakCredentials(adminUserName, adminPassword)
+                .then(token => {
+                    authToken = token
+                    return users.getUserProfile(token, email)
+                })
+                .then(userProfile => {
+                    debugger
+                    return users.enforceOTP(authToken, userProfile[0])
+                })
             })
         },
 

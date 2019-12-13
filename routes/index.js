@@ -63,18 +63,40 @@ router.get('/appStatus', async function(req, res, next){
 
 router.get('/searchUser', async function(req, res, next){
 	let emailSearchString = req.query.search
-	let tenantsToSearch = ['on']
-	tenantsToSearch.forEach(function(tenantName){
+	let tenantsToSearch = req.query.filter.tenants 
+	return Promise.all(tenantsToSearch.map( function(tenantName){
 		let tenant = tenantsManager.getTenantByName(tenantName)
-		tenant.getProviderAccountUserList()
-		.then(x =>{
-			debugger
+		return tenant.getProviderAccountUserList()
 		})
+	)
+	.then(userArrays =>{
+		let returnArray = []
+		userArrays.forEach(users => 
+			users.forEach(user => {
+			if(!returnArray.includes(user.user.email)){
+				returnArray.push(user.user.email)
+			}
+		}))
+		return returnArray
 	})
-	let returnData = users.getUserList(emailSearchString)
-	.then(x =>{
+	.then(userEmails => {
+		let keyCloakProfiles = userEmails.map(email => users.getUserList(email))
+		return Promise.all(keyCloakProfiles) 
+	})
+	.then( x => {
 		res.send(x)
 	})
+
+
+/*	let returnData = users.getUserList(emailSearchString)
+	.then(x =>{
+		res.send(x)
+	})*/
+})
+
+
+router.get('/getTenantNames', async function(req, res, next){
+	res.send(tenantsManager.tenants().map(t => t.name))
 })
 
 router.get('/getTenantAccounts', async function(req, res, next){
@@ -86,6 +108,12 @@ router.get('/getTenantAccounts', async function(req, res, next){
 	})
 })
 
+router.get('/enforceOTP', async function(req, res, next){
+	let userEmails = req.query.emails
+	let enforceOTP = userEmails.map(email => users.enforceTwoFactorAuthentication(email))
+	Promise.all(enforceOTP)
+	.then(res.send('done'))
+})
 
 router.get('/getTenantUsers', async function(req, res, next){
 	let tenantName = req.query.tenantName

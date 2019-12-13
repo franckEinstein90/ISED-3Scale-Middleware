@@ -8,6 +8,7 @@
 
 "use strict"
 const keyCloakUsers = require('./showUsers').keyCloakUsers
+
 const timer = (function(){
     return {
         eachMinute: function(){
@@ -21,6 +22,10 @@ const timer = (function(){
         }
     }
 })()
+
+
+const tenantsFilter = new Map()
+
 $(function(){
 
     const socket = io()
@@ -28,7 +33,9 @@ $(function(){
     //status msg in top nav
     timer.eachMinute()
     setInterval(timer.eachMinute, 10000)
-
+    $.get('/getTenantNames', {}, function(data){
+        data.forEach(tName => tenantsFilter.set(tName, 'off'))
+    })
     let appStatus = $('#appStatus').text()
 	
     if (appStatus === 'running'){
@@ -45,11 +52,39 @@ $(function(){
         document.getElementById('id01').style.display='block'
     }) 
 
+    $('#userActions').click(function(event){
+        event.preventDefault()
+        let emails = []
+        let otpEnforceEmail = $('.enforceOTPCheck')
+        otpEnforceEmail.each( function() {
+            if ($(this).is(':checked')){
+                emails.push($(this).val())
+            }
+        })
 
+        $.get('/enforceOTP', {emails})
+        console.log('e')
+    })
     $("#searchUser").click(function(event){
         event.preventDefault()
         $('#searchResults').empty()
-        let parameters = {search: $('#userEmail').val()}
+        let filter = {
+            tenants: []
+        }
+        tenantsFilter.forEach((state, tName)=>{
+            if($(`#${tName}SearchSelect`).is(":checked")){
+                tenantsFilter.set(tName, 'on')
+                filter.tenants.push(tName)
+            }
+            else{
+                tenantsFilter.set(tName, 'off')
+            }
+        })
+    
+        let parameters = {
+            search: $('#userEmail').val(), 
+            filter
+        }
         $.get('/searchUser', parameters, keyCloakUsers.showUsers)
     })
 

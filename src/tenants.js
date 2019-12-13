@@ -154,8 +154,11 @@ tenants.Tenant.prototype.getAccounts = function(){
 tenants.Tenant.prototype.getProviderAccountUserList = function(){
     return new Promise((resolve, reject) => {
         this.getProviderAccountUsers()
-        .then(x =>{
-            debugger
+        .then(x => {
+            if(x === null){
+                return resolve('invalid response')
+            }
+            return resolve(x.users)
         })
     })
 }

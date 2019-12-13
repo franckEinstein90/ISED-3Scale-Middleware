@@ -14,7 +14,7 @@ const alwaysResolve = function (apiCall, options = {
                } 
 
                request(apiCall, function(err, response, body) {
-                    if (err) return resolve(options.bad(err))
+                    if (err) return resolve(options.bad)
                     if (response && response.statusCode === 200 && response.statusMessage === "OK") {
                         resolve(options.good(body))
                     } else {
