@@ -88,7 +88,6 @@ const users = (function(){
         }, 
 
         enforceTwoFactorAuthentication: function( email ){
-            debugger
             //given an email address, enforces 2-factor authenication for that user
             let authToken = null
             let adminUserName = config.get('keyCloakAdminUsername')
@@ -100,7 +99,6 @@ const users = (function(){
                     return users.getUserProfile(token, email)
                 })
                 .then(userProfile => {
-                    debugger
                     return users.enforceOTP(authToken, userProfile[0])
                 })
             })

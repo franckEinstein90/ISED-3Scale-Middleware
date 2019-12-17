@@ -163,12 +163,30 @@ tenants.Tenant.prototype.getProviderAccountUserList = function(){
     })
 }
 
-tenants.Tenant.prototype.getAdminUsers = function( options ){
+tenants.Tenant.prototype.getAllUsers = function( options ){
    //returns the admin users for this tenant
 
    return new Promise( (resolve, reject) => {
-       this.getAccounts()
-       .then(x =>{
+       this.getAccountList()
+       .then(accounts => {
+           return accounts.map(acc => {
+               if ('account' in acc) return acc.account //answer is not consistent. Someimes wrapped in account property, sometimes not
+               return acc
+           })
+       })
+       .then(accounts => accounts.map(acc => acc.id))
+       .then(accountIDs => accountIDs.map(accID => this.getAccountUsers(accID)))
+       .then(accountUsers => Promise.all(accountUsers))
+       .then(accountUsers => accountUsers.map(userInfo => {
+          if('users' in userInfo)  return userInfo.users
+          return userInfo
+       }))
+       .then(users => users.map(userArray => {
+           if(Array.isArray(userArray) && userArray.length === 1) return userArray[0]
+           return userArray 
+       }))
+       .then (users => users.map(user => user.user))
+       .then (x => {
            debugger
        })
    })

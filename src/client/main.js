@@ -65,12 +65,16 @@ $(function(){
         $.get('/enforceOTP', {emails})
         console.log('e')
     })
+
+
     $("#searchUser").click(function(event){
         event.preventDefault()
         $('#searchResults').empty()
         let filter = {
-            tenants: []
+            tenants: [], 
+            provideraccounts: $('#providerAccountSearchSelect').is(":checked")
         }
+        
         tenantsFilter.forEach((state, tName)=>{
             if($(`#${tName}SearchSelect`).is(":checked")){
                 tenantsFilter.set(tName, 'on')

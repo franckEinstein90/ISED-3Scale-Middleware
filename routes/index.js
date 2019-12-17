@@ -63,10 +63,16 @@ router.get('/appStatus', async function(req, res, next){
 
 router.get('/searchUser', async function(req, res, next){
 	let emailSearchString = req.query.search
-	let tenantsToSearch = req.query.filter.tenants 
+	let tenantsToSearch = req.query.filter.tenants
+	let providerAccountsFilter = req.query.filter.provideraccounts
 	return Promise.all(tenantsToSearch.map( function(tenantName){
 		let tenant = tenantsManager.getTenantByName(tenantName)
-		return tenant.getProviderAccountUserList()
+		if(providerAccountsFilter === 'true'){
+			return tenant.getProviderAccountUserList()
+			}
+        else{
+			return tenant.getAllUsers()
+			}
 		})
 	)
 	.then(userArrays =>{

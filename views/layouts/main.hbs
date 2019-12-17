@@ -13,8 +13,12 @@
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js"></script>
 
     <style>
+      html {
+        scroll-behavior: smooth;
+        }
     	html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
     </style>
+
 
   <script>
     
@@ -34,6 +38,12 @@
 <nav    class="w3-sidebar w3-collapse w3-black w3-animate-left w3-center" 
         style="z-index:3;width:150px;" id="mySidebar">
 
+
+  <a href="#" class="w3-bar-item w3-button w3-padding-large w3-black w3-hover-black">
+    <i class="fa fa-home w3-xxlarge"></i>
+    <p>TENANTS</p>
+  </a>
+
 <a  ID="manageUsersBtn" onclick="document.getElementById('id01').style.display='block'" 
     class="w3-bar-item w3-button w3-padding-large w3-hover-black">
     <i class="fa fa-users w3-xxlarge"></i>
@@ -43,8 +53,8 @@
 
 <a  href="#userMgtSection" 
     class="w3-bar-item w3-button w3-padding-large w3-hover-black">
-    <i class="fa fa-users w3-xxlarge"></i>
-    <p>VIEW</p>
+    <i class="fa fa-eye w3-xxlarge"></i>
+    <p>SELECTED</p>
   </a>
 
 
@@ -59,9 +69,10 @@
 <div class="w3-overlay w3-hide-large w3-animate-opacity" onclick="w3_close()" style="cursor:pointer"
  title="close side menu" id="myOverlay"></div>
 
+<div class="w3-main" style="margin-left:160px;margin-top:43px;margin-right:10px">
     {{{body}}}
 
-
+</div>
 
 <script>
 // Get the Sidebar

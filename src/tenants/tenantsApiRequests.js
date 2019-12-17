@@ -194,11 +194,12 @@ tenants.Tenant.prototype.getProviderAccountUsers = function(){
     }
     return alwaysResolve(apiCall, {good, bad})
 }
+
 tenants.Tenant.prototype.getUsers = function(){
-    let accountList = 
         this.getAccountList()
         .then(x => 
             {
+                debugger
                let accountIDs = x.map(obj => obj.account.id) 
                return Promise.all(accountIDs.map(accID => this.getAccountUsers(accID)))
             })

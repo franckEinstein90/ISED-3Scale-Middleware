@@ -57,15 +57,15 @@ const appVariables = require('@server/appStatus').appVariables
 
 const users = require('@users/users').users
 
-
+let initKeyCloakUserMgt = async function(){
+}
 let initISEDMiddleWare = async function() {
     appLogger.log('info', 'Initializing application')
     //test : users.enforceTwoFactorAuthentication('neuronfac@gmail.com')
-
     let JSONAppData = config.get('master')
     if( JSONAppData && typeof JSONAppData === 'object'){
         appVariables.env = JSONAppData.env
-        users.onReady()
+        users.onReady() 
     }
     else {
         throw "bad configuration file"
@@ -113,6 +113,7 @@ let initISEDMiddleWare = async function() {
 }
 
 let initAppFeatures = function(){
+    initKeyCloakUserMgt()
     initISEDMiddleWare()
 }
 
@@ -129,7 +130,6 @@ let initViews = async function(){
         layoutsDir: __dirname + '/views/layouts/', 
         partialsDir: __dirname + '/views/partials/'
     }))
-   //app.set('views', path.join(__dirname, 'views'));
    app.set('view engine', 'hbs');
 }
 
@@ -144,7 +144,7 @@ let startServer = async function() {
 		 saveUninitialized: true, 
 		 store: memoryStore
 	 }))
-	 app.use(keycloak.middleware())
+	app.use(keycloak.middleware())
     app.use(logger('dev'));
     app.use(express.json());
     app.use(express.urlencoded({

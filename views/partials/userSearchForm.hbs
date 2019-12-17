@@ -1,3 +1,13 @@
+<script>
+  function selectAllTenants(){
+    $('.tenantFilterCheckBox').prop('checked', true)
+  }
+
+  function unselectAllTenants(){
+    $('.tenantFilterCheckBox').prop('checked', false)
+  }
+
+</script>
 
 <form class="w3-container w3-card-4">
     <label class="w3-text-blue"><b>email pattern</b></label>
@@ -5,24 +15,37 @@
 
 
 
-    <div class="w3-row">
-
-  <div class="w3-col m5 l5 w3-left-align">
-  <label class="w3-text-blue"><b>tenants</b></label>
+  <div class="w3-row">
+  <div class="w3-col m4 l4 w3-left-align">
+  <label class="w3-text-blue"><b>TENANTS (OR)</b></label>
   <br/>
+        <button onclick="selectAllTenants()">select all</button>
+        <button onclick="unselectAllTenants()">unselect all</button>
+        <br/>
+
 	{{#each tenants}}
-        <input class="w3-check" id='{{this.name}}SearchSelect' type="checkbox">
+        <input class="w3-check tenantFilterCheckBox" id='{{this.name}}SearchSelect' type="checkbox">
         <label class="w3-text-blue">{{this.name}}</label>
         <br/>
 	{{/each}}
   </div>
 
-  <div class="w3-col m5 l5 w3-left-align">
-        <input class="w3-check" type="checkbox" checked="checked">
+   <div class="w3-col m4 l4 w3-left-align">
+   <label class="w3-text-blue"><b>PROPERTIES (AND)</b></label>
+   <BR/>
+        <input class="w3-check" id='providerAccountSearchSelect' type="checkbox" checked="checked">
         <label class="w3-text-deep-orange">Provider Accounts</label>
         <br/>
         <input class="w3-check" type="checkbox">
         <label class="w3-text-deep-orange">OTP Not Enabled</label>
+   <br/>
+</div>
+<div class="w3-col m4 l4 w3-left-align">
+        <label class="w3-text-blue"><b>COMMANDS (AND)</b></label>
+        <BR/>
+        <input class="w3-check" type="checkbox" checked="checked">
+        <label class="w3-text-deep-orange">Enforce OTP</label>
+        <br/>
    <br/>
 </div>
 <br/>
