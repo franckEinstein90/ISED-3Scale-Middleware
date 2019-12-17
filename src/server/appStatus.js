@@ -11,13 +11,16 @@ const appVariables = function(){
 
 const appStatus = (function(){
     
-   let currentState = statusCodes.init 
+    let currentState = statusCodes.init 
+    let keyCloakEnabled = false
 
-   return {
+    return {
         state: currentState, 
 
+        enableKeyCloak: () => keyCloakEnabled = true , 
+        keyCloakEnabled: () => keyCloakEnabled,
+        
         isRunning: () => (currentState === statusCodes.running), 
-
         run: function(){
             currentState = statusCodes.running
         }

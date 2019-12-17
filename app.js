@@ -57,15 +57,16 @@ const appVariables = require('@server/appStatus').appVariables
 
 const users = require('@users/users').users
 
-let initKeyCloakUserMgt = async function(){
-}
 let initISEDMiddleWare = async function() {
     appLogger.log('info', 'Initializing application')
     //test : users.enforceTwoFactorAuthentication('neuronfac@gmail.com')
     let JSONAppData = config.get('master')
     if( JSONAppData && typeof JSONAppData === 'object'){
         appVariables.env = JSONAppData.env
-        users.onReady() 
+        users.onReady()
+        .then(x => {
+            if(x) appStatus.enableKeyCloak()
+        }) 
     }
     else {
         throw "bad configuration file"
@@ -113,7 +114,6 @@ let initISEDMiddleWare = async function() {
 }
 
 let initAppFeatures = function(){
-    initKeyCloakUserMgt()
     initISEDMiddleWare()
 }
 

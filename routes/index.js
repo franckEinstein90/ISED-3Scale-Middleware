@@ -86,8 +86,10 @@ router.get('/searchUser', async function(req, res, next){
 		return returnArray
 	})
 	.then(userEmails => {
-		let keyCloakProfiles = userEmails.map(email => users.getUserList(email))
-		return Promise.all(keyCloakProfiles) 
+		if(appStatus.keyCloakEnabled()){
+			let keyCloakProfiles = userEmails.map(email => users.getUserList(email))
+			return Promise.all(keyCloakProfiles) 
+		}
 	})
 	.then( x => {
 		res.send(x)

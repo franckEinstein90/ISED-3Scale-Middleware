@@ -9,6 +9,7 @@
 
 "use strict"
 const keyCloakUsers = require('./showUsers').keyCloakUsers
+
 const timer = (function(){
     return {
         eachMinute: function(){
@@ -22,6 +23,10 @@ const timer = (function(){
         }
     }
 })()
+
+
+const tenantsFilter = new Map()
+
 $(function(){
 
     const socket = io()
@@ -29,7 +34,9 @@ $(function(){
     //status msg in top nav
     timer.eachMinute()
     setInterval(timer.eachMinute, 10000)
-
+    $.get('/getTenantNames', {}, function(data){
+        data.forEach(tName => tenantsFilter.set(tName, 'off'))
+    })
     let appStatus = $('#appStatus').text()
 	
     if (appStatus === 'running'){
@@ -46,11 +53,43 @@ $(function(){
         document.getElementById('id01').style.display='block'
     }) 
 
+    $('#userActions').click(function(event){
+        event.preventDefault()
+        let emails = []
+        let otpEnforceEmail = $('.enforceOTPCheck')
+        otpEnforceEmail.each( function() {
+            if ($(this).is(':checked')){
+                emails.push($(this).val())
+            }
+        })
+
+        $.get('/enforceOTP', {emails})
+        console.log('e')
+    })
+
 
     $("#searchUser").click(function(event){
         event.preventDefault()
         $('#searchResults').empty()
-        let parameters = {search: $('#userEmail').val()}
+        let filter = {
+            tenants: [], 
+            provideraccounts: $('#providerAccountSearchSelect').is(":checked")
+        }
+        
+        tenantsFilter.forEach((state, tName)=>{
+            if($(`#${tName}SearchSelect`).is(":checked")){
+                tenantsFilter.set(tName, 'on')
+                filter.tenants.push(tName)
+            }
+            else{
+                tenantsFilter.set(tName, 'off')
+            }
+        })
+    
+        let parameters = {
+            search: $('#userEmail').val(), 
+            filter
+        }
         $.get('/searchUser', parameters, keyCloakUsers.showUsers)
     })
 
@@ -68,12 +107,19 @@ const keyCloakUsers = (function(){
     return {
         showUsers:function(userData){
             userProfiles = userData
+            $('#userSelectionTable').empty()
             userData.forEach(userProfile => {
-                let otpEnabled = userProfile.disableableCredentialTypes.includes('otp') || userProfile.requiredActions.includes('CONFIGURE_TOTP')
-                let emailVerified = `<td>${userProfile.emailVerified}</td>`
-                let otpVerified = `<td>${userProfile.disableableCredentialTypes.includes('otp')}</td>`
-                let enableOTP = `<td><input class="w3-check" type="checkbox" ${otpEnabled?'disabled':''}></td>`
-                $('#searchResults').append(`<tr><td>${userProfile.email}</td>${emailVerified}${otpVerified}${enableOTP}</tr>`)
+                if('notFound' in userProfile){
+                    $('#userSelectionTable').append(`<tr><td>${userProfile.email}</td><td>No</td></tr>`)//${emailVerified}${otpVerified}${enableOTP}</tr>`)
+                }
+                if('id' in userProfile){
+                    let otpEnabled = userProfile.disableableCredentialTypes.includes('otp') || userProfile.requiredActions.includes('CONFIGURE_TOTP')
+                    let otpStatus = `<td>${otpEnabled?'Yes':'No'}</td>`
+                    let emailVerified = `<td>${userProfile.emailVerified}</td>`
+                    let otpVerified = `<td>${userProfile.disableableCredentialTypes.includes('otp')}</td>`
+                    let enableOTP = `<td><input class="w3-check enforceOTPCheck" value='${userProfile.email}' type="checkbox" ${otpEnabled?'disabled':''}></td>`
+                    $('#userSelectionTable').append(`<tr><td>${userProfile.email}</td><td>Yes</td>${otpStatus}${otpVerified}${enableOTP}</tr>`)
+                }
             })
         }
     }

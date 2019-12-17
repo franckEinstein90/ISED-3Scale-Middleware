@@ -16,35 +16,58 @@ const appVariables = require('@server/appStatus').appVariables
 
 const users = (function(){
 
-    let keyCloakAdminUserName = null
-    let keyCloakAdminPassword = null
+    let keyCloakClientId = null
+    let keyCloakClientSecret = null
     let keyCloakAccessToken = null
     let ssoHostUrl =  null
 
     return {
 
         onReady: function(){
+
             ssoHostUrl =    
                 ['https://sso', appVariables.env === "dev"?"-dev":"", 
                 '.ised-isde.canada.ca'].join('')
-            keyCloakAdminUserName = config.get('keyCloakAdminUsername')
-            keyCloakAdminPassword = config.get('keyCloakAdminPassword')
+            keyCloakClientId = config.get('keyCloakClientId')
+            keyCloakClientSecret = config.get('keyCloakClientSecret')
+            //make a test call to confirm all works
+            let testEmail = 'ic.api_store-magasin_des_apis.ic@canada.ca'
+            return users.getUserList(testEmail)
+            .then(testCall => {
+               if(typeof testCall === 'object' && 'email' in testCall && testCall.email === testEmail) return true
+               return false
+            })
         }, 
         
         getKeyCloakCredentials: function( ){
 
             return new Promise((resolve, reject) => {
+                let options = {
+                    url: `${ssoHostUrl}/auth/realms/gcapi/protocol/openid-connect/token` , 
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        "Authorization": `Basic ${new Buffer(keyCloakClientId + ':' + keyCloakClientSecret).toString('base64')}`,
+                        "User-Agent": "ISED API Store Middleware",
+                        "Accept": "*/*",
+                        "Cache-Control": "no-cache",
+                        "Accept-Encoding": "gzip, deflate",
+                        "Connection": "keep-alive",
+                        "cache-control": "no-cache"
+                      },
+                    form: {
+                        "grant_type": "client_credentials"
+                      }
+                }
 
-                request.post(`${ssoHostUrl}/auth/realms/gcapi/protocol/openid-connect/token`, 
-                    { form: {username:keyCloakAdminUserName, password:keyCloakAdminPassword, client_id:'admin-cli', grant_type:"password" }}, 
-                        function(err, httpResponse, body){
+                request.post(options, function(err, httpResponse, body){
                             if(err) return resolve(err)
-
-                            if (validator.isJSON(body)){
-                                resolve(JSON.parse(body))
+                            if(httpResponse.statusCode === 200) {
+                                if (validator.isJSON(body)){
+                                    return resolve(JSON.parse(body))
+                                }
+                                return resolve("Invalid JSON")
                             }
-
-                            return resolve("Invalid JSON")
+                            return resolve('bad response')
                     })
             })
         }, 
