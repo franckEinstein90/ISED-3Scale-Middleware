@@ -1,17 +1,56 @@
-<table id="userListView" class="w3-table display">
-          <thead>
-          <tr>
-            <th> email </th>
-            <th> email verified </th>
-            <th> otp enabled</th>
-            <th> enforce otp <br/><input class="w3-check" type="checkbox"> <label>select all</label></th>
-          </tr>
-          </thead>
-          <tbody id="searchResults" style='color:black'>
+<div class="w3-content w3-justify w3-padding-64" id="userMgtSection">
+		<form class='w3-container w3-card-4 w3-light-grey'>
+			<h3>Selected Users</h3>
+			<p>
+				<input class="w3-check" type="checkbox">
+				<label>Enforce OTP</label>
+			<p>
+				<button class='w3-button w3-block w3-yellow' id="userAction">GO!!!</button>
+			</p>
+		</form>
 
-          </tbody>
-          <tfooter>
-            <tr><td><button class="w3-btn w3-blue">enforce otp for selected users</button></td></tr>
-          </tfooter>
-</table>
+
+		<div class="w3-container w3-padding-64">
+		<table class='w3-table w3-striped w3-bordered' id="selectedUsersList">
+			<thead> 
+			<tr>
+
+				<th>email</th>
+				<th>keyCloak account</th>
+				<th>otp enabled</th>
+				<th>otp completed</th>
+
+			</tr>
+			</thead>
+				<tbody id="userSelectionTable">
+
+				</tbody>
+		</table>
+	</div>
+</div>
+<script>
+ 	let dataTable = $('#selectedUsersList').DataTable()
+	$('#userAction').on('click', function(){
+		alert('dsa')
+	})
+	$('#selectedUsersList tbody').on('click', 'tr', function(){
+		$(this).toggleClass('selected')
+	})
+
+  	addUserRow = function({
+		email, 
+		keyCloakAccount,
+		otpEnabled, 
+    	otpVerified
+	}){
+
+    dataTable.row.add([
+      	email,
+		keyCloakAccount, 
+      	otpEnabled,
+		otpVerified
+    ]).draw( false )
+  }
+</script>
+
 

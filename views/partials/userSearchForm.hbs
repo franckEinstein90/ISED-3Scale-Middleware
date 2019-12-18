@@ -1,5 +1,5 @@
 <script>
-  function selectAllTenants(){
+  function selectAllTenants(event){
     $('.tenantFilterCheckBox').prop('checked', true)
   }
 
@@ -16,7 +16,7 @@
 
 
   <div class="w3-row">
-  <div class="w3-col m4 l4 w3-left-align">
+  <div class="w3-col m6 l6 w3-left-align">
   <label class="w3-text-blue"><b>TENANTS (OR)</b></label>
   <br/>
         <button onclick="selectAllTenants()">select all</button>
@@ -30,7 +30,7 @@
 	{{/each}}
   </div>
 
-   <div class="w3-col m4 l4 w3-left-align">
+   <div class="w3-col m6 l6 w3-left-align">
    <label class="w3-text-blue"><b>PROPERTIES (AND)</b></label>
    <BR/>
         <input class="w3-check" id='providerAccountSearchSelect' type="checkbox" checked="checked">
@@ -38,14 +38,6 @@
         <br/>
         <input class="w3-check" type="checkbox">
         <label class="w3-text-deep-orange">OTP Not Enabled</label>
-   <br/>
-</div>
-<div class="w3-col m4 l4 w3-left-align">
-        <label class="w3-text-blue"><b>COMMANDS (AND)</b></label>
-        <BR/>
-        <input class="w3-check" type="checkbox" checked="checked">
-        <label class="w3-text-deep-orange">Enforce OTP</label>
-        <br/>
    <br/>
 </div>
 <br/>

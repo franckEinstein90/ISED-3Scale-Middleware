@@ -113,10 +113,9 @@ const users = (function(){
         enforceTwoFactorAuthentication: function( email ){
             //given an email address, enforces 2-factor authenication for that user
             let authToken = null
-            let adminUserName = config.get('keyCloakAdminUsername')
-            let adminPassword = config.get('keyCloakAdminPassword')
+
             return new Promise((resolve, reject) =>{
-                let keyAuth = users.getKeyCloakCredentials(adminUserName, adminPassword)
+                users.getKeyCloakCredentials()
                 .then(token => {
                     authToken = token
                     return users.getUserProfile(token, email)
@@ -166,7 +165,7 @@ const users = (function(){
 
             return new Promise((resolve, reject) => {
                 request.put(options, function(error, response, body){
-                    //todo check action success
+                    debugger
                 })
             })
 	    },
