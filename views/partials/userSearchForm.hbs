@@ -16,7 +16,7 @@
 
 
   <div class="w3-row">
-  <div class="w3-col m6 l6 w3-left-align">
+  <div class="w3-col m4 l4 w3-left-align">
   <label class="w3-text-blue"><b>TENANTS (OR)</b></label>
   <br/>
         <button onclick="selectAllTenants()">select all</button>
@@ -30,21 +30,35 @@
 	{{/each}}
   </div>
 
-   <div class="w3-col m6 l6 w3-left-align">
+   <div class="w3-col m4 l4 w3-left-align">
    <label class="w3-text-blue"><b>PROPERTIES (AND)</b></label>
    <BR/>
         <input class="w3-check" id='providerAccountSearchSelect' type="checkbox" checked="checked">
         <label class="w3-text-deep-orange">Provider Accounts</label>
         <br/>
+
         <input class="w3-check" type="checkbox">
         <label class="w3-text-deep-orange">OTP Not Enabled</label>
+
+        <br/>
+        <input class="w3-check" type="checkbox">
+        <label class="w3-text-deep-orange">No keyCloak account</label>
    <br/>
 </div>
-<br/>
+ <div class="w3-col m4 l4 w3-left-align">
+   <label class="w3-text-blue"><b>Existing Groups</b></label>
+   <BR/>
+        <UL>
+          <LI>Group 1</LI>
+          <LI>Group 2</LI>
+        </UL>
+   <br/>
+</div>
+br/>
 <p style='padding-top:15px'>
     <div class="w3-row" style='margin:15,15,15,15'>
         <br/>
-    <button class="w3-btn w3-blue w3-block" id="searchUser" >find</button>
+    <button class="w3-btn w3-blue w3-block" id="searchUser" >create</button>
     </div>
 </p>
 
