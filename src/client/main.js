@@ -7,6 +7,8 @@
  **********************************************************/
 
 "use strict"
+const tenantsInfo = require('./showUsers').tenantsInfo
+const users = require('./showUsers').users
 const keyCloakUsers = require('./showUsers').keyCloakUsers
 
 const timer = (function(){
@@ -24,26 +26,57 @@ const timer = (function(){
 })()
 
 
-const tenantsFilter = new Map()
+
+
+const selectedUsers = (function(){
+    let selectedUsers = new Map()
+
+    return{
+        toggleSelectedUser: function(userEmail){
+            if(selectedUsers.has(userEmail)){
+                selectedUsers.delete(userEmail)
+            }
+            else{
+                selectedUsers.set(userEmail, 1)
+            }
+            
+            $('#individuallySelectedUsers').text('fdsa')
+        }
+
+    }
+})()
+
+
+
+
 
 $(function(){
 
     const socket = io()
+    tenantsInfo.onReady()
 
+    users.onReady($('#selectedUsersList').DataTable())
+     
     //status msg in top nav
     timer.eachMinute()
     setInterval(timer.eachMinute, 10000)
-    $.get('/getTenantNames', {}, function(data){
-        data.forEach(tName => tenantsFilter.set(tName, 'off'))
-    })
+
+    
     let appStatus = $('#appStatus').text()
 	
     if (appStatus === 'running'){
 	
     }
 
+    $('#createNewGroup').click(function(event){
+        event.preventDefault()
+        if(tenantsInfo.ready()){
+            let newUserGroup = new users.Group()
+        }
+    })
+
     socket.on('refresh page', function(tenants){
-        location.reload(true)
+
     })
     
   
@@ -51,6 +84,12 @@ $(function(){
         $('#searchResults').empty()
         document.getElementById('id01').style.display='block'
     }) 
+
+    $('#selectedUsersList tbody').on('click', 'tr', function(){
+		$(this).toggleClass('selected')
+		let selectedUserEmail = users.selectUserFromSelectedTableRow(this) 
+		selectedUsers.toggleSelectedUser(selectedUserEmail)
+    })
 
     $('#userActions').click(function(event){
         event.preventDefault()
@@ -89,7 +128,7 @@ $(function(){
             search: $('#userEmail').val(), 
             filter
         }
-        $.get('/searchUser', parameters, keyCloakUsers.showUsers)
+        $.get('/findUsers', parameters, keyCloakUsers.showUsers)
     })
 
   

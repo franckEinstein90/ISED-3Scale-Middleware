@@ -44,25 +44,32 @@
     <p>TENANTS</p>
   </a>
 
-<a  ID="manageUsersBtn" onclick="document.getElementById('id01').style.display='block'" 
+  <a  ID="manageUsersBtn" onclick="document.getElementById('userGroupsModal').style.display='block'" 
     class="w3-bar-item w3-button w3-padding-large w3-hover-black">
     <i class="fa fa-users w3-xxlarge"></i>
     <p>GROUPS</p>
   </a>
   {{> userMgtModal}}
 
-<a  href="#userMgtSection" 
+  <a  href="#userMgtSection" 
     class="w3-bar-item w3-button w3-padding-large w3-hover-black">
     <i class="fa fa-eye w3-xxlarge"></i>
     <p>SELECTED</p>
   </a>
 
-
-<a  class="w3-bar-item w3-button w3-padding-large w3-hover-black">
+  <a  class="w3-bar-item w3-button w3-padding-large w3-hover-black">
     <i class="fa fa-cog w3-xxlarge"></i>
     <p>SETTINGS</p>
   </a>
 
+  <center>
+    <div id="loadingIndicator" style="display:none">
+    <p>loading</p>
+    <div class="loader"></div>
+    </div>
+  </center>
+
+  
 </nav>
 
 <!-- Overlay effect when opening sidebar on small screens -->
@@ -71,7 +78,6 @@
 
 <div class="w3-main" style="margin-left:160px;margin-top:43px;margin-right:10px">
     {{{body}}}
-
 </div>
 
 <script>

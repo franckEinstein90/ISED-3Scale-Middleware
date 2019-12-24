@@ -1,9 +1,8 @@
-<div id="id01" class="w3-modal">
+<div id="userGroupsModal" class="w3-modal">
     <div class="w3-modal-content w3-card-4 w3-animate-zoom" style="max-width:1200px">
 
       <header class="w3-container w3-blue">
-        
- <button class="w3-button w3-blue w3-xlarge w3-left" onclick="w3_open()">☰</button>
+        <button class="w3-button w3-blue w3-xlarge w3-left" onclick="w3_open()">☰</button>
         <h1>USER GROUPS</h1>
       </header>
       
@@ -11,9 +10,11 @@
         <div class ='w3-row'>
 
           <div class='w3-col w3-container'>
-          <span onclick="document.getElementById('id01').style.display='none'" class="w3-button w3-display-topright">&times;</span>
 
-          {{>userSearchForm}}
+            <span onclick="document.getElementById('userGroupsModal').style.display='none'" class="w3-button w3-display-topright">
+            <i class="fa fa-window-close w3-xxlarge"></i>
+            </span>
+            {{>userSearchForm}}
 
           </div>
 

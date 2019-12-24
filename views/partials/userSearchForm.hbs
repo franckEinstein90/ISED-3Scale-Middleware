@@ -1,15 +1,5 @@
-<script>
-  function selectAllTenants(event){
-    $('.tenantFilterCheckBox').prop('checked', true)
-  }
-
-  function unselectAllTenants(){
-    $('.tenantFilterCheckBox').prop('checked', false)
-  }
-
-</script>
-
-<form class="w3-container w3-card-4">
+<form>
+    class="w3-container w3-card-4">
     <label class="w3-text-blue"><b>email pattern</b></label>
     <input class="w3-input w3-border" id="userEmail" type="text"></p>
 
@@ -19,8 +9,8 @@
   <div class="w3-col m4 l4 w3-left-align">
   <label class="w3-text-blue"><b>TENANTS (OR)</b></label>
   <br/>
-        <button onclick="selectAllTenants()">select all</button>
-        <button onclick="unselectAllTenants()">unselect all</button>
+        <button id="selectAllTenants">select all</button>
+        <button id="unselectAllTenants">unselect all</button>
         <br/>
 
 	{{#each tenants}}
@@ -31,37 +21,59 @@
   </div>
 
    <div class="w3-col m4 l4 w3-left-align">
-   <label class="w3-text-blue"><b>PROPERTIES (AND)</b></label>
+   <label class="w3-text-yellow"><b>PROPERTIES (AND)</b></label>
    <BR/>
         <input class="w3-check" id='providerAccountSearchSelect' type="checkbox" checked="checked">
         <label class="w3-text-deep-orange">Provider Accounts</label>
-        <br/>
 
-        <input class="w3-check" type="checkbox">
+        <P>
+
+        <label class='w3-text-yellow'>KeyCloak</label>
+        <BR/>
+
+        <input class="w3-check" id='otpNotEnabledSelect' type="checkbox" checked="checked">
         <label class="w3-text-deep-orange">OTP Not Enabled</label>
 
         <br/>
-        <input class="w3-check" type="checkbox">
-        <label class="w3-text-deep-orange">No keyCloak account</label>
+        <input class="w3-check" id='keyCloakAccountSelect' type="checkbox" checked='checked'>
+        <label class="w3-text-deep-orange">KeyCloak account</label>
    <br/>
 </div>
- <div class="w3-col m4 l4 w3-left-align">
+
+<div class="w3-col m4 l4 w3-left-align">
    <label class="w3-text-blue"><b>Existing Groups</b></label>
-   <BR/>
-        <UL>
-          <LI>Group 1</LI>
-          <LI>Group 2</LI>
-        </UL>
+   <table>
+     <tbody id="userGroupsList">
+
+     </tbody>
+   </table>
    <br/>
 </div>
-br/>
+
+<br/>
 <p style='padding-top:15px'>
     <div class="w3-row" style='margin:15,15,15,15'>
         <br/>
-    <button class="w3-btn w3-blue w3-block" id="searchUser" >create</button>
+    <button class="w3-btn w3-blue w3-block" id="createNewGroup" >create</button>
     </div>
 </p>
 
 </div>
 
 </form>
+
+<script>
+  $('#selectAllTenants').click(function(event){
+    event.preventDefault()
+    $('.tenantFilterCheckBox').prop('checked', true)
+  })
+
+  $('#unSelectAllTenants').click(function(event){
+    event.preventDefault()
+    $('.tenantFilterCheckBox').prop('checked', false)
+  })
+
+
+
+</script>
+

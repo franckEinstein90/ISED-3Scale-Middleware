@@ -61,13 +61,17 @@ router.get('/appStatus', async function(req, res, next){
 	res.send(statusOut)
 })
 
-router.get('/searchUser', async function(req, res, next){
+router.get('/findUsers', async function(req, res, next){
+	
 	let emailSearchString = req.query.search
-	let tenantsToSearch = req.query.filter.tenants
-	let providerAccountsFilter = req.query.filter.provideraccounts
+	let tenantsToSearch = req.query.tenants
+	let providerAccountsFilter = req.query.userProperties.includes('providerAccount')
+	let hasKeyCloakAccountFilter = req.query.userProperties.includes('keyCloakAccount')
+	let otpNotEnabledFilter = req.query.userProperties.includes('otpNotEnabled')
+
 	return Promise.all(tenantsToSearch.map( function(tenantName){
 		let tenant = tenantsManager.getTenantByName(tenantName)
-		if(providerAccountsFilter === 'true'){
+		if(providerAccountsFilter){
 			return tenant.getProviderAccountUserList()
 			}
         else{
@@ -77,8 +81,8 @@ router.get('/searchUser', async function(req, res, next){
 	)
 	.then(userArrays =>{
 		let returnArray = []
-		userArrays.forEach(users => 
-			users.forEach(user => {
+		userArrays.forEach(tenantUsers => 
+			tenantUsers.forEach(user => {
 			if(!returnArray.includes(user.user.email)){
 				returnArray.push(user.user.email)
 			}
@@ -86,20 +90,20 @@ router.get('/searchUser', async function(req, res, next){
 		return returnArray
 	})
 	.then(userEmails => {
-		if(appStatus.keyCloakEnabled()){
+		if( appStatus.keyCloakEnabled() ){
 			let keyCloakProfiles = userEmails.map(email => users.getUserList(email))
-			return Promise.all(keyCloakProfiles) 
+			return Promise.all(keyCloakProfiles)
 		}
 	})
-	.then( x => {
-		res.send(x)
+	.then( results => {
+		if(hasKeyCloakAccountFilter){
+			results = results.filter(user => ('id' in user))
+			if(otpNotEnabledFilter){
+				results = results.filter(user => !(user.requiredActions.includes("CONFIGURE_TOTP") || (user.disableableCredentialTypes.includes('otp'))))
+			}
+		}
+		res.send(results)
 	})
-
-
-/*	let returnData = users.getUserList(emailSearchString)
-	.then(x =>{
-		res.send(x)
-	})*/
 })
 
 
