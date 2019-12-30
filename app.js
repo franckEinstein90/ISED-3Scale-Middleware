@@ -1,12 +1,11 @@
-/***********************************************************
+/*******************************************************************************
  * Franck Binard, ISED
  * Canadian Gov. API Store middleware
  * -------------------------------------
  *  app.js
  *
- *  class definition and implementation for the server setup
- **********************************************************/
-
+ *  Server setup
+ ******************************************************************************/
 "use strict"
 
 
@@ -138,7 +137,7 @@ const keycloak = new Keycloak({store: memoryStore })
 
 let startServer = async function() {
     initViews()
-	 app.use(session({
+	app.use(session({
 		 secret: 'fdafdsajfndas', 
 		 resave: false, 
 		 saveUninitialized: true, 

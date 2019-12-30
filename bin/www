@@ -1,5 +1,15 @@
 #!/usr/bin/env node
-require('module-alias/register') //used for to create @tags for requires - should be the first line of this file
+/*******************************************************************************
+ * Franck Binard, ISED
+ * Canadian Gov. API Store middleware
+ * -------------------------------------
+ * ISED Middleware App 
+ * Entry point
+ *
+ ******************************************************************************/
+"use strict"
+
+require('module-alias/register') 
 
 
 /**

@@ -1,8 +1,9 @@
-/***************************************
+/*******************************************************************************
  * Franck Binard, ISED
  * Canadian Gov. API Store middleware
- ***************************************/
-"use strict";
+ * --------------------------------------
+ *******************************************************************************/
+"use strict"
 
 const validator = require('validator')
 const accessLog = require('@src/utils').utils.accessLog 
@@ -10,9 +11,10 @@ const accessLog = require('@src/utils').utils.accessLog
 const queryManager = (function() {
 	
     return {
-		  requestLogMessage: function(req){
+		requestLogMessage: function(req){
 			 	return `[ip: ${req.ip}] [received: ${req._startTime}]`
-		  }, 
+        }, 
+
         validate: function(req, logMessage) {
             //if not valid, simply return null objects
             let userEmail = req.query.email

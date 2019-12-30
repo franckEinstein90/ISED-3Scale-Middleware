@@ -4,12 +4,14 @@
  ***************************************/
 const express = require('express')
 const router = express.Router()
-const accessLog = require('@src/utils').utils.accessLog
 const tenantsManager = require('@services/tenantsManager').tenantsManager
 const queryManager = require('./queryManager').queryManager
 const appTimer = require('@src/cron/timer').cacheManage
+
+const accessLog = require('@server/logs').logs.accessLog
 const messages = require('@server/messages').messages
 const appStatus = require('@server/appStatus').appStatus
+
 const users = require('@users/users').users
 
 router.get('/userinfo.json', async function(req, res, next) {

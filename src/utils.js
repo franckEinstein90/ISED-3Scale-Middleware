@@ -13,24 +13,13 @@
 const fs = require('fs')
 const path = require('path')
 const request = require('request')
-const winston = require('winston')
 
 
 const utils = (function() {
 
-    let langCodes, envCodes, requestLogger
+    let langCodes, envCodes
 
-    requestLogger = winston.createLogger({
-	    format: winston.format.combine(
-		    winston.format.json(), 
-		    winston.format.splat()
-	    ),
-	    transports: [
-		    new winston.transports.File({filename: 'logs/access.log'})
-		]
-    })
-
-    langCodes = {
+   langCodes = {
         fr: "fr",
         en: "en"
     }
@@ -42,7 +31,8 @@ const utils = (function() {
 
 
    return {
-	runningEnv: function() {},
+
+        runningEnv: function() {},
 
         readConfigFile: function(fileName = 'default.json') {
             //used for testing
@@ -60,7 +50,6 @@ const utils = (function() {
             }
         },
 
-	accessLog: requestLogger, 
 
         log: function(str) {
             console.log(str)

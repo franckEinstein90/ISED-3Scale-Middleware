@@ -8,7 +8,7 @@
   "_moduleAliases": {
     "@src": "src",
     "@routes": "routes",
-    "@utils": "src/utils", 
+    "@utils": "src/utils",
     "@services": "src/services",
     "@server": "src/server",
     "@errors": "src/errors.js",
