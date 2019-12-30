@@ -91,7 +91,7 @@ services.Service.prototype.outputAPIDescription = function(language) {
             name: swaggerBody.info.title,
             description: swaggerBody.info.description,
             baseURL: `https://${swaggerBody.host}${swaggerBody.basePath}`,
-            humanURL: [`https://${this.tenant.name}`,
+            humanUrl: [`https://${this.tenant.name}`,
                 (this.tenant.env === "dev" ? ".dev" : ""),
                 `.api.canada.ca/${language}`,
                 `/detail?api=${this.system_name}`

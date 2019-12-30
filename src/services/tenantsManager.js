@@ -76,6 +76,7 @@ const tenantsManager = (function() {
                 }
                 JSONResponse.tenants.push(tenantInfo)
             })
+        JSONResponse.tenants.sort((t1, t2) => t1.name.localeCompare(t2.name))
         return JSON.stringify(JSONResponse)
     }
 
