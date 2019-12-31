@@ -73,15 +73,16 @@ router.get('/findUsers', async function(req, res, next){
 
 	return Promise.all(tenantsToSearch.map( function(tenantName){
 		let tenant = tenantsManager.getTenantByName(tenantName)
-		if(providerAccountsFilter){
+		if( providerAccountsFilter ){
 			return tenant.getProviderAccountUserList()
-			}
+		}
         else{
 			return tenant.getAllUsers()
 			}
 		})
 	)
 	.then(userArrays =>{
+		console.log(`Obtained ${userArrays.length} groups of users`)
 		let returnArray = []
 		userArrays.forEach(tenantUsers => 
 			tenantUsers.forEach(user => {
