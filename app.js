@@ -119,24 +119,13 @@ let initAppFeatures = function(){
 initAppFeatures()
 
 const app = express()
-
-const hbs = require('express-handlebars')
-let initViews = async function(){
-   // view engine setup
-    app.engine('hbs', hbs({
-        extname: 'hbs', 
-        defaultLayout: 'main', 
-        layoutsDir: __dirname + '/views/layouts/', 
-        partialsDir: __dirname + '/views/partials/'
-    }))
-   app.set('view engine', 'hbs');
-}
-
+const viewSystem = require('@server/views/viewSystem.js').viewSystem
 const memoryStore = new session.MemoryStore()
 //const keycloak = new Keycloak({store: memoryStore })
 
 let startServer = async function() {
-    initViews()
+
+    viewSystem.configure({app, root: __dirname})
 	app.use(session({
 		 secret: 'fdafdsajfndas', 
 		 resave: false, 
