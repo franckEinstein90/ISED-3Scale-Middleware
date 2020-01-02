@@ -42,6 +42,7 @@ const users = (function() {
             return users.getUserList(testEmail)
                 .then(testCall => {
                     if (typeof testCall === 'object' && 'email' in testCall && testCall.email === testEmail) return true
+                    console.log("keycloak thing didn't work")
                     return false
                 })
         },
