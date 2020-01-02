@@ -32,9 +32,7 @@ const users = (function() {
         onReady: function() {
             configureSupportRequest()
 
-            ssoHostUrl = ['https://sso', appVariables.env === "dev" ? "-dev" : "",
-                '.ised-isde.canada.ca'
-            ].join('')
+            ssoHostUrl = 'https://sso-dev.ised-isde.canada.ca'
             keyCloakClientId = config.get('keyCloakClientId')
             keyCloakClientSecret = config.get('keyCloakClientSecret')
             //make a test call to confirm all works
