@@ -41,7 +41,10 @@ const users = (function() {
             let testEmail = 'ic.api_store-magasin_des_apis.ic@canada.ca'
             return users.getUserList(testEmail)
                 .then(testCall => {
-                    if (typeof testCall === 'object' && 'email' in testCall && testCall.email === testEmail) return true
+                    if (typeof testCall === 'object' && 'email' in testCall && testCall.email === testEmail) {
+                        console.log('keycloak connect: ok')
+                        return true
+                    }
                     console.log("keycloak thing didn't work")
                     return false
                 })
