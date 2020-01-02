@@ -44,7 +44,8 @@ const supportRequest = require('@apiStore/supportRequest.js').jiraInterface
 router.post('/support', async function(req, res, next){
 	//creates a jira support ticket for the api store
 	res.header("Content-Type", "application/json; charset=utf-8")
-	supportRequest.createSupportRequest({summary: 'testing automatic request creation from api store'})
+	let summary = req.body.summary
+	supportRequest.createSupportRequest({summary})
 	res.send( JSON.stringify({test:'allo'}) )
 })
 
