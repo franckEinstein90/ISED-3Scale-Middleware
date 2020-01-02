@@ -1,7 +1,11 @@
-/***************************************
+/*******************************************************************************
  * Franck Binard, ISED
  * Canadian Gov. API Store middleware
- ***************************************/
+ * -------------------------------------
+ *  app.js
+ *
+ *  Server setup
+ *******************************************************************************/
 const express = require('express')
 const router = express.Router()
 const tenantsManager = require('@services/tenantsManager').tenantsManager
@@ -12,7 +16,7 @@ const accessLog = require('@server/logs').logs.accessLog
 const messages = require('@server/messages').messages
 const appStatus = require('@server/appStatus').appStatus
 
-const users = require('@users/users').users
+const users = require('@storeUsers').users
 
 router.get('/userinfo.json', async function(req, res, next) {
 		let logMessage, callArgs
@@ -35,6 +39,14 @@ router.get('/api.json', async function(req, res, next) {
 		res.send(await tenantsManager.getApiInfo(callArgs))
 	})
 
+
+const supportRequest = require('@apiStore/supportRequest.js').jiraInterface
+router.post('/support', async function(req, res, next){
+	//creates a jira support ticket for the api store
+	res.header("Content-Type", "application/json; charset=utf-8")
+	supportRequest.createSupportRequest({summary: 'testing automatic request creation from api store'})
+	res.send( JSON.stringify({test:'allo'}) )
+})
 
 
 /* GET home page. Used to test connection*/
@@ -72,7 +84,9 @@ router.get('/findUsers', async function(req, res, next){
 	let otpNotEnabledFilter = req.query.userProperties.includes('otpNotEnabled')
 
 	return Promise.all(tenantsToSearch.map( function(tenantName){
+
 		let tenant = tenantsManager.getTenantByName(tenantName)
+		
 		if( providerAccountsFilter ){
 			return tenant.getProviderAccountUserList()
 		}

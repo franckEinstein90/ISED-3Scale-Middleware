@@ -52,6 +52,7 @@ const tenantsManager = (function() {
                 }
             }
         }
+
         let displayApplications = tenantAccount => {
             let applications = []
             let tenantServices = tenantAccount.tenant.services.register

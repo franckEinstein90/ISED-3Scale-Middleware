@@ -40,9 +40,6 @@ const config = require('config')
 
 
 
-const indexRouter = require('./routes/index')
-const usersRouter = require('./routes/users')
-
 const utils = require('@src/utils.js').utils
 const tenantsManager = require('@services/tenantsManager').tenantsManager
 
@@ -54,7 +51,7 @@ const statusCodes = require('@server/appStatus').statusCodes
 const appStatus = require('@server/appStatus').appStatus
 const appVariables = require('@server/appStatus').appVariables
 
-const users = require('@users/users').users
+const users = require('@storeUsers').users
 
 let initISEDMiddleWare = async function() {
     appLogger.log('info', 'Initializing application')
@@ -140,30 +137,9 @@ let startServer = async function() {
     }));
     app.use(cookieParser());
     app.use(express.static(path.join(__dirname, 'public')));
-
-
-    app.use('/', indexRouter);
-    app.use('/users', usersRouter);
-
-    // catch 404 and forward to error handler
-    app.use(function(req, res, next) {
-        next(createError(404));
-    });
-
-
-    // error handler
-    app.use(function(err, req, res, next) {
-        // set locals, only providing error in development
-        res.locals.message = err.message;
-        res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-        // render the error page
-        res.status(err.status || 500);
-        res.render('error');
-    });
-
-
 }
 
+const routingSystem = require('@server/routingSystem').routingSystem
 startServer()
+routingSystem.configure({app})
 module.exports = app;

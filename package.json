@@ -5,6 +5,7 @@
   "scripts": {
     "start": "node ./bin/www"
   },
+
   "_moduleAliases": {
     "@src": "src",
     "@routes": "routes",
@@ -12,8 +13,10 @@
     "@services": "src/services",
     "@server": "src/server",
     "@errors": "src/errors.js",
-    "@users": "src/users"
+    "@apiStore": "src/apiStore", 
+    "@storeUsers": "src/apiStore/users.js"
   },
+  
   "dependencies": {
     "appversion": "^1.7.1",
     "async": "^3.1.0",
