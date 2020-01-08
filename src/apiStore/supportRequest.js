@@ -31,7 +31,12 @@ const jiraInterface = (function(){
       auth.password = password
     },
 
-    createSupportRequest: function( {summary} ){
+    createSupportRequest: function({
+        summary, 
+        description, 
+        user, 
+        email
+      }){
 
       let body =`{
         "update":{},
@@ -45,33 +50,17 @@ const jiraInterface = (function(){
           "issuetype":{
               "name":"Task" 
           }, 
-          "summary": "${summary}" 
-        },
-     "description":{
-         "type":"doc", 
-         "version":1, 
-         "content":[
-           {
-             "type": "paragraph",
-             "content":[
-               {
-                 "text": "orjer", 
-                 "type": "text"
-               }
-             ]
-           }]
-         }
-       }`
+          "summary": "${summary}", 
+          "description": "From user ${user} (${email}): \n${description}"
+        }
+      }`
       options.auth = auth
       options.body = body
-      request(options, function (error, response, body) {
-
-        if (error) throw new Error(error)
-        let data = JSON.parse(body) 
-        console.log(
-          'Response: ' + response.statusCode + ' ' + response.statusMessage
-        )
-        console.log(body);
+      return new Promise((resolve, reject)=> {
+        request(options, function (error, response, body) {
+          if (error) throw new Error(error)
+          return resolve( response )
+        })
       })
     }
   }

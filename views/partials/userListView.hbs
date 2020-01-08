@@ -1,31 +1,8 @@
 <div class="w3-content w3-justify w3-padding-64" id="userMgtSection">
-<form class='w3-container w3-card-4 w3-light-grey'>
-		<div class='w3-row'>
-			<div class='w3-col m6 l6'>
-			<h3>Selected Users</h3>
-			<p>
-				<input class="w3-check" type="checkbox">
-				<label>Enforce OTP</label>
-			<p>
-			</p>
+		{{>paneUserActions}}
+</div>		
 
-			</div>
-			<div class='w3-col m6 l6'>
-			<br/>
-			<button onclick="myFunction('Demo1')" class="w3-btn w3-block w3-black w3-left-align">view selected users</button>
-			<div id="Demo1" class="w3-container w3-hide">
-				<h4>Section 1</h4>
-				<p id="individuallySelectedUsers">
-
-				</p>
-			</div>			
-			<button class='w3-button w3-block w3-yellow' id="userAction">GO!!!</button>
-		</div>
-		
-		</form>
-		</div>
-
-		<div class="w3-container w3-padding-64">
+<div class="w3-container w3-padding-64">
 		<table class='w3-table w3-striped w3-bordered' id="selectedUsersList">
 			<thead> 
 			<tr>
@@ -41,7 +18,6 @@
 
 				</tbody>
 		</table>
-	</div>
 </div>
 
 <script>
@@ -58,7 +34,7 @@
 
 
 	$('#userAction').on('click', function(){
-		alert('dsa')
+		selectedUsers.applySelectedActions()
 	})
 	
 

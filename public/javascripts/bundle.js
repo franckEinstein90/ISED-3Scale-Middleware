@@ -49,23 +49,39 @@ const timer = (function(){
 
 
 
-
+const userActions = require('./userActions').userActions
 const selectedUsers = (function(){
-    let selectedUsers = new Map()
 
+    let userStore = new Map()
+
+    let toEmailList = function(){
+        let userList = []
+        userStore.forEach((_, userEmail) => userList.push( userEmail ))
+        return userList
+    }
+
+    let displayCurrentUserSelection = function(){
+        $('#individuallySelectedUsers').text(toEmailList().join(';'))
+    }
+ 
     return{
+
         toggleSelectedUser: function(userEmail){
-            if(selectedUsers.has(userEmail)){
-                selectedUsers.delete(userEmail)
+            if(userStore.has(userEmail)){
+                userStore.delete(userEmail)
             }
             else{
-                selectedUsers.set(userEmail, 1)
+                userStore.set(userEmail, 1)
             }
-            
-            $('#individuallySelectedUsers').text('fdsa')
-        }
+            displayCurrentUserSelection()
+       }, 
 
-    }
+       applySelectedActions: function(){
+           
+           userActions.update( toEmailList() )
+       }
+
+   }
 })()
 
 
@@ -95,6 +111,10 @@ $(function(){
         if(tenantsInfo.ready()){
             let newUserGroup = new users.Group()
         }
+    })
+
+    socket.on('updateBottomStatusInfo', function(data){
+        $('#bottomStatusBar').text(data.message)
     })
 
     socket.on('refresh page', function(tenants){
@@ -128,6 +148,10 @@ $(function(){
     })
 
 
+	$('#userActionGo').on('click', function(){
+		selectedUsers.applySelectedActions()
+    })
+    
     $("#searchUser").click(function(event){
         event.preventDefault()
         $('#searchResults').empty()
@@ -158,8 +182,10 @@ $(function(){
 
 
 
-},{"./showUsers":3}],3:[function(require,module,exports){
+},{"./showUsers":3,"./userActions":4}],3:[function(require,module,exports){
+
 "use strict"
+
 const dataExchangeStatus = require('./dataExchangeStatus').dataExchangeStatus
 
 const tenantsInfo = (function(){
@@ -309,4 +335,35 @@ module.exports = {
     users, 
     keyCloakUsers 
 }
-},{"./dataExchangeStatus":1}]},{},[2]);
+},{"./dataExchangeStatus":1}],4:[function(require,module,exports){
+/*************************************************************************
+ * Client side, trigger user actions
+ * 
+ *************************************************************************/
+
+ "use strict"
+
+ const userActions = (function(){
+
+    let actions = [
+        { action: 'enforceOTP', route:'enforceOTP' } 
+    ]
+    return {
+        update: function(userEmailList, actionList){
+            //giving a liste of user addresses
+            //enact actions of those users
+            let actions = ['enforceOTP']
+            let inputData = {
+               users: userEmailList 
+            }
+            $.post('/enforceOTP', inputData, function(data){
+
+            })
+        }
+    }
+ })()
+
+ module.exports = {
+     userActions
+ }
+},{}]},{},[2]);

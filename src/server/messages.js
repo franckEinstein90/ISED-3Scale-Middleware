@@ -38,6 +38,10 @@ const messages = (function(){
 
         emitRefreshFront: function(){
             _io.emit('refresh page', messages.tenantInfo()) 
+        }, 
+
+        emitRefreshBottomStatusBar: function(message){
+            _io.emit('updateBottomStatusInfo', { message })
         }
     }
 })()

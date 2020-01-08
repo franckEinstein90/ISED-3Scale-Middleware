@@ -142,4 +142,6 @@ let startServer = async function() {
 const routingSystem = require('@server/routingSystem').routingSystem
 startServer()
 routingSystem.configure({app})
+
+
 module.exports = app;

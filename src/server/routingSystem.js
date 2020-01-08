@@ -7,25 +7,39 @@
  *  sets up the routing plumbing for the app
  ******************************************************************************/
 "use strict"
+const express = require('express')
 
-const indexRouter = require('@routes/index')
-const usersRouter = require('@routes/users')
 
+const indexRouting = require('@routes/index').indexRouting
+const tenantRoutes = require('@routes/tenants').tenantRoutes
+const apiStoreUserRoutes = require('@routes/apiStoreUsers').apiStoreUserRoutes
+
+const appStatus = require('@server/appStatus').appStatus
 
 const routingSystem = (function() {
+
+    let router = express.Router()
 
     return {
         configure: function({
             app
         }) {
 
-            app.use('/', indexRouter)
-            app.use('/users', usersRouter)
-            // catch 404 and forward to error handler
+            app.use('/', router)
+            indexRouting.configure(router)
+
+            router.get('/appStatus', appStatus.output)
+            router.get('/getTenantNames', tenantRoutes.getTenantNames)
+            router.get('/getTenantAccounts', tenantRoutes.getTenantAccounts)
+            router.get('/findUsers', apiStoreUserRoutes.findUsers) 
+            router.get('/userinfo.json', apiStoreUserRoutes.getUserInfo)
+            router.get('/api.json', apiStoreUserRoutes.getApi)
+            router.post('/support', apiStoreUserRoutes.postJiraRequest)
+            router.post('/enforceOTP', apiStoreUserRoutes.postEnforceOTP)
+
             app.use(function(req, res, next) {
                 next(createError(404));
             })
-
 
             // error handler
             app.use(function(err, req, res, next) {

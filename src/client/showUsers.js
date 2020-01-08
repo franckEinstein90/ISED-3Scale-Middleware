@@ -1,4 +1,6 @@
+
 "use strict"
+
 const dataExchangeStatus = require('./dataExchangeStatus').dataExchangeStatus
 
 const tenantsInfo = (function(){
