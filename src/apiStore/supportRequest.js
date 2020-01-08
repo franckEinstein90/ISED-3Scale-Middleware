@@ -51,14 +51,17 @@ const jiraInterface = (function(){
               "name":"Task" 
           }, 
           "summary": "${summary}", 
-          "description": "From user ${user} (${email}): \n${description}"
+          "description": "From user ${user} (${email}): ${description}"
         }
       }`
       options.auth = auth
       options.body = body
       return new Promise((resolve, reject)=> {
         request(options, function (error, response, body) {
-          if (error) throw new Error(error)
+          if (error) {
+            console.log('error on jira task support request')
+            throw new Error(error)
+          }
           return resolve( response )
         })
       })
