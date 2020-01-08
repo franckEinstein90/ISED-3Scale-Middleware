@@ -85,9 +85,10 @@ const apiStoreUserRoutes =  (function (){
         postJiraRequest: async function(req, res, next){
 	        //creates a jira support ticket for the api store
             res.header("Content-Type", "application/json; charset=utf-8")
-
+            
             let summary = req.body.summary || "no summary"
-            let description = req.body.description || "no description"
+            let description = req.body.description? req.body.description.replace(/[^a-zA-Z0-9(),/.@'\- ]/g, " ") : "no description"
+
             let user = req.body.user || "no user name"
             let email = req.body.email || "no email"
 
