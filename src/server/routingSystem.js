@@ -20,8 +20,15 @@ const appStatus = require('@server/appStatus').appStatus
 const routingSystem = (function() {
 
     let router = express.Router()
+    let whiteList = ['https://dev.api.canada.ca', 'https://api.canada.ca']
     let corsOptions = {
-        origin: 'https://dev.api.canada.ca'
+        origin: function(origin, callback) {
+            if(whiteList.indexOf(origin) !== 1){
+                callback(null, true)
+            } else {
+                callback(new Error('Not allowed by CORS'))
+            }
+        }
     }
 
     return {
