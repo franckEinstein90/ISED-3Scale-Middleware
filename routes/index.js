@@ -21,7 +21,9 @@ const users = require('@storeUsers').users
 const indexRouting = (function(){
 
     let router = null
+
     let configureIndexPageRender = function(){
+
         router.get('/', function(req, res, next) {
         	let pageData = {
                 title: "GoC API Store middleware", 

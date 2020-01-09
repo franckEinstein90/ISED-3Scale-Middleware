@@ -8,7 +8,7 @@
  ******************************************************************************/
 "use strict"
 const express = require('express')
-
+const cors = require('cors')
 
 const indexRouting = require('@routes/index').indexRouting
 const tenantRoutes = require('@routes/tenants').tenantRoutes
@@ -16,9 +16,13 @@ const apiStoreUserRoutes = require('@routes/apiStoreUsers').apiStoreUserRoutes
 
 const appStatus = require('@server/appStatus').appStatus
 
+
 const routingSystem = (function() {
 
     let router = express.Router()
+    let corsOptions = {
+        origin: 'https://dev.api.canada.ca'
+    }
 
     return {
         configure: function({
@@ -34,7 +38,7 @@ const routingSystem = (function() {
             router.get('/findUsers', apiStoreUserRoutes.findUsers) 
             router.get('/userinfo.json', apiStoreUserRoutes.getUserInfo)
             router.get('/api.json', apiStoreUserRoutes.getApi)
-            router.post('/support', apiStoreUserRoutes.postJiraRequest)
+            router.post('/support', cors(corsOptions), apiStoreUserRoutes.postJiraRequest)
             router.post('/enforceOTP', apiStoreUserRoutes.postEnforceOTP)
 
             app.use(function(req, res, next) {

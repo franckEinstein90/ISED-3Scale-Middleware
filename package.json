@@ -5,7 +5,6 @@
   "scripts": {
     "start": "node ./bin/www"
   },
-
   "_moduleAliases": {
     "@src": "src",
     "@routes": "routes",
@@ -13,16 +12,16 @@
     "@services": "src/services",
     "@server": "src/server",
     "@errors": "src/errors.js",
-    "@apiStore": "src/apiStore", 
+    "@apiStore": "src/apiStore",
     "@storeUsers": "src/apiStore/users.js"
   },
-  
   "dependencies": {
     "appversion": "^1.7.1",
     "async": "^3.1.0",
     "chai": "^4.2.0",
     "config": "^3.2.2",
     "cookie-parser": "~1.4.4",
+    "cors": "^2.8.5",
     "debug": "~2.6.9",
     "express": "~4.16.1",
     "express-handlebars": "^3.1.0",
