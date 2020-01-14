@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "node ./bin/www",
+    "dev": "nodemon ./bin/www"
   },
   "_moduleAliases": {
     "@src": "src",
@@ -38,6 +39,7 @@
     "request": "^2.88.0",
     "request-promise": "^4.2.4",
     "socket.io": "^2.3.0",
+    "sqlite3": "^4.1.1",
     "unirest": "^0.6.0",
     "validator": "^11.1.0",
     "winston": "^3.2.1",

@@ -16,7 +16,7 @@
   		} else { 
     		x.className = x.className.replace(" w3-show", "");
   		}
-    }
+    	}
 
 	let openTenantTab = function(evt, tenantName, tab){
 		let tabs = ['Services', 'Users', 'Accounts']
@@ -63,11 +63,16 @@
 	}
 
 </script>
+	<div id='userGroupNames' style='display:none'>
+	{{#each definedUserGroups}}
+		{{this}},
+	{{/each}}
+	</div>
 
      <div class="w3-container" ID="tenantCards">
 		{{#each tenants}}
 			{{>tenantCard}}
 		{{/each}}
-	 </div>
+     </div>
 {{>userListView}}
 

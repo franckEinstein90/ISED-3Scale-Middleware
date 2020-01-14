@@ -69,11 +69,12 @@ const selectedUsers = (function(){
 $(function(){
 
     const socket = io()
-    tenantsInfo.onReady()
 
+    tenantsInfo.onReady()
     users.onReady($('#selectedUsersList').DataTable())
-     
-    //status msg in top nav
+    let userGroupNames = $('#userGroupNames').text().split(',').map(name => name.trim())
+    userGroupNames.splice(userGroupNames.length - 1, 1)
+	    
     timer.eachMinute()
     setInterval(timer.eachMinute, 10000)
 

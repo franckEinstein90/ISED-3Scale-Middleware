@@ -28,7 +28,8 @@ const indexRouting = (function(){
         	let pageData = {
                 title: "GoC API Store middleware", 
                 state: 'initializing' , 
-                tenants: messages.tenantInfo() 
+                tenants: messages.tenantInfo(), 
+                definedUserGroups: ['fdsa', 'falllfdsa'] 
             }
         
             if(appStatus.isRunning()){

@@ -57,10 +57,12 @@
     <p>SELECTED</p>
   </a>
 
-  <a  class="w3-bar-item w3-button w3-padding-large w3-hover-black">
+  <a  	onclick="document.getElementById('appSettingsModal').style.display='block'"
+	class="w3-bar-item w3-button w3-padding-large w3-hover-black">
     <i class="fa fa-cog w3-xxlarge"></i>
     <p>SETTINGS</p>
   </a>
+  {{>appSettingsModal}}
 
   <center>
     <div id="loadingIndicator" style="display:none">

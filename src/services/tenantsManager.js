@@ -19,6 +19,7 @@ const t = require('@src/responses').tenants
 const UserAccount = require('@src/accounts').accounts.UserAccount
 const errors = require('@src/errors').errors
 const moment = require('moment')
+const db = require('@server/db').appDatabase
 
 const tenantsManager = (function() {
 
@@ -140,7 +141,12 @@ const tenantsManager = (function() {
             })
             tenants.sort((t1, t2) => t1.name.localeCompare(t2.name))
             //set up index by name
-            tenants.forEach(tenant => updateRegister.set(tenant.name, null))
+            tenants.forEach( tenant => updateRegister.set(tenant.name, null))
+            db.setTenants( tenants.map(t => t.name)  )
+//            let databaseUpdate.map( tenant => {
+
+ //           })
+
         },
         getTenantByName: function(tenantName) {
             let tenant = tenants.find(t => t.name === tenantName)

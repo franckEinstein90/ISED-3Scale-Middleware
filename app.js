@@ -53,6 +53,10 @@ const appVariables = require('@server/appStatus').appVariables
 
 const users = require('@storeUsers').users
 
+const db = require('@server/db').appDatabase
+let initDatabase = async function(){
+    db.configure()
+}
 let initISEDMiddleWare = async function() {
     appLogger.log('info', 'Initializing application')
     //test : users.enforceTwoFactorAuthentication('neuronfac@gmail.com')
@@ -110,6 +114,7 @@ let initISEDMiddleWare = async function() {
 }
 
 let initAppFeatures = function(){
+    initDatabase()
     initISEDMiddleWare()
 }
 
