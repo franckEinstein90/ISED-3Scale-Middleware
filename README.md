@@ -7,3 +7,5 @@ It interacts with several connected systems and provides various tools to api st
 its users
 its tenants
 its services
+
+![app screen grab](https://github.com/franckEinstein90/ISED-3Scale-Middleware/blob/master/docs/appScreenShot.png)
