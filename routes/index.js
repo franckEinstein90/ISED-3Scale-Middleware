@@ -26,10 +26,10 @@ const indexRouting = (function(){
 
         router.get('/', function(req, res, next) {
         	let pageData = {
-                title: "GoC API Store middleware", 
+                title: "APICan", 
                 state: 'initializing' , 
                 tenants: messages.tenantInfo(), 
-                definedUserGroups: ['fdsa', 'falllfdsa'] 
+                definedUserGroups: ['admins all', 'admins no cra'] 
             }
         
             if(appStatus.isRunning()){

@@ -1,4 +1,42 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+/*******************************************************************************
+ * Franck Binard, ISED (FranckEinstein90)
+ *
+ * APICan application - 2020
+ * -------------------------------------
+ *  Canadian Gov. API Store middleware - client side
+ *
+ *  APICan.js: client app admin
+ *
+ ******************************************************************************/
+"use strict"
+
+const tenants = require('./tenants').tenants
+const storeUsers = require('./storeUsers').storeUsers
+const timer = require('./timer.js').timer
+
+const APICan = (function() {
+    let socket = null
+
+    return {
+        init: function() {
+            socket = io()
+            tenants.onReady()
+            storeUsers.onReady($('#selectedUsersList').DataTable())
+            timer.eachMinute()
+            setInterval(timer.eachMinute, 10000)
+        },
+        run: function() {
+            document.getElementById('userGroupsModal').style.display='block'
+        }
+
+    }
+})()
+
+module.exports = {
+    APICan
+}
+},{"./storeUsers":4,"./tenants":5,"./timer.js":6}],2:[function(require,module,exports){
 "use strict"
 
 
@@ -19,33 +57,22 @@ const dataExchangeStatus = (function(){
 module.exports = {
     dataExchangeStatus
 }
-},{}],2:[function(require,module,exports){
-/***********************************************************
- * Franck Binard, ISED
- * Canadian Gov. API Store middleware
- * -------------------------------------
- *  main.js / client side
+},{}],3:[function(require,module,exports){
+/*******************************************************************************
+ * Franck Binard, ISED (FranckEinstein90)
  *
- **********************************************************/
-
+ * APICan application - 2020
+ * -------------------------------------
+ *  Canadian Gov. API Store middleware - client side
+ *
+ *  main.js: entry point 
+ *
+ ******************************************************************************/
 "use strict"
-const tenantsInfo = require('./showUsers').tenantsInfo
-const users = require('./showUsers').users
-const keyCloakUsers = require('./showUsers').keyCloakUsers
 
-const timer = (function(){
-    return {
-        eachMinute: function(){
-            $.get('/appStatus', {}, function(data){
-                $('#appStatus').text(
-                    [`ISED API Store Middleware - status ${data.state}`, 
-                     `online: ${data.runningTime} mins`, 
-                     `next refresh: ${data.nextTenantRefresh} mins`].join(' - ')
-                )
-            })
-        }
-    }
-})()
+const APICan = require('./APICan').APICan
+//const users = require('./showUsers').users
+//const keyCloakUsers = require('./showUsers').keyCloakUsers
 
 
 
@@ -90,10 +117,31 @@ const selectedUsers = (function(){
 
 $(function(){
 
-    const socket = io()
+  let setUp = function(){
+       try{
+            console.group("Init APICan Client")
+            APICan.init()
+            console.groupEnd()
+            return true
 
-    tenantsInfo.onReady()
-    users.onReady($('#selectedUsersList').DataTable())
+        } catch( err ){
+            errors(err)
+            return false
+        }
+   }
+
+   if( setUp( ) ){
+       try {
+        APICan.run()
+       } catch ( err ){
+           errors(err)
+       }
+   }
+})
+
+/*
+   
+
     let userGroupNames = $('#userGroupNames').text().split(',').map(name => name.trim())
     userGroupNames.splice(userGroupNames.length - 1, 1)
 	    
@@ -177,44 +225,19 @@ $(function(){
         }
         $.get('/findUsers', parameters, keyCloakUsers.showUsers)
     })
-
+*/
   
-})
 
 
 
-},{"./showUsers":3,"./userActions":4}],3:[function(require,module,exports){
+},{"./APICan":1,"./userActions":7}],4:[function(require,module,exports){
 
 "use strict"
 
 const dataExchangeStatus = require('./dataExchangeStatus').dataExchangeStatus
 
-const tenantsInfo = (function(){
 
-    let tenantsInfo = new Map()
-    let tenantsInfoReady = false
-
-    return {
-        ready: function(){
-            return tenantsInfoReady
-        },
-        names: function(){
-            let tenantNames = []
-            tenantsInfo.forEach((_, tName) => tenantNames.push(tName))
-            return tenantNames
-        }, 
-        onReady: function(){
-            $.get('/getTenantNames', {}, data => {
-               data.forEach(tName => tenantsInfo.set(tName, ''))
-            })
-            .done(x => {
-                tenantsInfoReady = true
-            })
-        }
-    }
-})()
-
-const users = (function(){
+const storeUsers = (function(){
 
     let dataTableHandle = null
     let groups = new Map()
@@ -332,11 +355,79 @@ const keyCloakUsers = (function(){
 })()
 
 module.exports = {
-    tenantsInfo, 
-    users, 
+    storeUsers, 
     keyCloakUsers 
 }
-},{"./dataExchangeStatus":1}],4:[function(require,module,exports){
+},{"./dataExchangeStatus":2}],5:[function(require,module,exports){
+/*******************************************************************************
+ * Franck Binard, ISED (FranckEinstein90)
+ *
+ * APICan Canada API Store control application - 2020
+ * -----------------------------------------------------------------------------
+ *  Canadian Gov. API Store middleware - client side
+ *
+ *  tenants.js: tenant related routines 
+ *
+ ******************************************************************************/
+"use strict"
+const tenants = (function(){
+
+    let tenantsInfo = new Map()
+    let tenantsInfoReady = false
+
+    return {
+        ready: function(){
+            return tenantsInfoReady
+        },
+        names: function(){
+            let tenantNames = []
+            tenantsInfo.forEach((_, tName) => tenantNames.push(tName))
+            return tenantNames
+        }, 
+        onReady: function(){
+            $.get('/getTenantNames', {}, data => {
+               data.forEach(tName => tenantsInfo.set(tName, ''))
+            })
+            .done(x => {
+                tenantsInfoReady = true
+            })
+        }
+    }
+})()
+
+module.exports = {
+    tenants
+}
+},{}],6:[function(require,module,exports){
+/*******************************************************************************
+ * Franck Binard, ISED (FranckEinstein90)
+ *
+ * APICan application - 2020
+ * -------------------------------------
+ *  Canadian Gov. API Store middleware - client side
+ *
+ *  APICan.js: client app admin
+ *
+ ******************************************************************************/
+"use strict"
+const timer = (function(){
+    return {
+        eachMinute: function(){
+            $.get('/appStatus', {}, function(data){
+                $('#appStatus').text(
+                    [`ISED API Store Middleware - status ${data.state}`, 
+                     `online: ${data.runningTime} mins`, 
+                     `next refresh: ${data.nextTenantRefresh} mins`].join(' - ')
+                )
+            })
+        }
+    }
+})()
+
+module.exports = {
+    timer
+}
+},{}],7:[function(require,module,exports){
 /*************************************************************************
  * Client side, trigger user actions
  * 
@@ -367,4 +458,4 @@ module.exports = {
  module.exports = {
      userActions
  }
-},{}]},{},[2]);
+},{}]},{},[3]);

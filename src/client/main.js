@@ -1,29 +1,18 @@
-/***********************************************************
- * Franck Binard, ISED
- * Canadian Gov. API Store middleware
- * -------------------------------------
- *  main.js / client side
+/*******************************************************************************
+ * Franck Binard, ISED (FranckEinstein90)
  *
- **********************************************************/
-
+ * APICan application - 2020
+ * -------------------------------------
+ *  Canadian Gov. API Store middleware - client side
+ *
+ *  main.js: entry point 
+ *
+ ******************************************************************************/
 "use strict"
-const tenantsInfo = require('./showUsers').tenantsInfo
-const users = require('./showUsers').users
-const keyCloakUsers = require('./showUsers').keyCloakUsers
 
-const timer = (function(){
-    return {
-        eachMinute: function(){
-            $.get('/appStatus', {}, function(data){
-                $('#appStatus').text(
-                    [`ISED API Store Middleware - status ${data.state}`, 
-                     `online: ${data.runningTime} mins`, 
-                     `next refresh: ${data.nextTenantRefresh} mins`].join(' - ')
-                )
-            })
-        }
-    }
-})()
+const APICan = require('./APICan').APICan
+//const users = require('./showUsers').users
+//const keyCloakUsers = require('./showUsers').keyCloakUsers
 
 
 
@@ -68,10 +57,31 @@ const selectedUsers = (function(){
 
 $(function(){
 
-    const socket = io()
+  let setUp = function(){
+       try{
+            console.group("Init APICan Client")
+            APICan.init()
+            console.groupEnd()
+            return true
 
-    tenantsInfo.onReady()
-    users.onReady($('#selectedUsersList').DataTable())
+        } catch( err ){
+            errors(err)
+            return false
+        }
+   }
+
+   if( setUp( ) ){
+       try {
+        APICan.run()
+       } catch ( err ){
+           errors(err)
+       }
+   }
+})
+
+/*
+   
+
     let userGroupNames = $('#userGroupNames').text().split(',').map(name => name.trim())
     userGroupNames.splice(userGroupNames.length - 1, 1)
 	    
@@ -155,8 +165,7 @@ $(function(){
         }
         $.get('/findUsers', parameters, keyCloakUsers.showUsers)
     })
-
+*/
   
-})
 
 

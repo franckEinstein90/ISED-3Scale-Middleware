@@ -64,6 +64,20 @@
   </a>
   {{>appSettingsModal}}
 
+  <hr  class="w3-bar-item"/>
+  <div id='userGroupNames' class="w3-left-align" style='padding-left:15px'>
+    <h4>User Groups</h4>
+	  {{#each definedUserGroups}}
+		  <p>
+        <i class="fa fa-user w3-large padding-right:15px"></i>
+        <a href="#" class="w3-left-align w3-hover-black"> 
+        {{this}}
+      </a>
+      </p>
+	  {{/each}}
+	</div>
+  <hr  class="w3-bar-item"/>
+
   <center>
     <div id="loadingIndicator" style="display:none">
     <p>loading</p>

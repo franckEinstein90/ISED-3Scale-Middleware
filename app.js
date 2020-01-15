@@ -99,6 +99,7 @@ db.configure({filePath: './settings.db'})
 .then( setTimerRefresh )
 
 const app = express()
+const favicon = require('express-favicon')
 const viewSystem = require('@server/views/viewSystem.js').viewSystem
 const memoryStore = new session.MemoryStore()
 //const keycloak = new Keycloak({store: memoryStore })
@@ -119,7 +120,8 @@ let configureExpress = async function() {
         extended: false
     }));
     app.use(cookieParser());
-    app.use(express.static(path.join(__dirname, 'public')));
+    app.use(express.static(path.join(__dirname, 'public')))
+    app.use(favicon(__dirname + '/public/LOGO139x139.png'))
 }
 
 const routingSystem = require('@server/routingSystem').routingSystem
