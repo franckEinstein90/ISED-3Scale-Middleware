@@ -15,7 +15,7 @@ const accessLog = require('@server/logs').logs.accessLog
 const messages = require('@server/messages').messages
 const appStatus = require('@server/appStatus').appStatus
 
-const users = require('@storeUsers').users
+const users = require('@users/users').users
 
 
 const indexRouting = (function(){

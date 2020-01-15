@@ -6,8 +6,9 @@ const cache = require('memory-cache')
 const codes = require('@src/tenants').tenants.codes
 const errors = require('@errors').errors
 const messages = require('@server/messages').messages
+const cronJob = require('node-cron')
 
-const cacheManage = (function() {
+const scheduler = (function() {
 
     //frequency of tenant api info refresh
     let tenantInfoRefresh = {
@@ -64,7 +65,7 @@ const cacheManage = (function() {
             tenantInfoRefresh.lastRefresh = 0
             try {
                 tenantsManager.updateTenantInformation()
-                    .then(results => checkResults(results))
+                .then(results => checkResults(results))
             } catch (err) {
                 console.log(err)
             }
@@ -73,6 +74,13 @@ const cacheManage = (function() {
     }
 
     return {
+
+        start: function({
+            tenantInfoRefresh
+        }){
+            scheduler.setRefreshTime( tenantInfoRefresh )
+            cronJob.schedule('* * * * *', scheduler.cronUpdate)
+        },
 
         runningTime: function() {
             return runningTimeMinutes
@@ -99,5 +107,5 @@ const cacheManage = (function() {
 })()
 
 module.exports = {
-    cacheManage
+   scheduler 
 }

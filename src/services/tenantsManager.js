@@ -1,20 +1,18 @@
-/***********************************************************
+/***********************************************************************************
  * Franck Binard, ISED
  * Canadian Gov. API Store middleware
  * -------------------------------------
  *  Module tenantsManager / server side
  *
  *  - manages a store of tenants
- *  - replies to API requests userInfo.json and 
- *    apiInfo.json
- *  - updates the tenant and service information 
- *  	on a schedule
- **********************************************************/
+ *  - replies to API requests userInfo.json and apiInfo.json
+ *  - updates the tenant and service information on a schedule
+ **********************************************************************************/
 
 
 "use strict"
 
-const utils = require('@src/utils').utils
+const APICanData = require('@src/APICanData').APICanData
 const t = require('@src/responses').tenants
 const UserAccount = require('@src/accounts').accounts.UserAccount
 const errors = require('@src/errors').errors
@@ -23,8 +21,10 @@ const db = require('@server/db').appDatabase
 
 const tenantsManager = (function() {
 
-    let env, userInfoResponse, tenantToApiInfo,
-        userApiInfoResponse, applicationAPIURI
+    let userInfoResponse, tenantToApiInfo,
+        userApiInfoResponse
+
+    let _applicationAPIURI = null
 
     let tenants = []
     let updateRegister = new Map()
@@ -128,14 +128,13 @@ const tenantsManager = (function() {
 
     return {
 
-        onReady: function(dataJSON) {
-            //on ready is run once at application startup
-            env = dataJSON.env
-            applicationAPIURI = (env === "dev" ? ".dev" : "") + ".api.canada.ca/admin/applications/"
-            //construct tenant instances from dataJSON
-            dataJSON.tenants.forEach(tenantInfo => {
+        configure: function(dataJSON) {
+            let env = APICanData.env() 
+            _applicationAPIURI = (env === "dev" ? ".dev" : "") + ".api.canada.ca/admin/applications/"
+
+            APICanData.tenantsConfigurationInfo().forEach(tenantInfo => {
                 if (tenantInfo.visible) {
-                    let newTenant = new t.Tenant(tenantInfo, env)
+                    let newTenant = new t.Tenant( tenantInfo, APICanData.env() )
                     tenants.push(newTenant)
                 }
             })
@@ -143,11 +142,8 @@ const tenantsManager = (function() {
             //set up index by name
             tenants.forEach( tenant => updateRegister.set(tenant.name, null))
             db.setTenants( tenants.map(t => t.name)  )
-//            let databaseUpdate.map( tenant => {
-
- //           })
-
         },
+
         getTenantByName: function(tenantName) {
             let tenant = tenants.find(t => t.name === tenantName)
             return tenant

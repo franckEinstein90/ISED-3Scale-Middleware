@@ -1,13 +1,16 @@
+#!/usr/bin/env node
+
 /*******************************************************************************
  * Franck Binard, ISED
  * Canadian Gov. API Store middleware
+ * Application APICan
  * -------------------------------------
- *  app.js
+ *  app.js : entry point
  *
  *  Server setup
  ******************************************************************************/
 "use strict"
-
+require('module-alias/register')
 
 const features = {
    testGetUser: 1
@@ -36,46 +39,19 @@ const session = require('express-session')
 const path = require('path')
 const cookieParser = require('cookie-parser')
 const logger = require('morgan')
-const config = require('config')
 
 
 
-const utils = require('@src/utils.js').utils
+
+const appStatus = require('@server/appStatus').appStatus
+
+
+appLogger.log('info', 'Initializing application')
 const tenantsManager = require('@services/tenantsManager').tenantsManager
 
-const cronJob = require('node-cron')
-const timer = require('@src/cron/timer.js').cacheManage
-
-const messages = require('@server/messages').messages
-const statusCodes = require('@server/appStatus').statusCodes
-const appStatus = require('@server/appStatus').appStatus
-const appVariables = require('@server/appStatus').appVariables
-
-const users = require('@storeUsers').users
-
-const db = require('@server/db').appDatabase
-let initDatabase = async function(){
-    db.configure()
-}
-let initISEDMiddleWare = async function() {
-    appLogger.log('info', 'Initializing application')
-    //test : users.enforceTwoFactorAuthentication('neuronfac@gmail.com')
-    let JSONAppData = config.get('master')
-    if( JSONAppData && typeof JSONAppData === 'object'){
-        appVariables.env = JSONAppData.env
-        users.onReady()
-        .then(x => {
-            if(x) appStatus.enableKeyCloak()
-        }) 
-    }
-    else {
-        throw "bad configuration file"
-    }
-	
-    //function to detect and correct api errors
-    let correctFetchErrors =  (tenantsUpdateReport) => {
-        let tenantUpdateErrors = [] //ist of tenants for which there was an error during the update
-		tenantsUpdateReport.forEach (
+let correctFetchErrors =  (tenantsUpdateReport) => {
+    let tenantUpdateErrors = [] //ist of tenants for which there was an error during the update
+	tenantsUpdateReport.forEach (
 
 			tenantReport => {
 				if ( tenantReport.updateOk() ){
@@ -92,40 +68,42 @@ let initISEDMiddleWare = async function() {
             }
 	}
 
-    let setTimerRefresh = function(){
+const scheduler = require('@src/cron/timer.js').scheduler
+let setTimerRefresh = function(){
         appStatus.run() //the app is ready to answer requests
         messages.emitRefreshFront()
 
         console.log('*******************************************')
         console.log('App is running and ready to receive requests')
         console.log('*******************************************')
-
-        timer.setRefreshTime(5) //refresh information every 5 minutes
-        cronJob.schedule('* * * * *', timer.cronUpdate)
+        scheduler.start({
+            tenantInfoRefresh: 1
+        })
         return 1
-    }
-
-    tenantsManager.onReady(JSONAppData)
-    //initial data fetching on loading
-    tenantsManager.updateTenantInformation()
-        .then(correctFetchErrors)
-        .then(setTimerRefresh)
-
 }
 
-let initAppFeatures = function(){
-    initDatabase()
-    initISEDMiddleWare()
-}
+   
+const db = require('@server/db').appDatabase
+const APICan = require('@src/APICan').APICan
+const users = require('@users/users').users
 
-initAppFeatures()
+db.configure({filePath: './settings.db'})
+.then( APICan.configure )
+.then( users.onReady )
+.then(x => {
+	if(x) appStatus.enableKeyCloak()
+	})
+.then( tenantsManager.configure )
+.then( tenantsManager.updateTenantInformation )
+.then( correctFetchErrors )
+.then( setTimerRefresh )
 
 const app = express()
 const viewSystem = require('@server/views/viewSystem.js').viewSystem
 const memoryStore = new session.MemoryStore()
 //const keycloak = new Keycloak({store: memoryStore })
 
-let startServer = async function() {
+let configureExpress = async function() {
 
     viewSystem.configure({app, root: __dirname})
 	app.use(session({
@@ -145,8 +123,66 @@ let startServer = async function() {
 }
 
 const routingSystem = require('@server/routingSystem').routingSystem
-startServer()
+configureExpress()
 routingSystem.configure({app})
+const server = require('@server/httpServer').httpServer(app)
+
+const debug = require('debug')('ised-3scale-middleware:server');
+/**
+ * Get port from environment and store in Express.
+ */
+
+console.log(`App running on port ${server.port}`)
+
+server.on('error', onError);
+server.on('listening', onListening);
 
 
-module.exports = app;
+const io = require('socket.io')(server.server())
+const messages = require('@server/messages').messages
+messages.init(io)
+
+/**
+ * Event listener for HTTP server "error" event.
+ */
+
+function onError(error) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  var bind = typeof port === 'string'
+    ? 'Pipe ' + port
+    : 'Port ' + port;
+
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case 'EACCES':
+      console.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(bind + ' is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+/**
+ * Event listener for HTTP server "listening" event.
+ */
+
+function onListening() {
+  var addr = server.address();
+  var bind = typeof addr === 'string'
+    ? 'pipe ' + addr
+    : 'port ' + addr.port;
+  debug('Listening on ' + bind);
+}
+
+module.exports = {
+    app, 
+    server
+}

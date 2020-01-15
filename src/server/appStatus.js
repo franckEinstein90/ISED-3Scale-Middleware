@@ -9,15 +9,11 @@
 
 "use strict"
 
-const appTimer = require('@src/cron/timer').cacheManage
+const scheduler = require('@src/cron/timer').scheduler
 
 const statusCodes = {
     init: "initializing", 
     running: "running" 
-}
-
-const appVariables = function(){
-    this.env = null
 }
 
 const appStatus = (function(){
@@ -37,9 +33,9 @@ const appStatus = (function(){
         
         output: async function(req, res, next){
 	        let statusOut = {
-		        runningTime: appTimer.runningTime(), 
+		        runningTime: scheduler.runningTime(), 
 		        state: 'initializing', 
-		        nextTenantRefresh: appTimer.nextRefresh()
+		        nextTenantRefresh: scheduler.nextRefresh()
             }
             if(appStatus.isRunning()) statusOut.state = 'running'
             res.send(statusOut)
@@ -51,6 +47,5 @@ const appStatus = (function(){
 
 module.exports = {
     statusCodes, 
-    appStatus, 
-    appVariables
+    appStatus 
 }
