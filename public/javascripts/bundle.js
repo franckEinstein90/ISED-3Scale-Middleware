@@ -18,11 +18,21 @@ const timer = require('./timer.js').timer
 const APICan = (function() {
     let socket = null
 
+    let setUI = function(){
+        $('#createNewGroup').click(function(event){
+            event.preventDefault()
+            if(tenants.ready()){
+                let newUserGroup = new storeUsers.Group()
+            }
+        })
+    }
+
     return {
         init: function() {
             socket = io()
             tenants.onReady()
             storeUsers.onReady($('#selectedUsersList').DataTable())
+            setUI()
             timer.eachMinute()
             setInterval(timer.eachMinute, 10000)
         },
@@ -104,7 +114,6 @@ const selectedUsers = (function(){
        }, 
 
        applySelectedActions: function(){
-           
            userActions.update( toEmailList() )
        }
 
@@ -155,12 +164,6 @@ $(function(){
 	
     }
 
-    $('#createNewGroup').click(function(event){
-        event.preventDefault()
-        if(tenantsInfo.ready()){
-            let newUserGroup = new users.Group()
-        }
-    })
 
     socket.on('updateBottomStatusInfo', function(data){
         $('#bottomStatusBar').text(data.message)
@@ -235,7 +238,7 @@ $(function(){
 "use strict"
 
 const dataExchangeStatus = require('./dataExchangeStatus').dataExchangeStatus
-
+const tenants = require('./tenants').tenants
 
 const storeUsers = (function(){
 
@@ -250,10 +253,14 @@ const storeUsers = (function(){
         },
 
         Group: function(){
+
             this.tenants = [] 
             this.userProperties = [] 
 
-            tenantsInfo.names().forEach( tName =>{
+            let newGroupName = $('#userGroupName').val()
+            let groupEmailPattern = $('#groupEmailPattern').val()
+
+            tenants.names().forEach( tName =>{
                 if($(`#${tName}SearchSelect`).is(":checked")){
                     this.tenants.push(tName)
                 }
@@ -269,17 +276,23 @@ const storeUsers = (function(){
                 this.userProperties.push('otpNotEnabled')
             }
 
-            let groupName = newGroupDefaultName() 
-            groups.set(groupName, this)
-            $('#userGroupsList').append(
+            $.post('/newUserGroup', {
+                'userProperties[]':this.userProperties, 
+                name: newGroupName, 
+                groupEmailPattern, 
+                'tenants[]': this.tenants
+            })
+            groups.set(newGroupName, this)
+            $('#userFormGroupList tbody').append(
                 [   `<tr>`, 
-                    `<td><span class='w3-text-red'>${groupName}</span></td>`,
-                    `<td><button id='${groupName}View'> view </button></td>`,
-                    `<td><button id='${groupName}properties'> properties </button></td>`,
+                    `<td><span class='w3-text-red'>${newGroupName}</span></td>`,
+                    `<td><button id='${newGroupName}View'> view </button></td>`,
+                    `<td><button id='${newGroupName}properties'> properties </button></td>`,
+                    `<td>fdsa</td>`,
                     `</tr>`
                 ].join(''))
 
-            users.viewButton(groupName, {tenants: this.tenants, userProperties: this.userProperties})
+            storeUsers.viewButton(newGroupName, {tenants: this.tenants, userProperties: this.userProperties})
         },
 
         viewButton : function(groupName, parameters){
@@ -295,11 +308,13 @@ const storeUsers = (function(){
                     keyCloakUsers.showUsers(data)
                 })
             })
-        }, 
+        },
+
         selectUserFromSelectedTableRow : function(dataRow){
             let selectedUser = (dataTableHandle.row(dataRow).data())[0]
             return selectedUser
         },
+
         addUserRow : function({
             email, 
             keyCloakAccount,
@@ -358,7 +373,7 @@ module.exports = {
     storeUsers, 
     keyCloakUsers 
 }
-},{"./dataExchangeStatus":2}],5:[function(require,module,exports){
+},{"./dataExchangeStatus":2,"./tenants":5}],5:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *

@@ -4,6 +4,7 @@ const tenantsManager = require('@services/tenantsManager').tenantsManager
 const messages = require('@server/messages').messages
 const appStatus = require('@server/appStatus').appStatus
 const users = require('@users/users').users
+const userGroups = require('@users/groups').groups
 const queryManager = require('@routes/queryManager').queryManager
 const accessLog = require('@server/logs').logs.accessLog
 const supportRequest = require('@apiStore/supportRequest.js').jiraInterface
@@ -118,6 +119,19 @@ const apiStoreUserRoutes =  (function (){
             let enforceOTP = userEmails.map(email => users.enforceTwoFactorAuthentication(email))
             Promise.all(enforceOTP)
             .then(res.send('done'))
+        },
+
+        postNewUserGroup: async function(req, res, next){
+            let groupName = req.body.name
+            let groupUserProperties = req.body['userProperties[]']
+            let groupTenants = req.body['tenants[]']
+            let groupEmailPattern = req.body.groupEmailPattern
+            userGroups.newGroup({
+                groupName, 
+                groupUserProperties, 
+                groupTenants, 
+                groupEmailPattern
+            })
         }
     }
 })()

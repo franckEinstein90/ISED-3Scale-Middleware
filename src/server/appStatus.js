@@ -20,8 +20,14 @@ const appStatus = (function(){
     
     let currentState = statusCodes.init 
     let keyCloakEnabled = false
+    let _tenantRefreshEventID = null
 
     return {
+        configure : function({
+            tenantRefreshEventID
+        }){
+            _tenantRefreshEventID = tenantRefreshEventID
+        }, 
         state: currentState, 
 
         enableKeyCloak: () => keyCloakEnabled = true , 
@@ -32,10 +38,12 @@ const appStatus = (function(){
         }, 
         
         output: async function(req, res, next){
+            let nextTenantRefresh = 0 
+            if( _tenantRefreshEventID )  nextTenantRefresh = scheduler.nextRefresh( _tenantRefreshEventID) 
 	        let statusOut = {
 		        runningTime: scheduler.runningTime(), 
 		        state: 'initializing', 
-		        nextTenantRefresh: scheduler.nextRefresh()
+		        nextTenantRefresh
             }
             if(appStatus.isRunning()) statusOut.state = 'running'
             res.send(statusOut)

@@ -17,11 +17,21 @@ const timer = require('./timer.js').timer
 const APICan = (function() {
     let socket = null
 
+    let setUI = function(){
+        $('#createNewGroup').click(function(event){
+            event.preventDefault()
+            if(tenants.ready()){
+                let newUserGroup = new storeUsers.Group()
+            }
+        })
+    }
+
     return {
         init: function() {
             socket = io()
             tenants.onReady()
             storeUsers.onReady($('#selectedUsersList').DataTable())
+            setUI()
             timer.eachMinute()
             setInterval(timer.eachMinute, 10000)
         },

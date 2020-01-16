@@ -50,36 +50,34 @@ appLogger.log('info', 'Initializing application')
 const tenantsManager = require('@services/tenantsManager').tenantsManager
 
 let correctFetchErrors =  (tenantsUpdateReport) => {
-    let tenantUpdateErrors = [] //ist of tenants for which there was an error during the update
-	tenantsUpdateReport.forEach (
+  let tenantUpdateErrors = [] //ist of tenants for which there was an error during the update
+	tenantsUpdateReport.forEach ( tenantReport => {
+		if ( tenantReport.updateOk() ){
+      return errors.codes.Ok
+		} else{
+      console.log(`There was an error updating ${tenantReport.tenantName}, recovering`)
+      tenantUpdateErrors.push(tenantReport.tenantName)
+    }
+  })
+  if (tenantUpdateErrors.length > 0){
+      return tenantsManager.updateTenantInformation( tenantUpdateErrors )
+      .then( correctFetchErrors )
+  }
+}
 
-			tenantReport => {
-				if ( tenantReport.updateOk() ){
-                    return errors.codes.Ok
-				}
-				else{
-                    console.log(`There was an error updating ${tenantReport.tenantName}, recovering`)
-                    tenantUpdateErrors.push(tenantReport.tenantName)
-                }
-            })
-            if (tenantUpdateErrors.length > 0){
-                return tenantsManager.updateTenantInformation(tenantUpdateErrors)
-                .then(correctFetchErrors)
-            }
-	}
+
 
 const scheduler = require('@src/cron/timer.js').scheduler
-let setTimerRefresh = function(){
-        appStatus.run() //the app is ready to answer requests
-        messages.emitRefreshFront()
+const appEvents = require('@server/appEvents').appEvents
 
-        console.log('*******************************************')
-        console.log('App is running and ready to receive requests')
-        console.log('*******************************************')
-        scheduler.start({
-            tenantInfoRefresh: 1
-        })
-        return 1
+let setTimerRefresh = function(){
+  let id =  appEvents.configureTenantRefresh( 5 )
+  let optEnforceID = appEvents.configureOTPEnforce( 1 )
+  appStatus.configure ({tenantRefreshEventID: id})
+  scheduler.start( )
+  appStatus.run() //the app is ready to answer requests
+  messages.emitRefreshFront()
+  return 1
 }
 
    
@@ -106,7 +104,7 @@ const memoryStore = new session.MemoryStore()
 
 let configureExpress = async function() {
 
-    viewSystem.configure({app, root: __dirname})
+  viewSystem.configure({app, root: __dirname})
 	app.use(session({
 		 secret: 'fdafdsajfndas', 
 		 resave: false, 
@@ -129,10 +127,9 @@ configureExpress()
 routingSystem.configure({app})
 const server = require('@server/httpServer').httpServer(app)
 
+
 const debug = require('debug')('ised-3scale-middleware:server');
-/**
- * Get port from environment and store in Express.
- */
+
 
 console.log(`App running on port ${server.port}`)
 

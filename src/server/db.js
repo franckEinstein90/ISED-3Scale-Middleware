@@ -48,7 +48,27 @@ const appDatabase = (function() {
                         })
                     }
                 })
+        }, 
+
+        getGroupID: function( groupName ){
+            debugger
+            return new Promise((resolve, reject) => {
+                
+            })
+        }, 
+        
+        newUserGroup: function( groupName ){
+            return new Promise((resolve, reject)=>{
+                db.run(`INSERT INTO groups('name') VALUES(?)`, [groupName], function(err) {
+                    if (err) {
+                        reject(err)
+                    }else{
+                        return resolve('ok')
+                    }
+                }) 
+            })
         }
+
     }
 })()
 

@@ -44,7 +44,6 @@ const selectedUsers = (function(){
        }, 
 
        applySelectedActions: function(){
-           
            userActions.update( toEmailList() )
        }
 
@@ -95,12 +94,6 @@ $(function(){
 	
     }
 
-    $('#createNewGroup').click(function(event){
-        event.preventDefault()
-        if(tenantsInfo.ready()){
-            let newUserGroup = new users.Group()
-        }
-    })
 
     socket.on('updateBottomStatusInfo', function(data){
         $('#bottomStatusBar').text(data.message)
