@@ -18,12 +18,18 @@ const APICan = (function() {
     let socket = null
 
     let setUI = function(){
+
         $('#createNewGroup').click(function(event){
             event.preventDefault()
             if(tenants.ready()){
                 let newUserGroup = new storeUsers.Group()
             }
         })
+
+        $('.navGroupLink').click(function(event){
+            debugger
+        })
+
     }
 
     return {
@@ -36,7 +42,7 @@ const APICan = (function() {
             setInterval(timer.eachMinute, 10000)
         },
         run: function() {
-            document.getElementById('userGroupsModal').style.display='block'
+
         }
 
     }

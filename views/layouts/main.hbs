@@ -36,7 +36,7 @@
     {{>navBottom}}
 <!-- Sidebar/menu -->
 <nav    class="w3-sidebar w3-collapse w3-black w3-animate-left w3-center" 
-        style="z-index:3;width:150px;" id="mySidebar">
+        style="z-index:3;width:250px;" id="mySidebar">
 
 
   <a href="#" class="w3-bar-item w3-button w3-padding-large w3-black w3-hover-black">
@@ -67,13 +67,13 @@
   <hr  class="w3-bar-item"/>
   <div id='userGroupNames' class="w3-left-align" style='padding-left:15px'>
     <h4>User Groups</h4>
-	  {{#each definedUserGroups}}
-		  <p>
-        <i class="fa fa-user w3-large padding-right:15px"></i>
-        <a href="#" class="w3-left-align w3-hover-black"> 
-        {{this}}
-      </a>
-      </p>
+	{{#each definedUserGroups}}
+		<p>
+        	<i class="fa fa-user w3-large padding-right:15px"></i>
+        	<a href="#" id="navgroup_{{this.id}}" class="w3-left-align w3-hover-black navGroupLink"> 
+        	{{this.name}}
+      		</a>
+    </p>
 	  {{/each}}
 	</div>
   <hr  class="w3-bar-item"/>
@@ -92,7 +92,7 @@
 <div class="w3-overlay w3-hide-large w3-animate-opacity" onclick="w3_close()" style="cursor:pointer"
  title="close side menu" id="myOverlay"></div>
 
-<div class="w3-main" style="margin-left:160px;margin-top:43px;margin-right:10px">
+<div class="w3-main" style="margin-left:260px;margin-top:43px;margin-right:10px">
     {{{body}}}
 </div>
 

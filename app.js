@@ -71,8 +71,8 @@ const scheduler = require('@src/cron/timer.js').scheduler
 const appEvents = require('@server/appEvents').appEvents
 
 let setTimerRefresh = function(){
-  let id =  appEvents.configureTenantRefresh( 5 )
-  let optEnforceID = appEvents.configureOTPEnforce( 1 )
+  let id =  appEvents.configureTenantRefresh( 50 )
+  let optEnforceID = appEvents.configureOTPEnforce( 20 )
   appStatus.configure ({tenantRefreshEventID: id})
   scheduler.start( )
   appStatus.run() //the app is ready to answer requests
@@ -84,10 +84,13 @@ let setTimerRefresh = function(){
 const db = require('@server/db').appDatabase
 const APICan = require('@src/APICan').APICan
 const users = require('@users/users').users
+const groups = require('@users/groups').groups
 
 db.configure({filePath: './settings.db'})
 .then( APICan.configure )
 .then( users.onReady )
+.then( groups.onReady )
+
 .then(x => {
 	if(x) appStatus.enableKeyCloak()
 	})

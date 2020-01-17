@@ -18,14 +18,14 @@ const APICanData = (function(){
 
  	let _tenantsConfigurationInfo = null	
 	let _configurationEnv = null
-
+	
 	return{
 
 		configure : function({
 				 masterData 
 		}){
 
-	   	_tenantsConfigurationInfo  = masterData.tenants
+	   		_tenantsConfigurationInfo  = masterData.tenants
 			_configurationEnv = masterData.env
 
 		},

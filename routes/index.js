@@ -16,7 +16,7 @@ const messages = require('@server/messages').messages
 const appStatus = require('@server/appStatus').appStatus
 
 const users = require('@users/users').users
-
+let groups = require('@users/groups').groups
 
 const indexRouting = (function(){
 
@@ -29,7 +29,7 @@ const indexRouting = (function(){
                 title: "APICan", 
                 state: 'initializing' , 
                 tenants: messages.tenantInfo(), 
-                definedUserGroups: ['admins all', 'admins no cra'] 
+                definedUserGroups: groups.definedGroups()
             }
         
             if(appStatus.isRunning()){

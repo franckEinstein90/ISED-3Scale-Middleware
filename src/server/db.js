@@ -49,17 +49,67 @@ const appDatabase = (function() {
                     }
                 })
         }, 
-
-        getGroupID: function( groupName ){
-            debugger
-            return new Promise((resolve, reject) => {
-                
+        getGroupDefinitions: function(){
+            return new Promise((resolve, reject) =>{
+                let SQLStatement = `SELECT ID, name FROM groups`
+                db.all(SQLStatement, function( err, rows){
+                    if(err){
+                        reject( err)
+                    } else {
+                        return resolve(rows)
+                    }
+                })
             })
         }, 
-        
-        newUserGroup: function( groupName ){
+        getGroupID: function( groupName ){
+            return new Promise((resolve, reject) => {
+                let SQLStatement = `SELECT ID FROM groups WHERE name='${groupName}'`
+                db.get(SQLStatement, function( err, row ){
+                    if(err){
+                        reject(err)
+                    }else{
+                        return resolve(row.ID)
+                    }
+                })
+            })
+        }, 
+
+        setGroupTenants: function( groupID, tenants ){
+            return new Promise((resolve, reject) => {
+                let rows = tenants.map( tenant=> `(${groupID}, '${tenant}')`).join(',')
+                let SQLStatement = `INSERT INTO lnkGroupsTenants ('group', 'tenant') VALUES ${rows}`
+                db.run(SQLStatement, function(err){
+                    if( err ){
+                        reject(err)
+                    }else{
+                        return resolve( groupID )
+                    }
+                })
+            })
+        }, 
+
+        setGroupProperties: function( groupID, groupProperties ){
+            return new Promise((resolve, reject) => {
+                let rows = groupProperties.map( property => `(${groupID}, '${property}')`).join(',')
+                let SQLStatement = `INSERT INTO lnkGroupsProperties ('group', 'property') VALUES ${rows}`
+                db.run( SQLStatement, function( err ) {
+                    if( err ){
+                        reject(err)
+                    } else {
+                        return resolve( groupID )
+                    }
+                })
+            })
+        }, 
+        newUserGroup: function({
+            groupName, 
+            groupDescription, 
+            groupEmailPattern
+         }){
             return new Promise((resolve, reject)=>{
-                db.run(`INSERT INTO groups('name') VALUES(?)`, [groupName], function(err) {
+                let newRecordValues = `('${groupName}',  '${groupEmailPattern}', '${groupDescription}')`
+                let SQLStatement = `INSERT INTO groups('name', 'emailPattern', 'description') VALUES ${newRecordValues}`
+                db.run(SQLStatement, function(err) {
                     if (err) {
                         reject(err)
                     }else{

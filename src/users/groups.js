@@ -9,9 +9,19 @@
 "use strict"
 
 const db = require('@server/db').appDatabase
+
 const groups = (function( ){
+	let userGroups = null 
 
 	return {
+
+		onReady: function(){
+			db.getGroupDefinitions()
+			.then(groups => {
+				userGroups = groups
+			})
+		}, 
+		definedGroups : _ => userGroups, 
 		newGroup: function({
 			groupName, 
 			groupUserProperties, 
@@ -19,10 +29,18 @@ const groups = (function( ){
 			groupEmailPattern
 		}){
 			db.newUserGroup({
-				groupName
+				groupName, 
+				groupDescription: "none", 
+				groupEmailPattern
 			})
 			.then(result => {
-				debugger
+				return db.getGroupID(groupName)
+			})
+			.then(groupID => {
+				return db.setGroupTenants(groupID, groupTenants)
+			})
+			.then(groupID => {
+				return db.setGroupProperties(groupID, groupUserProperties)
 			})
 			.catch(error => {
 				debugger
