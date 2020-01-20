@@ -71,8 +71,8 @@ const scheduler = require('@src/cron/timer.js').scheduler
 const appEvents = require('@server/appEvents').appEvents
 
 let setTimerRefresh = function(){
-  let id =  appEvents.configureTenantRefresh( 50 )
-  let optEnforceID = appEvents.configureOTPEnforce( 20 )
+  let id =  appEvents.configureTenantRefresh( 15 )
+  appEvents.configureOTPEnforce( 100 )
   appStatus.configure ({tenantRefreshEventID: id})
   scheduler.start( )
   appStatus.run() //the app is ready to answer requests

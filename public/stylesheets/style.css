@@ -8,6 +8,10 @@
     animation: spin 2s linear infinite;
   }
 
+ .groupCmd {
+    cursor: pointer
+ }
+
 .settingsItem {
   cursor: pointer
 }

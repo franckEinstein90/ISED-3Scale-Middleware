@@ -25,7 +25,6 @@
   </script>
   <body class='w3-light-grey'>
 
-
     <div class="w3-bar w3-top w3-black w3-large" style="z-index:4">
         <button class="w3-bar-item w3-button w3-hide-large w3-hover-none w3-hover-text-light-grey" onclick="w3_open();">
           <i class="fa fa-bars"></i>  Menu
@@ -34,59 +33,8 @@
     </div>
 
     {{>navBottom}}
-<!-- Sidebar/menu -->
-<nav    class="w3-sidebar w3-collapse w3-black w3-animate-left w3-center" 
-        style="z-index:3;width:250px;" id="mySidebar">
+    {{>leftNav/navBar}}
 
-
-  <a href="#" class="w3-bar-item w3-button w3-padding-large w3-black w3-hover-black">
-    <i class="fa fa-home w3-xxlarge"></i>
-    <p>TENANTS</p>
-  </a>
-
-  <a  ID="manageUsersBtn" onclick="document.getElementById('userGroupsModal').style.display='block'" 
-    class="w3-bar-item w3-button w3-padding-large w3-hover-black">
-    <i class="fa fa-users w3-xxlarge"></i>
-    <p>GROUPS</p>
-  </a>
-  {{> userMgtModal}}
-
-  <a  href="#userMgtSection" 
-    class="w3-bar-item w3-button w3-padding-large w3-hover-black">
-    <i class="fa fa-eye w3-xxlarge"></i>
-    <p>SELECTED</p>
-  </a>
-
-  <a  onclick="document.getElementById('appSettingsModal').style.display='block'"
-	    class="w3-bar-item w3-button w3-padding-large w3-hover-black">
-      <i class="fa fa-cog w3-xxlarge"></i>
-      <p>SETTINGS</p>
-  </a>
-  {{>appSettingsModal}}
-
-  <hr  class="w3-bar-item"/>
-  <div id='userGroupNames' class="w3-left-align" style='padding-left:15px'>
-    <h4>User Groups</h4>
-	{{#each definedUserGroups}}
-		<p>
-        	<i class="fa fa-user w3-large padding-right:15px"></i>
-        	<a href="#" id="navgroup_{{this.id}}" class="w3-left-align w3-hover-black navGroupLink"> 
-        	{{this.name}}
-      		</a>
-    </p>
-	  {{/each}}
-	</div>
-  <hr  class="w3-bar-item"/>
-
-  <center>
-    <div id="loadingIndicator" style="display:none">
-    <p>loading</p>
-    <div class="loader"></div>
-    </div>
-  </center>
-
-  
-</nav>
 
 <!-- Overlay effect when opening sidebar on small screens -->
 <div class="w3-overlay w3-hide-large w3-animate-opacity" onclick="w3_close()" style="cursor:pointer"

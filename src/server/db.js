@@ -100,7 +100,22 @@ const appDatabase = (function() {
                     }
                 })
             })
+        },
+
+
+        deleteUserGroup: function(groupName){
+            return new Promise((resolve, reject) => {
+                let SQLStatement = `DELETE FROM groups WHERE name = '${groupName}'`
+                db.run(SQLStatement, function(err){
+                    if (err){
+                        reject (err)
+                    }else{
+                        return resolve('ok')
+                    }
+                })
+            })
         }, 
+
         newUserGroup: function({
             groupName, 
             groupDescription, 

@@ -47,38 +47,8 @@
 </form>
 </div>
 
-<div class="w3-col m6 l6 w3-left-align">
-  <form class="w3-container">
-    <h2 class="w3-text-blue">Work with an existing group</h2>
+  {{>userGroups/tableDisplay}}
 
-    <table class="w3-table w3-bordered" id="userFormGroupList">
-      <thead>
-      <tr class="w3-text-black">
-        <th>Group</th>
-        <th>Load</th>
-        <th>Edit</th>
-        <th>Delete</th>
-      </tr>
-      </thead>
-      <tbody>
-    {{#each definedUserGroups}}
-      <tr>
-       <td>
-      <a href="#" class="w3-left-align w3-hover-black w3-text-green"> 
-      {{this}}
-    </a>
-    </td>
-    <td><i class="fa fa-eye w3-large w3-text-black"></i></td>
-    <td><i class="fa fa-gears  w3-large w3-text-black"></i></td>
-    <td><i class="fa fa-trash w3-large w3-text-black"></i></td>
-    </tr>
-    {{/each}}
-    </tbody>
-    </table>
-  </form>
-<br/>
-
-</div>
 </div>
 
 <script>

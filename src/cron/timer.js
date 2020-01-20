@@ -17,6 +17,7 @@ const cronJob = require('node-cron')
 const scheduler = (function(){
 
     let runningTimeMinutes = 0
+  
     let events = []
   
     return {
@@ -54,18 +55,20 @@ const scheduler = (function(){
         console.log(`Running time: ${runningTimeMinutes} (min)`)
   
         events.forEach(event => {
-          event.lastRefresh += 1
-          if( event.lastRefresh >=  event.frequency ){
-            event.lastRefresh = 0
-            return event.callback()
-          } 
+            event.lastRefresh += 1
+            if( event.lastRefresh >=  event.frequency ){
+              event.lastRefresh = 0
+              return event.callback()
+            } 
         })
       }
   
   
     }
   })()
-  
+ 
+
+
 module.exports = {
    scheduler 
 }

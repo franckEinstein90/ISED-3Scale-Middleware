@@ -132,6 +132,13 @@ const apiStoreUserRoutes =  (function (){
                 groupTenants, 
                 groupEmailPattern
             })
+            .then(_ => res.send(200))
+        }, 
+
+        deleteUserGroup: async function(req, res, next){
+            let groupName = req.body.groupName
+            userGroups.deleteGroup(groupName)
+            .then(resCode => res.send(resCode))
         }
     }
 })()

@@ -30,13 +30,19 @@ const APICan = (function() {
             debugger
         })
 
+        $('.groupCmdRow').each(function (grpCmds){
+            debugger
+        })
     }
 
     return {
         init: function() {
             socket = io()
             tenants.onReady()
-            storeUsers.onReady($('#selectedUsersList').DataTable())
+            storeUsers.onReady({
+                userDisplayList: $('#selectedUsersList')
+            })
+
             setUI()
             timer.eachMinute()
             setInterval(timer.eachMinute, 10000)

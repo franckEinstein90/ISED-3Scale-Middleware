@@ -28,7 +28,7 @@ const groups = (function( ){
 			groupTenants, 
 			groupEmailPattern
 		}){
-			db.newUserGroup({
+			return db.newUserGroup({
 				groupName, 
 				groupDescription: "none", 
 				groupEmailPattern
@@ -43,9 +43,20 @@ const groups = (function( ){
 				return db.setGroupProperties(groupID, groupUserProperties)
 			})
 			.catch(error => {
-				debugger
+			})
+		}, 
+		deleteGroup: function(groupName){
+			return db.deleteUserGroup(groupName)
+			.then(x => {
+				if(x === 'ok') {
+					return 200 
+				}
+				else {
+					return 404
+				}
 			})
 		}
+
 	}
 })()
 

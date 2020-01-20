@@ -15,7 +15,7 @@ const APICan = require('./APICan').APICan
 //const keyCloakUsers = require('./showUsers').keyCloakUsers
 
 
-
+const storeUsers = require('./storeUsers').storeUsers
 const userActions = require('./userActions').userActions
 const selectedUsers = (function(){
 

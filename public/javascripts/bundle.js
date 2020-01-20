@@ -19,11 +19,20 @@ const APICan = (function() {
     let socket = null
 
     let setUI = function(){
+
         $('#createNewGroup').click(function(event){
             event.preventDefault()
             if(tenants.ready()){
                 let newUserGroup = new storeUsers.Group()
             }
+        })
+
+        $('.navGroupLink').click(function(event){
+            debugger
+        })
+
+        $('.groupCmdRow').each(function (grpCmds){
+            debugger
         })
     }
 
@@ -31,13 +40,16 @@ const APICan = (function() {
         init: function() {
             socket = io()
             tenants.onReady()
-            storeUsers.onReady($('#selectedUsersList').DataTable())
+            storeUsers.onReady({
+                userDisplayList: $('#selectedUsersList')
+            })
+
             setUI()
             timer.eachMinute()
             setInterval(timer.eachMinute, 10000)
         },
         run: function() {
-            document.getElementById('userGroupsModal').style.display='block'
+
         }
 
     }
@@ -85,7 +97,7 @@ const APICan = require('./APICan').APICan
 //const keyCloakUsers = require('./showUsers').keyCloakUsers
 
 
-
+const storeUsers = require('./storeUsers').storeUsers
 const userActions = require('./userActions').userActions
 const selectedUsers = (function(){
 
@@ -233,7 +245,7 @@ $(function(){
 
 
 
-},{"./APICan":1,"./userActions":7}],4:[function(require,module,exports){
+},{"./APICan":1,"./storeUsers":4,"./userActions":7}],4:[function(require,module,exports){
 
 "use strict"
 
@@ -246,10 +258,52 @@ const storeUsers = (function(){
     let groups = new Map()
     let newGroupDefaultName = _ => `group_${groups.size}` 
 
+    let displayGroups = function(groupName){
+        //Displays groups stored in register
+        $('#userFormGroupList tbody').empty()
+        groups.forEach((_, groupName)=>{
+            
+            $('#userFormGroupList tbody').append(
+            [   `<tr>`,
+                `<td class="w3-text-green">${groupName}</td>` , 
+                `<td><i class="fa fa-eye w3-large w3-text-black groupCmd"></i></td>`, 
+                `<td><i class="fa fa-gears  w3-large w3-text-black groupCmd"></i></td>`, 
+                `<td><i class="fa fa-trash w3-large w3-text-black groupCmd" id="${groupName}Delete"></i></td>`, 
+                `</tr>`
+            ].join(''))
+
+            $('#' + groupName+'Delete').click(function(event){  
+                storeUsers.deleteGroup(groupName)
+            })
+        })
+    }
+
 
     return{
-        onReady: function(dth){
-            dataTableHandle = dth
+        onReady: function({userDisplayList}){ 
+                       
+            dataTableHandle = userDisplayList 
+            dataTableHandle.DataTable()
+            $(".groupLeftNavLink").each(function(definedGroupLink){
+                let groupName = $( this ).text().trim()
+                groups.set(groupName, 1)
+            })
+            displayGroups()
+        },
+        
+        deleteGroup: function(groupName){
+            $.ajax({
+                method: "DELETE", 
+                url: '/group',
+                data: {groupName} 
+            })
+            .done(function(msg){
+                groups.delete(groupName)
+                displayGroups()
+            })
+            .fail(x => {
+                alert('failed')
+            })
         },
 
         Group: function(){
@@ -280,19 +334,20 @@ const storeUsers = (function(){
                 'userProperties[]':this.userProperties, 
                 name: newGroupName, 
                 groupEmailPattern, 
-                'tenants[]': this.tenants
+                'tenants[]': this.tenants, 
             })
-            groups.set(newGroupName, this)
-            $('#userFormGroupList tbody').append(
-                [   `<tr>`, 
-                    `<td><span class='w3-text-red'>${newGroupName}</span></td>`,
-                    `<td><button id='${newGroupName}View'> view </button></td>`,
-                    `<td><button id='${newGroupName}properties'> properties </button></td>`,
-                    `<td>fdsa</td>`,
-                    `</tr>`
-                ].join(''))
+            .done( x => {
+                groups.set(newGroupName, 1)
+                displayGroups()
+            })
+            .fail( x => {
+                alert('error')
+            })
 
-            storeUsers.viewButton(newGroupName, {tenants: this.tenants, userProperties: this.userProperties})
+//           
+           
+
+       //     storeUsers.viewButton(newGroupName, {tenants: this.tenants, userProperties: this.userProperties})*/
         },
 
         viewButton : function(groupName, parameters){

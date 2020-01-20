@@ -10,10 +10,52 @@ const storeUsers = (function(){
     let groups = new Map()
     let newGroupDefaultName = _ => `group_${groups.size}` 
 
+    let displayGroups = function(groupName){
+        //Displays groups stored in register
+        $('#userFormGroupList tbody').empty()
+        groups.forEach((_, groupName)=>{
+            
+            $('#userFormGroupList tbody').append(
+            [   `<tr>`,
+                `<td class="w3-text-green">${groupName}</td>` , 
+                `<td><i class="fa fa-eye w3-large w3-text-black groupCmd"></i></td>`, 
+                `<td><i class="fa fa-gears  w3-large w3-text-black groupCmd"></i></td>`, 
+                `<td><i class="fa fa-trash w3-large w3-text-black groupCmd" id="${groupName}Delete"></i></td>`, 
+                `</tr>`
+            ].join(''))
+
+            $('#' + groupName+'Delete').click(function(event){  
+                storeUsers.deleteGroup(groupName)
+            })
+        })
+    }
+
 
     return{
-        onReady: function(dth){
-            dataTableHandle = dth
+        onReady: function({userDisplayList}){ 
+                       
+            dataTableHandle = userDisplayList 
+            dataTableHandle.DataTable()
+            $(".groupLeftNavLink").each(function(definedGroupLink){
+                let groupName = $( this ).text().trim()
+                groups.set(groupName, 1)
+            })
+            displayGroups()
+        },
+        
+        deleteGroup: function(groupName){
+            $.ajax({
+                method: "DELETE", 
+                url: '/group',
+                data: {groupName} 
+            })
+            .done(function(msg){
+                groups.delete(groupName)
+                displayGroups()
+            })
+            .fail(x => {
+                alert('failed')
+            })
         },
 
         Group: function(){
@@ -44,19 +86,20 @@ const storeUsers = (function(){
                 'userProperties[]':this.userProperties, 
                 name: newGroupName, 
                 groupEmailPattern, 
-                'tenants[]': this.tenants
+                'tenants[]': this.tenants, 
             })
-            groups.set(newGroupName, this)
-            $('#userFormGroupList tbody').append(
-                [   `<tr>`, 
-                    `<td><span class='w3-text-red'>${newGroupName}</span></td>`,
-                    `<td><button id='${newGroupName}View'> view </button></td>`,
-                    `<td><button id='${newGroupName}properties'> properties </button></td>`,
-                    `<td>fdsa</td>`,
-                    `</tr>`
-                ].join(''))
+            .done( x => {
+                groups.set(newGroupName, 1)
+                displayGroups()
+            })
+            .fail( x => {
+                alert('error')
+            })
 
-            storeUsers.viewButton(newGroupName, {tenants: this.tenants, userProperties: this.userProperties})
+//           
+           
+
+       //     storeUsers.viewButton(newGroupName, {tenants: this.tenants, userProperties: this.userProperties})*/
         },
 
         viewButton : function(groupName, parameters){

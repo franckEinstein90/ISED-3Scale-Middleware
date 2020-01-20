@@ -10,10 +10,9 @@
 const express = require('express')
 const cors = require('cors')
 
-const indexRouting = require('@routes/index').indexRouting
 const tenantRoutes = require('@routes/tenants').tenantRoutes
+const appRoot = require('@server/routes/appRoot').appRoot
 const apiStoreUserRoutes = require('@routes/apiStoreUsers').apiStoreUserRoutes
-
 const appStatus = require('@server/appStatus').appStatus
 
 
@@ -37,13 +36,15 @@ const routingSystem = (function() {
         }) {
 
             app.use('/', router)
-            indexRouting.configure(router)
-
+            router.get('/', appRoot.render)
             router.get('/appStatus', appStatus.output)
             router.get('/getTenantNames', tenantRoutes.getTenantNames)
             router.get('/getTenantAccounts', tenantRoutes.getTenantAccounts)
             router.get('/findUsers', apiStoreUserRoutes.findUsers)
+
+
             router.post('/newUserGroup', apiStoreUserRoutes.postNewUserGroup) 
+            router.delete('/group', apiStoreUserRoutes.deleteUserGroup)
             router.get('/userinfo.json', apiStoreUserRoutes.getUserInfo)
             router.get('/api.json', apiStoreUserRoutes.getApi)
             router.post('/support', cors(corsOptions), apiStoreUserRoutes.postJiraRequest)
