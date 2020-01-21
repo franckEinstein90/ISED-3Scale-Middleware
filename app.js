@@ -86,11 +86,10 @@ const APICan = require('@src/APICan').APICan
 const users = require('@users/users').users
 const groups = require('@users/groups').groups
 
-db.configure({filePath: './settings.db'})
-.then( APICan.configure )
+db.configure({filePath: './settings.db'}) //access the database
+.then( APICan.configure ) //configure the application engine
 .then( users.onReady )
 .then( groups.onReady )
-
 .then(x => {
 	if(x) appStatus.enableKeyCloak()
 	})

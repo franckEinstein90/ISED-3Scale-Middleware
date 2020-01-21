@@ -40,7 +40,10 @@ const routingSystem = (function() {
             router.get('/appStatus', appStatus.output)
             router.get('/getTenantNames', tenantRoutes.getTenantNames)
             router.get('/getTenantAccounts', tenantRoutes.getTenantAccounts)
+
+            /*get sets of users based on various criteria           */
             router.get('/findUsers', apiStoreUserRoutes.findUsers)
+            router.get('/groupUsers', apiStoreUserRoutes.getGroupUsers)
 
 
             router.post('/newUserGroup', apiStoreUserRoutes.postNewUserGroup) 

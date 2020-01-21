@@ -87,7 +87,19 @@ const appDatabase = (function() {
                 })
             })
         }, 
-
+        getGroupTenants: function( groupID ){
+            //returns the tenants associated with this group
+            return new Promise((resolve, reject) => {
+                let SQLStatement = `SELECT tenant FROM lnkGroupsTenants WHERE [group] = ${groupID};`
+                db.all(SQLStatement, function( err, rows){
+                    if( err ){
+                        reject( err )
+                    } else {
+                        return resolve({groupID, data:rows})
+                    }
+                })
+            })
+        },
         setGroupProperties: function( groupID, groupProperties ){
             return new Promise((resolve, reject) => {
                 let rows = groupProperties.map( property => `(${groupID}, '${property}')`).join(',')
@@ -101,6 +113,19 @@ const appDatabase = (function() {
                 })
             })
         },
+
+        getGroupUserProperties: function( groupID ){
+            return new Promise((resolve, reject) => {
+                let SQLStatement = `SELECT property FROM lnkGroupsProperties WHERE [group] = ${groupID};`
+                db.all(SQLStatement, function( err, rows ){
+                    if( err ){
+                        reject( err )
+                    } else {
+                        return resolve({groupID, data:rows})
+                    }
+                })
+            })
+        }, 
 
 
         deleteUserGroup: function(groupName){

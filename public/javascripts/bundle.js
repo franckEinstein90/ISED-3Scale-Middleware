@@ -266,7 +266,7 @@ const storeUsers = (function(){
             $('#userFormGroupList tbody').append(
             [   `<tr>`,
                 `<td class="w3-text-green">${groupName}</td>` , 
-                `<td><i class="fa fa-eye w3-large w3-text-black groupCmd"></i></td>`, 
+                `<td><i class="fa fa-eye w3-large w3-text-black groupCmd" id="${groupName}View"></i></td>`, 
                 `<td><i class="fa fa-gears  w3-large w3-text-black groupCmd"></i></td>`, 
                 `<td><i class="fa fa-trash w3-large w3-text-black groupCmd" id="${groupName}Delete"></i></td>`, 
                 `</tr>`
@@ -275,6 +275,12 @@ const storeUsers = (function(){
             $('#' + groupName+'Delete').click(function(event){  
                 storeUsers.deleteGroup(groupName)
             })
+
+            $('#' + groupName+'View').click(function(event){ 
+                event.preventDefault() 
+                storeUsers.displayGroupUsers(groupName)
+            })
+
         })
     }
 
@@ -303,6 +309,18 @@ const storeUsers = (function(){
             })
             .fail(x => {
                 alert('failed')
+            })
+        },
+        
+        displayGroupUsers: function( groupName ){
+            document.getElementById('userGroupsModal').style.display='none'
+            dataExchangeStatus.setLoading()
+            //fetches and shows user daya associated with this user group
+            let group = {group: groupName}
+            $.get('/GroupUsers', group, function(data){
+                dataExchangeStatus.setInactive()
+                dataTableHandle.clear().draw()
+                keyCloakUsers.showUsers(data)
             })
         },
 
@@ -343,11 +361,6 @@ const storeUsers = (function(){
             .fail( x => {
                 alert('error')
             })
-
-//           
-           
-
-       //     storeUsers.viewButton(newGroupName, {tenants: this.tenants, userProperties: this.userProperties})*/
         },
 
         viewButton : function(groupName, parameters){

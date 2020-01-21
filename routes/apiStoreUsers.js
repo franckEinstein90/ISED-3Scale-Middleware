@@ -40,7 +40,12 @@ const apiStoreUserRoutes =  (function (){
             res.header("Content-Type", "application/json; charset=utf-8")
             res.send(await tenantsManager.getApiInfo(callArgs))
         }, 
-    
+   
+        getGroupUsers: async function(req, res, next){
+            let groupName = req.query.group
+            debugger
+        }, 
+
         findUsers : async function(req, res, next){
 
             let emailSearchString = req.query.search
