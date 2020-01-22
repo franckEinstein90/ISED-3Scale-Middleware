@@ -1,21 +1,23 @@
-/***********************************************************
+/*******************************************************************************
  * Franck Binard, ISED
  * Canadian Gov. API Store middleware
+ * Application APICan
  * -------------------------------------
- *  Module tenants.js
+ *  tenants.js : Defines the tenant class, 
+ *  used in various parts of this application
  *
- *  class definition and implementation for Tenant 
- **********************************************************/
-
+ ******************************************************************************/
 
 "use strict"
+
+/*****************************************************************************/
 
 
 const utils = require('@src/utils').utils
 const log = require('@src/utils').utils.log
 const errHandle = require('@errors').errors.errorHandler
 const accounts = require('@src/accounts').accounts
-const ServiceRegister = require('@src/services').services.ServiceRegister
+const TenantProto = require('@src/tenants/tenantProto').TenantProto
 
 const tenants = (function() {
 
@@ -36,12 +38,16 @@ const tenants = (function() {
         },
 
 
-        Tenant: class {
+        Tenant: class extends TenantProto {
 
             constructor(tenantJSONInfo, env) {
-                this.id = tenantJSONInfo.id
+                super({
+                    accessToken: tenantJSONInfo.access_token,
+                    id: tenantJSONInfo.id,
+                    name: tenantJSONInfo.name,
+                    adminDomain: tenantJSONInfo.admin_domain
+                })
                 this.env = env
-                this.name = tenantJSONInfo.name
                 this.lastUpdateTime = "not updated"
                 this.maintainers = function(lang) {
                     let maintainerObject = {
@@ -55,16 +61,14 @@ const tenants = (function() {
                     return maintainerObject
                 }
 
-                
-                this.adminDomain = tenantJSONInfo.admin_domain
+
                 this.domain = tenantJSONInfo.domain
                 this.tenantDescription = function(lang) {
                     return (lang === 'en') ? tenantJSONInfo.description_en : tenantJSONInfo.description_fr
                 }
                 this.accounts = new Map() //indexed by email addresses
                 this.visibleServices = []
-                this.services = new ServiceRegister(this)
-                this.accessToken = tenantJSONInfo.access_token
+
                 this.baseURL = `https://${this.adminDomain}/admin/api/`
                 this.accountAdminBaseURL = {
                     services: `https://${this.adminDomain}/admin/api/services.json?access_token=${this.accessToken}`,
@@ -78,25 +82,25 @@ const tenants = (function() {
 })()
 
 tenants.Tenant.prototype.apiJsonAnswer = function(language) {
-        return {
-            name: this.name,
-            description: this.tenantDescription(language),
-            maintainers: this.maintainers(language),
-            apis: this.publicAPIList(language)
-        }
+    return {
+        name: this.name,
+        description: this.tenantDescription(language),
+        maintainers: this.maintainers(language),
+        apis: this.publicAPIList(language)
     }
+}
 
 tenants.Tenant.prototype.publicAPIList = function(language) {
     //returns an array of public services for this tenant
-    let billingualApis = 
+    let billingualApis =
         this.services.filter(
-            service => service.documentation.size >= 2 
+            service => service.documentation.size >= 2
         )
     let returnedAPIs = billingualApis.filter(
-            service => {
-                if(!('features'in service)) return true
-                if(service.features.length === 0) return true
-                return false
+        service => {
+            if (!('features' in service)) return true
+            if (service.features.length === 0) return true
+            return false
         })
     let listOfApis = []
     returnedAPIs.forEach(
@@ -107,7 +111,7 @@ tenants.Tenant.prototype.publicAPIList = function(language) {
             if (apiDesc) listOfApis.push(apiDesc)
         }
     )
-    return listOfApis 
+    return listOfApis
 }
 
 tenants.Tenant.prototype.getAccountPlan = function(planInfo, userEmail) {
@@ -142,59 +146,59 @@ tenants.Tenant.prototype.getUserApiInfo = async function(userEmail) {
 
 }
 
-tenants.Tenant.prototype.getAccounts = function(){
+tenants.Tenant.prototype.getAccounts = function() {
     return new Promise((resolve, reject) => {
         this.getAccountList()
-        .then(function(accountList){
-            resolve(accountList.map(accObj => accObj.account))
-        })
+            .then(function(accountList) {
+                resolve(accountList.map(accObj => accObj.account))
+            })
     })
 }
 
-tenants.Tenant.prototype.getProviderAccountUserList = function(){
+tenants.Tenant.prototype.getProviderAccountUserList = function() {
     return new Promise((resolve, reject) => {
         this.getProviderAccountUsers()
-        .then(x => {
-            if(x === null){
-                return resolve('invalid response')
-            }
-            return resolve(x.users)
-        })
+            .then(x => {
+                if (x === null) {
+                    return resolve('invalid response')
+                }
+                return resolve(x.users)
+            })
     })
 }
 
-tenants.Tenant.prototype.getAllUsers = function( options ){
-   //returns the admin users for this tenant
+tenants.Tenant.prototype.getAllUsers = function(options) {
+    //returns the admin users for this tenant
 
-   return new Promise( (resolve, reject) => {
-       this.getAccountList()
-       .then(accounts => {
-           return accounts.map(acc => {
-               if ('account' in acc) return acc.account //answer is not consistent. Someimes wrapped in account property, sometimes not
-               return acc
-           })
-       })
-       .then(accounts => accounts.map(acc => acc.id))
-       .then(accountIDs => accountIDs.map(accID => this.getAccountUsers(accID)))
-       .then(accountUsers => Promise.all(accountUsers))
-       .then(accountUsers => accountUsers.map(userInfo => {
-          if('users' in userInfo)  return userInfo.users
-          return userInfo
-       }))
-       .then(users => users.map(userArray => {
-           if(Array.isArray(userArray) && userArray.length === 1) return userArray[0]
-           return userArray 
-       }))
-       .then (users => users.map(user => user.user))
-       .then (x => {
-           debugger
-       })
-   })
-   return [{
-       firstName: 'paul', 
-       lastName: 'Dewar', 
-       email: 'dfa@da.ca'
-   }]
+    return new Promise((resolve, reject) => {
+        this.getAccountList()
+            .then(accounts => {
+                return accounts.map(acc => {
+                    if ('account' in acc) return acc.account //answer is not consistent. Someimes wrapped in account property, sometimes not
+                    return acc
+                })
+            })
+            .then(accounts => accounts.map(acc => acc.id))
+            .then(accountIDs => accountIDs.map(accID => this.getAccountUsers(accID)))
+            .then(accountUsers => Promise.all(accountUsers))
+            .then(accountUsers => accountUsers.map(userInfo => {
+                if ('users' in userInfo) return userInfo.users
+                return userInfo
+            }))
+            .then(users => users.map(userArray => {
+                if (Array.isArray(userArray) && userArray.length === 1) return userArray[0]
+                return userArray
+            }))
+            .then(users => users.map(user => user.user))
+            .then(x => {
+                debugger
+            })
+    })
+    return [{
+        firstName: 'paul',
+        lastName: 'Dewar',
+        email: 'dfa@da.ca'
+    }]
 }
 
 

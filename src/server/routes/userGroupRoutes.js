@@ -4,7 +4,7 @@
  *
  * Application APICan
  * -------------------------------------
- *  userRoutes.js 
+ *  userGroupRoutes.js 
  *
  ******************************************************************************/
 
@@ -20,40 +20,11 @@ const users = require('@users/users').users
 const userGroups = require('@users/groups').groups
 const queryManager = require('@routes/queryManager').queryManager
 const accessLog = require('@server/logs').logs.accessLog
-const supportRequest = require('@apiStore/supportRequest.js').jiraInterface
 
-const apiStoreUserRoutes =  (function (){
+const userGroupRoutes  =  (function (){
 
-    let userListPromise = function({
-        tenantsNames, filter  
-        }){
-           return Promise.all(tenantsNames.map( tenantName => {
-                let t = tenantsManager.getTenantByName(tenantName)
-                return filter.providerAccountsFilter? t.getProviderAccountUserList() : t.getAllUsers()
-           })) 
-        }
-    return {
-        getUserInfo :  async function(req, res, next) {
-            let logMessage, callArgs
-            logMessage = {
-                message: `userinfo request ${queryManager.requestLogMessage(req)} `
-            }
-            callArgs = queryManager.validate(req, logMessage)
-            accessLog.log('info', logMessage.message)
-            res.header("Content-Type", "application/json; charset=utf-8")
-            res.send(await tenantsManager.getUserInfo(callArgs))
-        }, 
-
-        getApi: async function(req, res, next) {
-            let logMessage = {
-                message: `api.json request ${queryManager.requestLogMessage(req)}`
-            }
-            let callArgs = queryManager.validate(req, logMessage)
-            accessLog.log('info', logMessage.message)
-            res.header("Content-Type", "application/json; charset=utf-8")
-            res.send(await tenantsManager.getApiInfo(callArgs))
-        }, 
-   
+   return {
+  
         getGroupUsers: async function(req, res, next){
             //returns an array of user accounts
             //meeting the property of the 
@@ -103,44 +74,6 @@ const apiStoreUserRoutes =  (function (){
             })
         }, 
        
-        postJiraRequest: async function(req, res, next){
-            let sanitize = function(fieldValue){
-                let sanitized = fieldValue.replace(/[^a-zA-Z0-9(),/.@'\-?" ]/g, " ")
-                sanitized = sanitized.replace(/"/g, "'")
-                return sanitized
-            }
-	        //creates a jira support ticket for the api store
-            res.header("Content-Type", "application/json; charset=utf-8")
-            
-            let summary = sanitize(req.body.summary || "no summary")
-            let description = sanitize(req.body.description || "no description")
-            let user = sanitize(req.body.user || "no user name")
-            let email = sanitize(req.body.email || "no email")
-
-            supportRequest.createSupportRequest({
-                summary, 
-                description, 
-                user, 
-                email})
-                
-            .then(response => {
-                let answerBody = JSON.parse(response.body)
-                res.send( JSON.stringify({
-                    status: 'success', 
-                    issueID:answerBody.id, 
-                    key: answerBody.key, 
-                    link:answerBody.self
-                    }) )
-            })
-        }, 
-
-        postEnforceOTP: async function(req, res, next){
-            let userEmails = req.body.userEmailList
-            let enforceOTP = userEmails.map(email => users.enforceTwoFactorAuthentication(email))
-            Promise.all(enforceOTP)
-            .then(res.send('done'))
-        },
-
         postNewUserGroup: async function(req, res, next){
             let groupName = req.body.name
             let groupUserProperties = req.body['userProperties[]']
@@ -167,5 +100,5 @@ const apiStoreUserRoutes =  (function (){
 
 
 module.exports = {
-    apiStoreUserRoutes
+    userGroupRoutes
 }

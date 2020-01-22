@@ -7,10 +7,11 @@ const log = require('@src/utils').utils.log
 const errors = require('@errors').errors
 const TenantUpdateReport = require('@errors').errors.TenantUpdateReport
 
-tenants.Tenant.prototype.updateServiceDefinitions = async function( tenantServiceListFetchResult, tenantUpdateReport ) {
+tenants.Tenant.prototype.updateServiceDefinitions = 
+    async function(tenantServiceListFetchResult, tenantUpdateReport) {
     //if the service list update generated an error, return here
-    if(tenantUpdateReport.fetches.serviceList !== errors.codes.Ok) {
-       return 
+    if (tenantUpdateReport.fetches.serviceList !== errors.codes.Ok) {
+        return
     }
     //flag the services that need to be removed from the list of registered services
     let currentServiceIDs = tenantServiceListFetchResult.map(
@@ -18,7 +19,7 @@ tenants.Tenant.prototype.updateServiceDefinitions = async function( tenantServic
     )
     this.services.forEach(
         (service, serviceID) => {
-            if (! currentServiceIDs.includes(serviceID) ) {
+            if (!currentServiceIDs.includes(serviceID)) {
                 updateReport.servicesToRemove.push(serviceID)
             }
         })
@@ -29,15 +30,15 @@ tenants.Tenant.prototype.updateServiceDefinitions = async function( tenantServic
     )
 }
 
-tenants.Tenant.prototype.updateActiveDocs = async function( apiDocsInfo, updateReport ) {
+tenants.Tenant.prototype.updateActiveDocs = async function(apiDocsInfo, updateReport) {
     //if the document fetch operation resulted in an error, return here
-    if( updateReport.fetches.activeDocs !== errors.codes.Ok ) return 
+    if (updateReport.fetches.activeDocs !== errors.codes.Ok) return
     apiDocsInfo.forEach(
-        apiDocObject => 
-					this.services.updateServiceDocs(
-							  apiDocObject, 
-							  updateReport )
-	 )
+        apiDocObject =>
+        this.services.updateServiceDocs(
+            apiDocObject,
+            updateReport)
+    )
 }
 
 tenants.Tenant.prototype.updateServiceFeatures = async function(featureDescriptions) {
@@ -46,8 +47,8 @@ tenants.Tenant.prototype.updateServiceFeatures = async function(featureDescripti
             console.log('problem')
             return
         }
-        featureDescriptions.forEach(features => 
-			  this.services.addServiceFeatures(features))
+        featureDescriptions.forEach(features =>
+            this.services.addServiceFeatures(features))
         return 'done'
     }
     console.log(featureDescription)
@@ -57,8 +58,8 @@ tenants.Tenant.prototype.validateAPIs = async function(tenantUpdateReport) {
     //At this stage, we've fetched the list of services from this tenant and
     //its set of documentation
     //if either the service list fetch or the active doc fetch returned errors 
-    if( tenantUpdateReport.fetches.serviceList !== errors.codes.Ok || 
-        tenantUpdateReport.fetches.activeDocs !== errors.codes.Ok ){
+    if (tenantUpdateReport.fetches.serviceList !== errors.codes.Ok ||
+        tenantUpdateReport.fetches.activeDocs !== errors.codes.Ok) {
         //report a failed update
         return tenantUpdateReport //update Failed
     }
@@ -68,16 +69,15 @@ tenants.Tenant.prototype.validateAPIs = async function(tenantUpdateReport) {
     let billingualServicesReports = []
     tenantUpdateReport.servicesUpdateReports.forEach(
         serviceUpdateReport => {
-            if ( serviceUpdateReport.languageUpdate.french === errors.codes.Ok &&
-                 serviceUpdateReport.languageUpdate.english === errors.codes.Ok ) {
-                     billingualServicesReports.push(serviceUpdateReport)
-            }
-            else{
+            if (serviceUpdateReport.languageUpdate.french === errors.codes.Ok &&
+                serviceUpdateReport.languageUpdate.english === errors.codes.Ok) {
+                billingualServicesReports.push(serviceUpdateReport)
+            } else {
                 serviceUpdateReport.updateSuccess = errors.codes.Ok
             }
         })
 
-    if ( billingualServicesReports.length === 0 ) {
+    if (billingualServicesReports.length === 0) {
         tenantUpdateReport.updateSuccess = errors.codes.Ok
         return tenantUpdateReport
     }
@@ -90,23 +90,23 @@ tenants.Tenant.prototype.validateAPIs = async function(tenantUpdateReport) {
             return service.updateFeatureInfo(serviceUpdateReport)
         })
 
-    let reportUpdateResults = ( servicesUpdateReports ) => {
+    let reportUpdateResults = (servicesUpdateReports) => {
         servicesUpdateReports.forEach(
             serviceUpdateReport => {
-                if( serviceUpdateReport.featuresUpdate === errors.codes.Ok ){
+                if (serviceUpdateReport.featuresUpdate === errors.codes.Ok) {
                     serviceUpdateReport.updateSuccess = errors.codes.Ok
                 }
             })
         let badServiceUpdateReport = tenantUpdateReport.servicesUpdateReports.find(
             serviceUpdateReport => serviceUpdateReport.updateSuccess !== errors.codes.Ok
         )
-        if ( !badServiceUpdateReport ){
+        if (!badServiceUpdateReport) {
             tenantUpdateReport.updateSuccess = errors.codes.Ok
         }
         return tenantUpdateReport
     }
     return Promise.all(promiseArray)
-            .then(reportUpdateResults)
+        .then(reportUpdateResults)
 }
 
 
@@ -119,23 +119,23 @@ tenants.Tenant.prototype.updateApiInfo = async function() {
 
     let serviceListingPromise = new Promise((resolve, reject) => {
         this.getServiceList(tenantUpdateReport)
-        .then(services => resolve(
-		   	 this.updateServiceDefinitions(
-							services,
-							tenantUpdateReport)
-	     ))
+            .then(services => resolve(
+                this.updateServiceDefinitions(
+                    services,
+                    tenantUpdateReport)
+            ))
     })
 
     let activeDocsPromise = new Promise((resolve, reject) => {
         this.getActiveDocsList(tenantUpdateReport)
-        .then(activeDocs => resolve(
-            this.updateActiveDocs( activeDocs, tenantUpdateReport )
-        ))
+            .then(activeDocs => resolve(
+                this.updateActiveDocs(activeDocs, tenantUpdateReport)
+            ))
     })
 
     //fulfills both promises in paralell
-    return Promise.all([serviceListingPromise , activeDocsPromise])
-        .then( _ => this.validateAPIs(tenantUpdateReport) )
+    return Promise.all([serviceListingPromise, activeDocsPromise])
+        .then(_ => this.validateAPIs(tenantUpdateReport))
 }
 
 module.exports = {

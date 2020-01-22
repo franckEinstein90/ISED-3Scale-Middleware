@@ -11,37 +11,39 @@
 
 const tenantsManager = require('@services/tenantsManager').tenantsManager
 
-const messages = (function(){
+const messages = (function() {
     let _io = null
 
 
-    return{
+    return {
 
-	   tenantInfo: function(){
-           //information on tenants passed to the front end
-           return tenantsManager.tenants().map( t => {
+        tenantInfo: function() {
+            //information on tenants passed to the front end
+            return tenantsManager.tenants().map(t => {
                 return {
                     name: t.name,
-                    id: t.id,  
-                    lastUpdate: tenantsManager.lastTenantUpdate(t.name), 
+                    id: t.id,
+                    lastUpdate: tenantsManager.lastTenantUpdate(t.name),
                     services: t.services.listServices()
                 }
-        	})
-    	},
+            })
+        },
 
-      init: function(io){
+        init: function(io) {
             _io = io
-            _io.on('connection', function(socket){
+            _io.on('connection', function(socket) {
                 console.log('user connected')
             })
-        }, 
+        },
 
-        emitRefreshFront: function(){
-            _io.emit('refresh page', messages.tenantInfo()) 
-        }, 
+        emitRefreshFront: function() {
+            _io.emit('refresh page', messages.tenantInfo())
+        },
 
-        emitRefreshBottomStatusBar: function(message){
-            _io.emit('updateBottomStatusInfo', { message })
+        emitRefreshBottomStatusBar: function(message) {
+            _io.emit('updateBottomStatusInfo', {
+                message
+            })
         }
     }
 })()

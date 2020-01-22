@@ -13,24 +13,22 @@
 const tenants = require('./tenants').tenants
 const storeUsers = require('./storeUsers').storeUsers
 const timer = require('./timer.js').timer
-
+const userGroupsDialog = require('./dialogs/userGroupsDialog').userGroupsDialog
 const APICan = (function() {
     let socket = null
 
-    let setUI = function(){
+    let setUI = function() {
 
-        $('#createNewGroup').click(function(event){
-            event.preventDefault()
-            if(tenants.ready()){
-                let newUserGroup = new storeUsers.Group()
-            }
+
+        userGroupsDialog({
+            jqCreateNewGroupButton: $('#createNewGroup')
         })
 
-        $('.navGroupLink').click(function(event){
+        $('.navGroupLink').click(function(event) {
             debugger
         })
 
-        $('.groupCmdRow').each(function (grpCmds){
+        $('.groupCmdRow').each(function(grpCmds) {
             debugger
         })
     }
@@ -38,12 +36,10 @@ const APICan = (function() {
     return {
         init: function() {
             socket = io()
-            tenants.onReady()
+            tenants.onReady(setUI)
             storeUsers.onReady({
                 userDisplayList: $('#selectedUsersList')
             })
-
-            setUI()
             timer.eachMinute()
             setInterval(timer.eachMinute, 10000)
         },

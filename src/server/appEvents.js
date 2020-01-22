@@ -1,4 +1,3 @@
-
 /*******************************************************************************
  * Franck Binard, ISED
  * Canadian Gov. API Store middleware
@@ -30,63 +29,63 @@ let checkResults = function(updateResults) {
 let updateTenants = function() {
     try {
         tenantsManager.updateTenantInformation()
-        .then(results => checkResults(results))
+            .then(results => checkResults(results))
     } catch (err) {
         console.log(err)
     }
 }
 
-let getProviderAccountUsers = function(tenantNames){
-    return Promise.all(tenantNames.map( tenantName => {
+let getProviderAccountUsers = function(tenantNames) {
+    return Promise.all(tenantNames.map(tenantName => {
         let t = tenantsManager.getTenantByName(tenantName)
-        return t.getProviderAccountUserList() 
+        return t.getProviderAccountUserList()
     }))
-} 
+}
 
-const appEvents = (function(){
+const appEvents = (function() {
 
-    let otpEnforce = function(){
+    let otpEnforce = function() {
         let tenants = tenantsManager.tenants()
             .map(t => t.name)
             .filter(tenantName => tenantName !== 'cra-arc')
         getProviderAccountUsers(tenants)
-        .then(tenantAdminAccounts => {
-            let userEmails = [] 
-            tenantAdminAccounts.forEach(adminAccounts =>{ 
-                adminAccounts.forEach(account => {
-                    if(!userEmails.includes(account.user.email)){
-                        userEmails.push(account.user.email)
-                    }
+            .then(tenantAdminAccounts => {
+                let userEmails = []
+                tenantAdminAccounts.forEach(adminAccounts => {
+                    adminAccounts.forEach(account => {
+                        if (!userEmails.includes(account.user.email)) {
+                            userEmails.push(account.user.email)
+                        }
+                    })
                 })
+                let keyCloakProfiles = userEmails.map(email => users.getUserList(email))
+                return Promise.all(keyCloakProfiles)
             })
-            let keyCloakProfiles = userEmails.map(email => users.getUserList(email))
-            return Promise.all(keyCloakProfiles)
-        })
-        .then(keycloakAccounts =>{
-            let userEmails = keycloakAccounts
-                .filter( account =>  'totp' in account && account.totp === false)
-                .filter( account => !(account.requiredActions.includes('CONFIGURE_TOTP')))
-                .filter( account => !(account.username === 'fbinard') )
-                .map( account => account.email)
-            return Promise.all(userEmails.map(email => users.enforceTwoFactorAuthentication(email)))
-        })
-        .then( x =>{
-            console.log('fdsa')
-        })
+            .then(keycloakAccounts => {
+                let userEmails = keycloakAccounts
+                    .filter(account => 'totp' in account && account.totp === false)
+                    .filter(account => !(account.requiredActions.includes('CONFIGURE_TOTP')))
+                    .filter(account => !(account.username === 'fbinard'))
+                    .map(account => account.email)
+                return Promise.all(userEmails.map(email => users.enforceTwoFactorAuthentication(email)))
+            })
+            .then(x => {
+                console.log('fdsa')
+            })
         //enforces otp for API Store users
     }
 
     return {
-        configureTenantRefresh : function( frequency ){
+        configureTenantRefresh: function(frequency) {
             return scheduler.newEvent({
-                frequency, 
+                frequency,
                 callback: updateTenants
             })
-        }, 
-        configureOTPEnforce : function( frequency ){
+        },
+        configureOTPEnforce: function(frequency) {
             return scheduler.newEvent({
-                frequency, 
-                callback: otpEnforce 
+                frequency,
+                callback: otpEnforce
             })
         }
     }

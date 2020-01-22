@@ -12,48 +12,48 @@
 const scheduler = require('@src/cron/timer').scheduler
 
 const statusCodes = {
-    init: "initializing", 
-    running: "running" 
+    init: "initializing",
+    running: "running"
 }
 
-const appStatus = (function(){
-    
-    let currentState = statusCodes.init 
+const appStatus = (function() {
+
+    let currentState = statusCodes.init
     let keyCloakEnabled = false
     let _tenantRefreshEventID = null
 
     return {
-        configure : function({
+        configure: function({
             tenantRefreshEventID
-        }){
+        }) {
             _tenantRefreshEventID = tenantRefreshEventID
-        }, 
-        state: currentState, 
+        },
+        state: currentState,
 
-        enableKeyCloak: () => keyCloakEnabled = true , 
+        enableKeyCloak: () => keyCloakEnabled = true,
         keyCloakEnabled: () => keyCloakEnabled,
-        isRunning: () => (currentState === statusCodes.running), 
-        run: function(){
+        isRunning: () => (currentState === statusCodes.running),
+        run: function() {
             currentState = statusCodes.running
-        }, 
-        
-        output: async function(req, res, next){
-            let nextTenantRefresh = 0 
-            if( _tenantRefreshEventID )  nextTenantRefresh = scheduler.nextRefresh( _tenantRefreshEventID) 
-	        let statusOut = {
-		        runningTime: scheduler.runningTime(), 
-		        state: 'initializing', 
-		        nextTenantRefresh
+        },
+
+        output: async function(req, res, next) {
+            let nextTenantRefresh = 0
+            if (_tenantRefreshEventID) nextTenantRefresh = scheduler.nextRefresh(_tenantRefreshEventID)
+            let statusOut = {
+                runningTime: scheduler.runningTime(),
+                state: 'initializing',
+                nextTenantRefresh
             }
-            if(appStatus.isRunning()) statusOut.state = 'running'
+            if (appStatus.isRunning()) statusOut.state = 'running'
             res.send(statusOut)
         }
 
-   }
+    }
 
 })()
 
 module.exports = {
-    statusCodes, 
-    appStatus 
+    statusCodes,
+    appStatus
 }

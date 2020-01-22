@@ -10,20 +10,22 @@
 
 const winston = require('winston')
 
-const logs = (function(){
+const logs = (function() {
 
     let requestLogger = winston.createLogger({
-	    format: winston.format.combine(
-		    winston.format.json(), 
-		    winston.format.splat()
-	    ),
-	    transports: [
-		    new winston.transports.File({filename: 'logs/access.log'})
-		]
+        format: winston.format.combine(
+            winston.format.json(),
+            winston.format.splat()
+        ),
+        transports: [
+            new winston.transports.File({
+                filename: 'logs/access.log'
+            })
+        ]
     })
 
     return {
-	    accessLog: requestLogger
+        accessLog: requestLogger
     }
 })()
 

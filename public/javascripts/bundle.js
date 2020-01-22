@@ -14,24 +14,22 @@
 const tenants = require('./tenants').tenants
 const storeUsers = require('./storeUsers').storeUsers
 const timer = require('./timer.js').timer
-
+const userGroupsDialog = require('./dialogs/userGroupsDialog').userGroupsDialog
 const APICan = (function() {
     let socket = null
 
-    let setUI = function(){
+    let setUI = function() {
 
-        $('#createNewGroup').click(function(event){
-            event.preventDefault()
-            if(tenants.ready()){
-                let newUserGroup = new storeUsers.Group()
-            }
+
+        userGroupsDialog({
+            jqCreateNewGroupButton: $('#createNewGroup')
         })
 
-        $('.navGroupLink').click(function(event){
+        $('.navGroupLink').click(function(event) {
             debugger
         })
 
-        $('.groupCmdRow').each(function (grpCmds){
+        $('.groupCmdRow').each(function(grpCmds) {
             debugger
         })
     }
@@ -39,12 +37,10 @@ const APICan = (function() {
     return {
         init: function() {
             socket = io()
-            tenants.onReady()
+            tenants.onReady(setUI)
             storeUsers.onReady({
                 userDisplayList: $('#selectedUsersList')
             })
-
-            setUI()
             timer.eachMinute()
             setInterval(timer.eachMinute, 10000)
         },
@@ -58,7 +54,7 @@ const APICan = (function() {
 module.exports = {
     APICan
 }
-},{"./storeUsers":4,"./tenants":5,"./timer.js":6}],2:[function(require,module,exports){
+},{"./dialogs/userGroupsDialog":3,"./storeUsers":5,"./tenants":6,"./timer.js":7}],2:[function(require,module,exports){
 "use strict"
 
 
@@ -80,6 +76,63 @@ module.exports = {
     dataExchangeStatus
 }
 },{}],3:[function(require,module,exports){
+/*******************************************************************************
+ * Franck Binard, ISED
+ * Canadian Gov. API Store middleware - 2020
+ * Application APICan
+ * -------------------------------------
+ *  dialogs/userGroupsDialog.js
+ * 
+ * Inits userGroupDialog 
+ ******************************************************************************/
+
+"use strict"
+
+/*****************************************************************************/
+const storeUsers = require('../storeUsers').storeUsers
+const tenants = require('../tenants').tenants
+
+let userGroupsDialog = function({
+    jqCreateNewGroupButton
+}){
+    let tenantSelectionCell = tName => {
+        return [
+            `<td class='tenantSelection'>`, 
+            `<label class="w3-text-blue">${tName} &nbsp;&nbsp;</label>`,
+            `<input class="w3-check tenantFilterCheckBox" id='${tName}SearchSelect' `, 
+            `type="checkbox"></input>`, 
+            '</td>'
+        ].join('')
+    }
+
+    jqCreateNewGroupButton.click(function(event) {
+        event.preventDefault()
+        if (tenants.ready()) {
+            let newUserGroup = new storeUsers.Group()
+        }
+    })
+
+    let currentRow = ""
+    tenants.names().forEach((tenant, index) => {
+        if( currentRow.length === 0){
+            currentRow = `<TR>${tenantSelectionCell(tenant)}`
+        }
+        else {
+            $('#tenantSelectionTable').append(`${currentRow}${tenantSelectionCell(tenant)}</TR>`)
+            currentRow = ""
+        }
+    })
+    if(currentRow.length > 0){
+        $('#tenantSelectionTable').append(`${currentRow}<td>&nbsp;</td></TR>`)
+    }
+}
+
+
+module.exports = {
+    userGroupsDialog
+}
+
+},{"../storeUsers":5,"../tenants":6}],4:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
@@ -131,9 +184,6 @@ const selectedUsers = (function(){
 
    }
 })()
-
-
-
 
 
 $(function(){
@@ -245,7 +295,7 @@ $(function(){
 
 
 
-},{"./APICan":1,"./storeUsers":4,"./userActions":7}],4:[function(require,module,exports){
+},{"./APICan":1,"./storeUsers":5,"./userActions":8}],5:[function(require,module,exports){
 
 "use strict"
 
@@ -441,7 +491,7 @@ module.exports = {
     storeUsers, 
     keyCloakUsers 
 }
-},{"./dataExchangeStatus":2,"./tenants":5}],5:[function(require,module,exports){
+},{"./dataExchangeStatus":2,"./tenants":6}],6:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
@@ -453,6 +503,8 @@ module.exports = {
  *
  ******************************************************************************/
 "use strict"
+
+/******************************************************************************/
 const tenants = (function(){
 
     let tenantsInfo = new Map()
@@ -467,11 +519,15 @@ const tenants = (function(){
             tenantsInfo.forEach((_, tName) => tenantNames.push(tName))
             return tenantNames
         }, 
-        onReady: function(){
-            $.get('/getTenantNames', {}, data => {
-               data.forEach(tName => tenantsInfo.set(tName, ''))
+        onReady: function(cb){
+            $.get('/tenants', {}, tenants => {
+               tenants.forEach(tenant => tenantsInfo.set(
+                   tenant.name, {
+                   services : tenant.numServices
+                }))
             })
             .done(x => {
+                cb()
                 tenantsInfoReady = true
             })
         }
@@ -481,7 +537,7 @@ const tenants = (function(){
 module.exports = {
     tenants
 }
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
@@ -510,7 +566,7 @@ const timer = (function(){
 module.exports = {
     timer
 }
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 /*************************************************************************
  * Client side, trigger user actions
  * 
@@ -541,4 +597,4 @@ module.exports = {
  module.exports = {
      userActions
  }
-},{}]},{},[3]);
+},{}]},{},[4]);

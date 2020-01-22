@@ -8,6 +8,11 @@
     animation: spin 2s linear infinite;
   }
 
+  .tenantSelection{
+    width:120px; 
+    text-align:right 
+  }
+
  .groupCmd {
     cursor: pointer
  }

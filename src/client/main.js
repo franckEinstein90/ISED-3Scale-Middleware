@@ -51,9 +51,6 @@ const selectedUsers = (function(){
 })()
 
 
-
-
-
 $(function(){
 
   let setUp = function(){

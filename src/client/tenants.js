@@ -9,6 +9,8 @@
  *
  ******************************************************************************/
 "use strict"
+
+/******************************************************************************/
 const tenants = (function(){
 
     let tenantsInfo = new Map()
@@ -23,11 +25,15 @@ const tenants = (function(){
             tenantsInfo.forEach((_, tName) => tenantNames.push(tName))
             return tenantNames
         }, 
-        onReady: function(){
-            $.get('/getTenantNames', {}, data => {
-               data.forEach(tName => tenantsInfo.set(tName, ''))
+        onReady: function(cb){
+            $.get('/tenants', {}, tenants => {
+               tenants.forEach(tenant => tenantsInfo.set(
+                   tenant.name, {
+                   services : tenant.numServices
+                }))
             })
             .done(x => {
+                cb()
                 tenantsInfoReady = true
             })
         }

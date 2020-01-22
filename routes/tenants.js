@@ -5,8 +5,14 @@ const tenantsManager = require('@services/tenantsManager').tenantsManager
 const tenantRoutes = (function(){
 
     return{
-        getTenantNames: async function(req, res, next){
-            res.send(tenantsManager.tenants().map(t => t.name))
+        getTenants: async function(req, res, next){
+            res.send(tenantsManager.tenants().map(t => {
+                let response = {
+                    name: t.name,
+                    numServices: t.services.register.size
+                }
+                return response
+            }))
         }, 
         
         getTenantAccounts: async function(req, res, next){
