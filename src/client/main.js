@@ -9,14 +9,13 @@
  *
  ******************************************************************************/
 "use strict"
-
+ 
+/******************************************************************************/
 const APICan = require('./APICan').APICan
-//const users = require('./showUsers').users
-//const keyCloakUsers = require('./showUsers').keyCloakUsers
-
-
 const storeUsers = require('./storeUsers').storeUsers
 const userActions = require('./userActions').userActions
+/******************************************************************************/
+
 const selectedUsers = (function(){
 
     let userStore = new Map()

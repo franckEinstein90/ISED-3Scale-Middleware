@@ -22,10 +22,13 @@ const users = (function() {
     let keyCloakAccessToken = null
     let ssoHostUrl = null
 
-    let configureSupportRequest = function(){
+    let configureSupportRequest = function() {
         let username = config.get('jiraRequestUserName')
         let password = config.get('jiraRequestPassword')
-        jiraInterface.configure({username, password})
+        jiraInterface.configure({
+            username,
+            password
+        })
     }
     return {
 

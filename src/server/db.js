@@ -157,7 +157,7 @@ const appDatabase = (function() {
                 let SQLStatement = `INSERT INTO groups('name', 'emailPattern', 'description') VALUES ${newRecordValues}`
                 db.run(SQLStatement, function(err) {
                     if (err) {
-                        reject(err)
+                        return reject(err)
                     } else {
                         return resolve('ok')
                     }

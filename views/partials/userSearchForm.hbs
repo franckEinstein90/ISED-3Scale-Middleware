@@ -1,56 +1,21 @@
-<div class="w3-row">
-<div class='w3-col m6 l6 w3-left-align"'>
 <form class="w3-container w3-left-align">
+<div class="w3-row">
 
-  <h2 class="w3-text-blue">Create a new group</h2>
+<div class='w3-col m5 l5 w3-left-align' style="margin-right:20px">
+  {{>newGroupForm/userProperties}}
+</div>
+<div class='w3-col m5 l5 w3-right-align"'>
+  {{>newGroupForm/tenantDomain}}
+</div>
+</div>
 
-  <label class="w3-text-blue"><b>Group Name</b></label>
-  <input class="w3-input w3-border" id="userGroupName" type="text"></p>
-
-  <label class="w3-text-blue"><b>Email pattern</b></label>
-  <input class="w3-input w3-border" id="groupEmailPattern" type="text"></p>
-
-  <label class="w3-text-blue"><b>Included tenants</b></label>
-  <br/>
-      <button id="selectAllTenants">select all</button>
-      <button id="unselectAllTenants">unselect all</button>
-  <br/>
-
-  <table id="tenantSelectionTable" style="padding-top:20px; padding-bottom:20px">
-    
-  </table>
-
-
-
-  <label class="w3-text-yellow"><b>PROPERTIES (AND)</b></label>
-  <BR/>
-      <input class="w3-check" id='providerAccountSearchSelect' type="checkbox" checked="checked">
-      <label class="w3-text-deep-orange">Provider Accounts</label>
-
-      <P>
-
-      <label class='w3-text-yellow'>KeyCloak</label>
-      <BR/>
-
-      <input class="w3-check" id='otpNotEnabledSelect' type="checkbox" checked="checked">
-      <label class="w3-text-deep-orange">OTP Not Enabled</label>
-
-      <br/>
-      <input class="w3-check" id='keyCloakAccountSelect' type="checkbox" checked='checked'>
-      <label class="w3-text-deep-orange">KeyCloak account</label>
-  <br/><p style='padding-top:15px'>
   <div class="w3-row" style='margin:15,15,15,15'>
-      <br/>
-  <button class="w3-btn w3-blue w3-block" id="createNewGroup" >create</button>
+    <br/>
+    <button class="w3-btn w3-blue w3-block" id="createNewGroup" >create</button>
+    <br/>
   </div>
-</p>
+
 </form>
-</div>
-
-  {{>userGroups/tableDisplay}}
-
-</div>
-
 <script>
 $('#selectAllTenants').click(function(event){
   event.preventDefault()
@@ -65,4 +30,3 @@ $('#unSelectAllTenants').click(function(event){
 
 
 </script>
-

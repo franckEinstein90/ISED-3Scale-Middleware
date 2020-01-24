@@ -50,10 +50,11 @@ const routingSystem = function({
     //get sets of users based on various criteria           
     router.get('/findUsers', userGroupRoutes.findUsers)
     router.get('/groupUsers', userGroupRoutes.getGroupUsers)
+    router.get('/groups', userGroupRoutes.getGroupList)
+    router.delete('/group', userGroupRoutes.deleteUserGroup)
+    router.post('/newUserGroup', userGroupRoutes.postNewUserGroup)
 
 
-    router.post('/newUserGroup', apiStoreUserRoutes.postNewUserGroup)
-    router.delete('/group', apiStoreUserRoutes.deleteUserGroup)
     router.get('/userinfo.json', apiStoreUserRoutes.getUserInfo)
     router.get('/api.json', apiStoreUserRoutes.getApi)
     router.post('/support', cors(corsOptions), apiStoreUserRoutes.postJiraRequest)

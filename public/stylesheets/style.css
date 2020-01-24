@@ -1,3 +1,19 @@
+
+:root {
+  --mainColor: #94DF00;
+  --formBackground: #31B4B4;
+  --comp1: #1982C4;
+
+}
+
+.apiCanModal{
+  background-color: var(--formBackground);
+}
+
+.groupCreationLabel{
+  color: var(--mainColor);
+}
+
 .loader {
     border: 16px solid #f3f3f3;
     border-radius: 50%;
@@ -13,7 +29,25 @@
     text-align:right 
   }
 
- .groupCmd {
+#leftNav {
+  background-color: black; 
+  color:white;
+  text-decoration:bold;
+  font-size: 1em;
+}
+.leftNavItem:hover{
+  background-color:yellow !important;
+}
+.leftNavIcon {
+  color: white
+}
+.groupLeftNavLink a {
+  color: var(--mainColor);
+  text-decoration: none;
+  font-size:1.2em; 
+}
+
+.groupCmd {
     cursor: pointer
  }
 

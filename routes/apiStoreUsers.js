@@ -139,27 +139,10 @@ const apiStoreUserRoutes =  (function (){
             let enforceOTP = userEmails.map(email => users.enforceTwoFactorAuthentication(email))
             Promise.all(enforceOTP)
             .then(res.send('done'))
-        },
-
-        postNewUserGroup: async function(req, res, next){
-            let groupName = req.body.name
-            let groupUserProperties = req.body['userProperties[]']
-            let groupTenants = req.body['tenants[]']
-            let groupEmailPattern = req.body.groupEmailPattern
-            userGroups.newGroup({
-                groupName, 
-                groupUserProperties, 
-                groupTenants, 
-                groupEmailPattern
-            })
-            .then(_ => res.send(200))
-        }, 
-
-        deleteUserGroup: async function(req, res, next){
-            let groupName = req.body.groupName
-            userGroups.deleteGroup(groupName)
-            .then(resCode => res.send(resCode))
         }
+
+       
+     
     }
 })()
 

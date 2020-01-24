@@ -13,6 +13,7 @@
 /*****************************************************************************/
 const storeUsers = require('../storeUsers').storeUsers
 const tenants = require('../tenants').tenants
+/*****************************************************************************/
 
 let userGroupsDialog = function({
     jqCreateNewGroupButton

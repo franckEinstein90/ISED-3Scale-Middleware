@@ -11,16 +11,17 @@
  ******************************************************************************/
 "use strict"
 
+/******************************************************************************/
 const tenants = require('./tenants').tenants
 const storeUsers = require('./storeUsers').storeUsers
 const timer = require('./timer.js').timer
 const userGroupsDialog = require('./dialogs/userGroupsDialog').userGroupsDialog
+/******************************************************************************/
+
 const APICan = (function() {
     let socket = null
 
     let setUI = function() {
-
-
         userGroupsDialog({
             jqCreateNewGroupButton: $('#createNewGroup')
         })
@@ -54,6 +55,7 @@ const APICan = (function() {
 module.exports = {
     APICan
 }
+
 },{"./dialogs/userGroupsDialog":3,"./storeUsers":5,"./tenants":6,"./timer.js":7}],2:[function(require,module,exports){
 "use strict"
 
@@ -91,6 +93,7 @@ module.exports = {
 /*****************************************************************************/
 const storeUsers = require('../storeUsers').storeUsers
 const tenants = require('../tenants').tenants
+/*****************************************************************************/
 
 let userGroupsDialog = function({
     jqCreateNewGroupButton
@@ -144,14 +147,13 @@ module.exports = {
  *
  ******************************************************************************/
 "use strict"
-
+ 
+/******************************************************************************/
 const APICan = require('./APICan').APICan
-//const users = require('./showUsers').users
-//const keyCloakUsers = require('./showUsers').keyCloakUsers
-
-
 const storeUsers = require('./storeUsers').storeUsers
 const userActions = require('./userActions').userActions
+/******************************************************************************/
+
 const selectedUsers = (function(){
 
     let userStore = new Map()
@@ -296,24 +298,74 @@ $(function(){
 
 
 },{"./APICan":1,"./storeUsers":5,"./userActions":8}],5:[function(require,module,exports){
-
+/*******************************************************************************
+ * Franck Binard, ISED (FranckEinstein90)
+ *
+ * APICan application - 2020
+ * -------------------------------------
+ *  Canadian Gov. API Store middleware - client side
+ *
+ *  main.js: entry point 
+ *
+ ******************************************************************************/
 "use strict"
-
+ 
+/******************************************************************************/
+const APICan = require('./APICan').APICan
+const userActions = require('./userActions').userActions
 const dataExchangeStatus = require('./dataExchangeStatus').dataExchangeStatus
 const tenants = require('./tenants').tenants
+/******************************************************************************/
+
+
+const getGroupFormInputs = function(){
+	//gets the parameters from a new group
+	//creation
+
+	let requestTenants = []
+	let userProperties = []
+	let groupDescription = $('#userGroupDescription').val()
+   let newGroupName = $('#userGroupName').val()
+   let groupEmailPattern = $('#groupEmailPattern').val()
+		
+	tenants.names().forEach( tName =>{
+    	if($(`#${tName}SearchSelect`).is(":checked")){
+        		requestTenants.push(tName)
+          }
+      })
+	if($('#providerAccountSearchSelect').is(":checked")){
+                userProperties.push('providerAccount')
+            }
+            if($('#keyCloakAccountSelect').is(":checked")){
+                userProperties.push('keyCloakAccount')
+            }
+            if($('#otpNotEnabledSelect').is(":checked")){
+                userProperties.push('otpNotEnabled')
+            }
+	return {
+		'tenants[]':requestTenants, 
+		'userProperties[]':userProperties, 
+		name:newGroupName,
+		groupDescription,
+		groupEmailPattern
+	}
+}
+
+const resetGroupFormInputs = function(){
+ $('#userGroupDescription').val("")
+ $('#userGroupName').val("")
+ $('#groupEmailPattern').val("")
+}
 
 const storeUsers = (function(){
 
+    let _groups = new Map()
+
     let dataTableHandle = null
-    let groups = new Map()
     let newGroupDefaultName = _ => `group_${groups.size}` 
 
-    let displayGroups = function(groupName){
-        //Displays groups stored in register
-        $('#userFormGroupList tbody').empty()
-        groups.forEach((_, groupName)=>{
-            
-            $('#userFormGroupList tbody').append(
+    let displayGroupsListInForm = function(groupName, groupID){
+        $('#userFormGroupList tbody').append(
             [   `<tr>`,
                 `<td class="w3-text-green">${groupName}</td>` , 
                 `<td><i class="fa fa-eye w3-large w3-text-black groupCmd" id="${groupName}View"></i></td>`, 
@@ -331,20 +383,42 @@ const storeUsers = (function(){
                 storeUsers.displayGroupUsers(groupName)
             })
 
+    }
+    let displayGroupsListInLeftNav = function(groupName){
+        $('#leftNavUserGroupList tbody').append(
+            [   `<tr>`,
+                `<td class="groupLeftNavLink">`, 
+                `<a href="#">${groupName}</a></td>` , 
+                `</tr>`
+            ].join(''))
+    }
+    let displayGroups = function(groupName){
+        //Displays groups stored in register
+        $('#userFormGroupList tbody').empty()
+        $('#leftNavUserGroupList tbody').empty()
+        _groups.forEach((_, groupName)=>{
+           displayGroupsListInForm(groupName) 
+           displayGroupsListInLeftNav(groupName)
         })
     }
 
 
     return{
         onReady: function({userDisplayList}){ 
-                       
             dataTableHandle = userDisplayList 
             dataTableHandle.DataTable()
-            $(".groupLeftNavLink").each(function(definedGroupLink){
-                let groupName = $( this ).text().trim()
-                groups.set(groupName, 1)
+            $.get('/Groups', {}, function(groups){
+                groups.forEach(group =>{
+                    let groupProperties = {
+                        ID: group.ID
+                    }
+                    _groups.set(group.name, groupProperties)
+                })
             })
-            displayGroups()
+            .done( displayGroups )
+            .fail(error=>{
+                    debugger
+            })
         },
         
         deleteGroup: function(groupName){
@@ -354,7 +428,7 @@ const storeUsers = (function(){
                 data: {groupName} 
             })
             .done(function(msg){
-                groups.delete(groupName)
+                _groups.delete(groupName)
                 displayGroups()
             })
             .fail(x => {
@@ -375,56 +449,15 @@ const storeUsers = (function(){
         },
 
         Group: function(){
-
-            this.tenants = [] 
-            this.userProperties = [] 
-
-            let newGroupName = $('#userGroupName').val()
-            let groupEmailPattern = $('#groupEmailPattern').val()
-
-            tenants.names().forEach( tName =>{
-                if($(`#${tName}SearchSelect`).is(":checked")){
-                    this.tenants.push(tName)
-                }
-            })
-
-            if($('#providerAccountSearchSelect').is(":checked")){
-                this.userProperties.push('providerAccount')
-            }
-            if($('#keyCloakAccountSelect').is(":checked")){
-                this.userProperties.push('keyCloakAccount')
-            }
-            if($('#otpNotEnabledSelect').is(":checked")){
-                this.userProperties.push('otpNotEnabled')
-            }
-
-            $.post('/newUserGroup', {
-                'userProperties[]':this.userProperties, 
-                name: newGroupName, 
-                groupEmailPattern, 
-                'tenants[]': this.tenants, 
-            })
+          	let formInput = getGroupFormInputs() 
+            $.post('/newUserGroup', formInput)
             .done( x => {
-                groups.set(newGroupName, 1)
+                _groups.set(formInput.name, 1)
+					 resetGroupFormInputs()
                 displayGroups()
             })
             .fail( x => {
                 alert('error')
-            })
-        },
-
-        viewButton : function(groupName, parameters){
-            $('#' + groupName+'View').click(function(event){
-                event.preventDefault()
-                document.getElementById('userGroupsModal').style.display='none'
-                dataExchangeStatus.setLoading()
-                //fetches and shows user daya associated with this user group
-                userSelectionTable
-                $.get('/findUsers', parameters, function(data){
-                    dataExchangeStatus.setInactive()
-                    dataTableHandle.clear().draw()
-                    keyCloakUsers.showUsers(data)
-                })
             })
         },
 
@@ -491,7 +524,8 @@ module.exports = {
     storeUsers, 
     keyCloakUsers 
 }
-},{"./dataExchangeStatus":2,"./tenants":6}],6:[function(require,module,exports){
+
+},{"./APICan":1,"./dataExchangeStatus":2,"./tenants":6,"./userActions":8}],6:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *

@@ -10,16 +10,17 @@
  ******************************************************************************/
 "use strict"
 
+/******************************************************************************/
 const tenants = require('./tenants').tenants
 const storeUsers = require('./storeUsers').storeUsers
 const timer = require('./timer.js').timer
 const userGroupsDialog = require('./dialogs/userGroupsDialog').userGroupsDialog
+/******************************************************************************/
+
 const APICan = (function() {
     let socket = null
 
     let setUI = function() {
-
-
         userGroupsDialog({
             jqCreateNewGroupButton: $('#createNewGroup')
         })
