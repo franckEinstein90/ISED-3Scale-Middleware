@@ -9,14 +9,15 @@
  *
  ******************************************************************************/
 "use strict"
-const timer = (function(){
+const timer = (function() {
     return {
-        eachMinute: function(){
-            $.get('/appStatus', {}, function(data){
+        eachMinute: function() {
+            $.get('/appStatus', {}, function(data) {
                 $('#appStatus').text(
-                    [`ISED API Store Middleware - status ${data.state}`, 
-                     `online: ${data.runningTime} mins`, 
-                     `next refresh: ${data.nextTenantRefresh} mins`].join(' - ')
+                    [`ISED API Store Middleware - status ${data.state}`,
+                        `online: ${data.runningTime} mins`,
+                        `next refresh: ${data.nextTenantRefresh} mins`
+                    ].join(' - ')
                 )
             })
         }

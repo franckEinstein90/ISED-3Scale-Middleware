@@ -1,16 +1,16 @@
 "use strict"
 
 
-const dataExchangeStatus = (function(){
+const dataExchangeStatus = (function() {
     let dataLoading = false
-    return{
-        setLoading: function(){
+    return {
+        setLoading: function() {
             dataLoading = true
-            document.getElementById('loadingIndicator').style.display='block'
+            document.getElementById('loadingIndicator').style.display = 'block'
         },
-        setInactive: function(){
+        setInactive: function() {
             dataLoading = false
-            document.getElementById('loadingIndicator').style.display='none'
+            document.getElementById('loadingIndicator').style.display = 'none'
         }
     }
 })()

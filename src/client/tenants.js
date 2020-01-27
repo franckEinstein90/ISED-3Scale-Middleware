@@ -11,31 +11,31 @@
 "use strict"
 
 /******************************************************************************/
-const tenants = (function(){
+const tenants = (function() {
 
     let tenantsInfo = new Map()
     let tenantsInfoReady = false
 
     return {
-        ready: function(){
+        ready: function() {
             return tenantsInfoReady
         },
-        names: function(){
+        names: function() {
             let tenantNames = []
             tenantsInfo.forEach((_, tName) => tenantNames.push(tName))
             return tenantNames
-        }, 
-        onReady: function(cb){
+        },
+        onReady: function(cb) {
             $.get('/tenants', {}, tenants => {
-               tenants.forEach(tenant => tenantsInfo.set(
-                   tenant.name, {
-                   services : tenant.numServices
-                }))
-            })
-            .done(x => {
-                cb()
-                tenantsInfoReady = true
-            })
+                    tenants.forEach(tenant => tenantsInfo.set(
+                        tenant.name, {
+                            services: tenant.numServices
+                        }))
+                })
+                .done(x => {
+                    cb()
+                    tenantsInfoReady = true
+                })
         }
     }
 })()

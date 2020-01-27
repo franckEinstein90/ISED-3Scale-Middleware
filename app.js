@@ -70,7 +70,7 @@ const scheduler = require('@src/cron/timer.js').scheduler
 const appEvents = require('@server/appEvents').appEvents
 
 let setTimerRefresh = function() {
-    let id = appEvents.configureTenantRefresh(1)    //every 1 minutes
+    let id = appEvents.configureTenantRefresh(10)    //every 1 minutes
     appEvents.configureOTPEnforce(100)
     appStatus.configure({
         tenantRefreshEventID: id

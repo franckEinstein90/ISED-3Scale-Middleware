@@ -5,7 +5,9 @@
   --comp1: #1982C4;
 
 }
-
+#userFormGroupList{
+  width:100%
+}
 .apiCanModal{
   background-color: var(--formBackground);
 }

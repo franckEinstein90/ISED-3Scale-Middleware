@@ -4,7 +4,7 @@
 
    <header class="w3-container" style="padding-top:22px">
      <div class="w3-panel">
-{{>userGroups/tableDisplay}}
+		{{>userGroups/tableDisplay}}
      </div>
    </header>
 
@@ -64,10 +64,18 @@
 
 </script>
 
-     <div class="w3-container" ID="tenantCards">
+	<div ID="containerFlex" style="display:flex">
+    <div ID="tenantCards" style="width:60%">
+		<center><h2>Tenants</h2></center>
 		{{#each tenants}}
 			{{>tenantCard}}
 		{{/each}}
      </div>
+
+	 <div ID='APIntel' style="width:30%">
+		 <center><h2>APIs</h2></center>
+	 </div>
+	</div>
+
 {{>userListView}}
 

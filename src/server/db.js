@@ -50,8 +50,10 @@ const appDatabase = (function() {
                 })
         },
         getGroupDefinitions: function() {
+            //gets the groups definitions and properties
+            //from the database
             return new Promise((resolve, reject) => {
-                let SQLStatement = `SELECT ID, name FROM groups`
+                let SQLStatement = `SELECT ID, name, Description, emailPattern FROM groups`
                 db.all(SQLStatement, function(err, rows) {
                     if (err) {
                         reject(err)
@@ -134,15 +136,34 @@ const appDatabase = (function() {
         },
 
 
-        deleteUserGroup: function(groupName) {
-            return new Promise((resolve, reject) => {
-                let SQLStatement = `DELETE FROM groups WHERE name = '${groupName}'`
-                db.run(SQLStatement, function(err) {
-                    if (err) {
+        deleteUserGroup: function( {
+            groupID,
+            groupName
+         }) {
+            let checkGroupInDb = _ => {
+                return new Promise((resolve, reject) => {
+                    let SQLStatement = `SELECT * FROM groups WHERE ID=${groupID}`
+                    db.all(SQLStatement, function(err, rows){
+                    if(err){
                         reject(err)
-                    } else {
-                        return resolve('ok')
                     }
+                    else{
+                        return resolve(rows[0])
+                        }
+                    })
+                })
+            }
+            return checkGroupInDb()
+            .then(groupRow =>{ //found database entry for this group
+                return new Promise((resolve, reject) => {
+                    let deleteGroupDefinitionSQL = `DELETE FROM groups WHERE ID=${groupID}`
+                    db.run(deleteGroupDefinitionSQL, function(err){
+                        if( err ){
+                            reject( err )
+                        } else {
+                            return resolve('ok')
+                        }
+                    })
                 })
             })
         },

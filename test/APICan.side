@@ -1,0 +1,285 @@
+{
+  "id": "609d362f-77f2-4774-bf98-48074fa6d7f9",
+  "version": "2.0",
+  "name": "APICan",
+  "url": "http://localhost:3000",
+  "tests": [{
+    "id": "7ff0307b-592d-4d43-9c46-8d4df418d614",
+    "name": "openApp",
+    "commands": [{
+      "id": "56a47af9-5052-4b40-9381-795506766ebd",
+      "comment": "",
+      "command": "open",
+      "target": "/",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "78abfbac-07cd-4f39-bcba-181610f9c3af",
+      "comment": "",
+      "command": "setWindowSize",
+      "target": "1096x1936",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "ffed2e40-b2d8-4b45-8d5b-9d58bf4c4f1c",
+      "comment": "",
+      "command": "click",
+      "target": "css=.w3-bar-item > .fa-eye",
+      "targets": [
+        ["css=.w3-bar-item > .fa-eye", "css:finder"],
+        ["xpath=//nav[@id='leftNav']/a[4]/i", "xpath:idRelative"],
+        ["xpath=//a[4]/i", "xpath:position"]
+      ],
+      "value": ""
+    }]
+  }, {
+    "id": "d59f25d7-98f7-4dd9-85ef-1b0cd6d7551f",
+    "name": "create a new user group \"demoUserGroup\"",
+    "commands": [{
+      "id": "07433e1c-54e5-4af5-9d1a-46c987eae4b9",
+      "comment": "",
+      "command": "open",
+      "target": "/",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "6b710f97-a0ae-41a6-b54d-026dc0a97bfc",
+      "comment": "",
+      "command": "setWindowSize",
+      "target": "1096x1936",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "a333cea8-b8c9-4b9b-a86b-033f61cf1c8e",
+      "comment": "",
+      "command": "click",
+      "target": "id=manageUsersBtn",
+      "targets": [
+        ["id=manageUsersBtn", "id"],
+        ["linkText=CREATE", "linkText"],
+        ["css=#manageUsersBtn", "css:finder"],
+        ["xpath=//a[@id='manageUsersBtn']", "xpath:attributes"],
+        ["xpath=//nav[@id='leftNav']/a[3]", "xpath:idRelative"],
+        ["xpath=//a[3]", "xpath:position"],
+        ["xpath=//a[contains(.,'CREATE')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "be82f938-4837-42f8-924b-e710aac78f2d",
+      "comment": "",
+      "command": "click",
+      "target": "id=userGroupName",
+      "targets": [
+        ["id=userGroupName", "id"],
+        ["css=#userGroupName", "css:finder"],
+        ["xpath=//input[@id='userGroupName']", "xpath:attributes"],
+        ["xpath=//div[@id='userGroupsModal']/div/div/div/div/form/div/div/input", "xpath:idRelative"],
+        ["xpath=//input", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "701d88ae-2148-4989-876d-3f07058c0727",
+      "comment": "",
+      "command": "type",
+      "target": "id=userGroupName",
+      "targets": [
+        ["id=userGroupName", "id"],
+        ["css=#userGroupName", "css:finder"],
+        ["xpath=//input[@id='userGroupName']", "xpath:attributes"],
+        ["xpath=//div[@id='userGroupsModal']/div/div/div/div/form/div/div/input", "xpath:idRelative"],
+        ["xpath=//input", "xpath:position"]
+      ],
+      "value": "demoUserGroup"
+    }, {
+      "id": "1d95d71c-434e-43c5-9060-d0e12f74ae45",
+      "comment": "",
+      "command": "click",
+      "target": "id=userGroupDescription",
+      "targets": [
+        ["id=userGroupDescription", "id"],
+        ["css=#userGroupDescription", "css:finder"],
+        ["xpath=//textarea[@id='userGroupDescription']", "xpath:attributes"],
+        ["xpath=//div[@id='userGroupsModal']/div/div/div/div/form/div/div/textarea", "xpath:idRelative"],
+        ["xpath=//textarea", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "635f50df-2191-4c9f-9737-c1e5fd7241f4",
+      "comment": "",
+      "command": "type",
+      "target": "id=userGroupDescription",
+      "targets": [
+        ["id=userGroupDescription", "id"],
+        ["css=#userGroupDescription", "css:finder"],
+        ["xpath=//textarea[@id='userGroupDescription']", "xpath:attributes"],
+        ["xpath=//div[@id='userGroupsModal']/div/div/div/div/form/div/div/textarea", "xpath:idRelative"],
+        ["xpath=//textarea", "xpath:position"]
+      ],
+      "value": "a user groups that includes tenant managers who have a keycloack account for tenants bc, ec, and on"
+    }, {
+      "id": "442ec4f3-6b09-47f9-922b-1fd74e378f07",
+      "comment": "",
+      "command": "click",
+      "target": "id=groupEmailPattern",
+      "targets": [
+        ["id=groupEmailPattern", "id"],
+        ["css=#groupEmailPattern", "css:finder"],
+        ["xpath=//input[@id='groupEmailPattern']", "xpath:attributes"],
+        ["xpath=//div[@id='userGroupsModal']/div/div/div/div/form/div/div/input[2]", "xpath:idRelative"],
+        ["xpath=//input[2]", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "33025235-6c02-4bc4-893e-9b05ff518d72",
+      "comment": "",
+      "command": "type",
+      "target": "id=groupEmailPattern",
+      "targets": [
+        ["id=groupEmailPattern", "id"],
+        ["css=#groupEmailPattern", "css:finder"],
+        ["xpath=//input[@id='groupEmailPattern']", "xpath:attributes"],
+        ["xpath=//div[@id='userGroupsModal']/div/div/div/div/form/div/div/input[2]", "xpath:idRelative"],
+        ["xpath=//input[2]", "xpath:position"]
+      ],
+      "value": "@canada.ca"
+    }, {
+      "id": "3d83f512-ba66-4efd-a9c1-289aaa10bc0f",
+      "comment": "",
+      "command": "click",
+      "target": "id=otpNotEnabledSelect",
+      "targets": [
+        ["id=otpNotEnabledSelect", "id"],
+        ["css=#otpNotEnabledSelect", "css:finder"],
+        ["xpath=//input[@id='otpNotEnabledSelect']", "xpath:attributes"],
+        ["xpath=//div[@id='userGroupsModal']/div/div/div/div/form/div/div/p[3]/input", "xpath:idRelative"],
+        ["xpath=//p[3]/input", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "e45875fb-eb45-4af8-920b-4b3b9eebdf28",
+      "comment": "",
+      "command": "click",
+      "target": "id=bcSearchSelect",
+      "targets": [
+        ["id=bcSearchSelect", "id"],
+        ["css=#bcSearchSelect", "css:finder"],
+        ["xpath=//input[@id='bcSearchSelect']", "xpath:attributes"],
+        ["xpath=//table[@id='tenantSelectionTable']/tr/td/input", "xpath:idRelative"],
+        ["xpath=//td/input", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "cc4765e2-cfda-41d5-8464-e8a0418ffda9",
+      "comment": "",
+      "command": "click",
+      "target": "id=ecSearchSelect",
+      "targets": [
+        ["id=ecSearchSelect", "id"],
+        ["css=#ecSearchSelect", "css:finder"],
+        ["xpath=//input[@id='ecSearchSelect']", "xpath:attributes"],
+        ["xpath=//table[@id='tenantSelectionTable']/tr[3]/td[2]/input", "xpath:idRelative"],
+        ["xpath=//tr[3]/td[2]/input", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "99e4e8f1-aa2d-45ec-be7a-21405b8e0a47",
+      "comment": "",
+      "command": "click",
+      "target": "id=onSearchSelect",
+      "targets": [
+        ["id=onSearchSelect", "id"],
+        ["css=#onSearchSelect", "css:finder"],
+        ["xpath=//input[@id='onSearchSelect']", "xpath:attributes"],
+        ["xpath=//table[@id='tenantSelectionTable']/tr[6]/td[2]/input", "xpath:idRelative"],
+        ["xpath=//tr[6]/td[2]/input", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "3d8c3061-6d6f-4edc-9519-683dd7d1f47c",
+      "comment": "",
+      "command": "click",
+      "target": "id=createNewGroup",
+      "targets": [
+        ["id=createNewGroup", "id"],
+        ["css=#createNewGroup", "css:finder"],
+        ["xpath=//button[@id='createNewGroup']", "xpath:attributes"],
+        ["xpath=//div[@id='userGroupsModal']/div/div/div/div/form/div[2]/button", "xpath:idRelative"],
+        ["xpath=//form/div[2]/button", "xpath:position"],
+        ["xpath=//button[contains(.,'create')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }]
+  }, {
+    "id": "5b8fc9a0-1cf7-4560-91f0-94bb8b5b9346",
+    "name": "view group members for group \"demoUserGroup\"",
+    "commands": [{
+      "id": "b852d2ef-ebaa-4edf-a98c-536b4ea06043",
+      "comment": "",
+      "command": "open",
+      "target": "/",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "94b115f3-1768-484f-b639-09fe3fd96e0d",
+      "comment": "",
+      "command": "setWindowSize",
+      "target": "1080x1920",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "c778c7a8-8324-4b0f-94c9-b79961dbe117",
+      "comment": "",
+      "command": "click",
+      "target": "id=demoUserGroupView",
+      "targets": [
+        ["id=demoUserGroupView", "id"],
+        ["css=#demoUserGroupView", "css:finder"],
+        ["xpath=//i[@id='demoUserGroupView']", "xpath:attributes"],
+        ["xpath=//table[@id='userFormGroupList']/tbody/tr[3]/td[2]/i", "xpath:idRelative"],
+        ["xpath=//tr[3]/td[2]/i", "xpath:position"]
+      ],
+      "value": ""
+    }]
+  }, {
+    "id": "496b872f-1db9-4490-a99f-2f1078e856fc",
+    "name": "delete user group \"demoUserGroup\"",
+    "commands": [{
+      "id": "055205cd-f39b-4dee-81f3-5a5458ac643d",
+      "comment": "",
+      "command": "open",
+      "target": "/",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "0b8aaa79-c529-47c4-94a3-aa91646b41c9",
+      "comment": "",
+      "command": "setWindowSize",
+      "target": "1080x1920",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "d5234cf9-f0c6-4189-ba64-31a06f34bd85",
+      "comment": "",
+      "command": "click",
+      "target": "id=demoUserGroupDelete",
+      "targets": [
+        ["id=demoUserGroupDelete", "id"],
+        ["css=#demoUserGroupDelete", "css:finder"],
+        ["xpath=//i[@id='demoUserGroupDelete']", "xpath:attributes"],
+        ["xpath=//table[@id='userFormGroupList']/tbody/tr[3]/td[4]/i", "xpath:idRelative"],
+        ["xpath=//tr[3]/td[4]/i", "xpath:position"]
+      ],
+      "value": ""
+    }]
+  }],
+  "suites": [{
+    "id": "61b7c653-df2a-4106-a1a4-ee9b480c733c",
+    "name": "Default Suite",
+    "persistSession": false,
+    "parallel": false,
+    "timeout": 300,
+    "tests": []
+  }],
+  "urls": ["http://localhost:3000/"],
+  "plugins": []
+}

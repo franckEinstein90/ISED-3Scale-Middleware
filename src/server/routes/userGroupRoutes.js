@@ -36,7 +36,9 @@ const userGroupRoutes  =  (function (){
             //group passed in as argument
             let groupName = req.query.group
             userGroups.getGroupUserAccounts(groupName)
-            .then(userAccounts => res.send(userAccounts))
+            .then(userAccounts => {
+                res.send(userAccounts)
+            })
         }, 
 
         findUsers : async function(req, res, next){
@@ -101,7 +103,9 @@ const userGroupRoutes  =  (function (){
         deleteUserGroup: async function(req, res, next){
             let groupName = req.body.groupName
             userGroups.deleteGroup(groupName)
-            .then(resCode => res.send(resCode))
+            .then(resCode => {
+                res.send(resCode)
+            })
         }
     }
 })()

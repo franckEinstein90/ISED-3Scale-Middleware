@@ -9,69 +9,68 @@
  *
  ******************************************************************************/
 "use strict"
- 
+
 /******************************************************************************/
 const APICan = require('./APICan').APICan
 const storeUsers = require('./storeUsers').storeUsers
 const userActions = require('./userActions').userActions
 /******************************************************************************/
 
-const selectedUsers = (function(){
+const selectedUsers = (function() {
 
     let userStore = new Map()
 
-    let toEmailList = function(){
+    let toEmailList = function() {
         let userList = []
-        userStore.forEach((_, userEmail) => userList.push( userEmail ))
+        userStore.forEach((_, userEmail) => userList.push(userEmail))
         return userList
     }
 
-    let displayCurrentUserSelection = function(){
+    let displayCurrentUserSelection = function() {
         $('#individuallySelectedUsers').text(toEmailList().join(';'))
     }
- 
-    return{
 
-        toggleSelectedUser: function(userEmail){
-            if(userStore.has(userEmail)){
+    return {
+
+        toggleSelectedUser: function(userEmail) {
+            if (userStore.has(userEmail)) {
                 userStore.delete(userEmail)
-            }
-            else{
+            } else {
                 userStore.set(userEmail, 1)
             }
             displayCurrentUserSelection()
-       }, 
+        },
 
-       applySelectedActions: function(){
-           userActions.update( toEmailList() )
-       }
+        applySelectedActions: function() {
+            userActions.update(toEmailList())
+        }
 
-   }
+    }
 })()
 
 
-$(function(){
+$(function() {
 
-  let setUp = function(){
-       try{
+    let setUp = function() {
+        try {
             console.group("Init APICan Client")
             APICan.init()
             console.groupEnd()
             return true
 
-        } catch( err ){
+        } catch (err) {
             errors(err)
             return false
         }
-   }
+    }
 
-   if( setUp( ) ){
-       try {
-        APICan.run()
-       } catch ( err ){
-           errors(err)
-       }
-   }
+    if (setUp()) {
+        try {
+            APICan.run()
+        } catch (err) {
+            errors(err)
+        }
+    }
 })
 
 /*
@@ -155,6 +154,3 @@ $(function(){
         $.get('/findUsers', parameters, keyCloakUsers.showUsers)
     })
 */
-  
-
-

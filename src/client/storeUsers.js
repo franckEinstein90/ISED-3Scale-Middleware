@@ -9,7 +9,7 @@
  *
  ******************************************************************************/
 "use strict"
- 
+
 /******************************************************************************/
 const APICan = require('./APICan').APICan
 const userActions = require('./userActions').userActions
@@ -18,209 +18,200 @@ const tenants = require('./tenants').tenants
 /******************************************************************************/
 
 
-const getGroupFormInputs = function(){
-	//gets the parameters from a new group
-	//creation
+const getGroupFormInputs = function() {
+    //gets the parameters from a new group
+    //creation
 
-	let requestTenants = []
-	let userProperties = []
-	let groupDescription = $('#userGroupDescription').val()
-   let newGroupName = $('#userGroupName').val()
-   let groupEmailPattern = $('#groupEmailPattern').val()
-		
-	tenants.names().forEach( tName =>{
-    	if($(`#${tName}SearchSelect`).is(":checked")){
-        		requestTenants.push(tName)
-          }
-      })
-	if($('#providerAccountSearchSelect').is(":checked")){
-                userProperties.push('providerAccount')
-            }
-            if($('#keyCloakAccountSelect').is(":checked")){
-                userProperties.push('keyCloakAccount')
-            }
-            if($('#otpNotEnabledSelect').is(":checked")){
-                userProperties.push('otpNotEnabled')
-            }
-	return {
-		'tenants[]':requestTenants, 
-		'userProperties[]':userProperties, 
-		name:newGroupName,
-		groupDescription,
-		groupEmailPattern
-	}
+    let requestTenants = []
+    let userProperties = []
+    let groupDescription = $('#userGroupDescription').val()
+    let newGroupName = $('#userGroupName').val()
+    let groupEmailPattern = $('#groupEmailPattern').val()
+
+    tenants.names().forEach(tName => {
+        if ($(`#${tName}SearchSelect`).is(":checked")) {
+            requestTenants.push(tName)
+        }
+    })
+    if ($('#providerAccountSearchSelect').is(":checked")) {
+        userProperties.push('providerAccount')
+    }
+    if ($('#keyCloakAccountSelect').is(":checked")) {
+        userProperties.push('keyCloakAccount')
+    }
+    if ($('#otpNotEnabledSelect').is(":checked")) {
+        userProperties.push('otpNotEnabled')
+    }
+    return {
+        'tenants[]': requestTenants,
+        'userProperties[]': userProperties,
+        name: newGroupName,
+        groupDescription,
+        groupEmailPattern
+    }
 }
 
-const resetGroupFormInputs = function(){
- $('#userGroupDescription').val("")
- $('#userGroupName').val("")
- $('#groupEmailPattern').val("")
+const resetGroupFormInputs = function() {
+    $('#userGroupDescription').val("")
+    $('#userGroupName').val("")
+    $('#groupEmailPattern').val("")
 }
 
-const storeUsers = (function(){
+const storeUsers = (function() {
 
     let _groups = new Map()
 
-    let dataTableHandle = null
-    let newGroupDefaultName = _ => `group_${groups.size}` 
+    let dataTableHandle = null	//table that displays user information
+    let newGroupDefaultName = _ => `group_${groups.size}`
 
-    let displayGroupsListInForm = function(groupName, groupID){
+    let displayGroupsListInForm = function(groupName, groupID) {
         $('#userFormGroupList tbody').append(
-            [   `<tr>`,
-                `<td class="w3-text-green">${groupName}</td>` , 
-                `<td><i class="fa fa-eye w3-large w3-text-black groupCmd" id="${groupName}View"></i></td>`, 
-                `<td><i class="fa fa-gears  w3-large w3-text-black groupCmd"></i></td>`, 
-                `<td><i class="fa fa-trash w3-large w3-text-black groupCmd" id="${groupName}Delete"></i></td>`, 
+            [`<tr>`,
+                `<td class="w3-text-green">${groupName}</td>`,
+                `<td><i class="fa fa-eye w3-large w3-text-black groupCmd" id="${groupName}View"></i></td>`,
+                `<td><i class="fa fa-gears  w3-large w3-text-black groupCmd"></i></td>`,
+                `<td><i class="fa fa-trash w3-large w3-text-black groupCmd" id="${groupName}Delete"></i></td>`,
                 `</tr>`
             ].join(''))
 
-            $('#' + groupName+'Delete').click(function(event){  
-                storeUsers.deleteGroup(groupName)
-            })
+        $('#' + groupName + 'Delete').click(function(event) {
+            storeUsers.deleteGroup(groupName)
+        })
 
-            $('#' + groupName+'View').click(function(event){ 
-                event.preventDefault() 
-                storeUsers.displayGroupUsers(groupName)
-            })
+        $('#' + groupName + 'View').click(function(event) {
+            event.preventDefault()
+            storeUsers.displayGroupUsers(groupName)
+        })
 
     }
-    let displayGroupsListInLeftNav = function(groupName){
+    let displayGroupsListInLeftNav = function(groupName) {
         $('#leftNavUserGroupList tbody').append(
-            [   `<tr>`,
-                `<td class="groupLeftNavLink">`, 
-                `<a href="#">${groupName}</a></td>` , 
+            [`<tr>`,
+                `<td class="groupLeftNavLink">`,
+                `<a href="#">${groupName}</a></td>`,
                 `</tr>`
             ].join(''))
     }
-    let displayGroups = function(groupName){
+    let displayGroups = function(groupName) {
         //Displays groups stored in register
         $('#userFormGroupList tbody').empty()
         $('#leftNavUserGroupList tbody').empty()
-        _groups.forEach((_, groupName)=>{
-           displayGroupsListInForm(groupName) 
-           displayGroupsListInLeftNav(groupName)
+        _groups.forEach((_, groupName) => {
+            displayGroupsListInForm(groupName)
+            displayGroupsListInLeftNav(groupName)
         })
     }
 
 
-    return{
-        onReady: function({userDisplayList}){ 
-            dataTableHandle = userDisplayList 
-            dataTableHandle.DataTable()
-            $.get('/Groups', {}, function(groups){
-                groups.forEach(group =>{
-                    let groupProperties = {
-                        ID: group.ID
-                    }
-                    _groups.set(group.name, groupProperties)
+    return {
+        onReady: function({
+            userDisplayList
+        }) {
+            dataTableHandle = userDisplayList.DataTable()
+            $.get('/Groups', {}, function(groups) {
+                    groups.forEach(group => {
+                        let groupProperties = {
+                            ID: group.ID
+                        }
+                        _groups.set(group.name, groupProperties)
+                    })
                 })
-            })
-            .done( displayGroups )
-            .fail(error=>{
+                .done(displayGroups)
+                .fail(error => {
                     debugger
-            })
+                })
         },
-        
-        deleteGroup: function(groupName){
+
+        deleteGroup: function(groupName) {
             $.ajax({
-                method: "DELETE", 
-                url: '/group',
-                data: {groupName} 
-            })
-            .done(function(msg){
-                _groups.delete(groupName)
-                displayGroups()
-            })
-            .fail(x => {
-                alert('failed')
-            })
+                    method: "DELETE",
+                    url: '/group',
+                    data: {
+                        groupName
+                    }
+                })
+                .done(function(msg) {
+                    _groups.delete(groupName)
+                    displayGroups()
+                })
+                .fail(x => {
+                    alert('failed')
+                })
         },
-        
-        displayGroupUsers: function( groupName ){
-            document.getElementById('userGroupsModal').style.display='none'
+
+        displayGroupUsers: function(groupName) {
+            document.getElementById('userGroupsModal').style.display = 'none'
             dataExchangeStatus.setLoading()
             //fetches and shows user daya associated with this user group
-            let group = {group: groupName}
-            $.get('/GroupUsers', group, function(data){
+            let group = {
+                group: groupName
+            }
+            $.get('/GroupUsers', group, function(data) {
                 dataExchangeStatus.setInactive()
                 dataTableHandle.clear().draw()
                 keyCloakUsers.showUsers(data)
             })
         },
 
-        Group: function(){
-          	let formInput = getGroupFormInputs() 
+        Group: function() {
+            let formInput = getGroupFormInputs()
             $.post('/newUserGroup', formInput)
-            .done( x => {
-                _groups.set(formInput.name, 1)
-					 resetGroupFormInputs()
-                displayGroups()
-            })
-            .fail( x => {
-                alert('error')
-            })
+                .done(x => {
+                    _groups.set(formInput.name, 1)
+                    document.getElementById('userGroupsModal').style.display = 'none'
+                    resetGroupFormInputs()
+                    displayGroups()
+                })
+                .fail(x => {
+                    alert('error')
+                })
         },
 
-        selectUserFromSelectedTableRow : function(dataRow){
+        selectUserFromSelectedTableRow: function(dataRow) {
             let selectedUser = (dataTableHandle.row(dataRow).data())[0]
             return selectedUser
         },
 
-        addUserRow : function({
-            email, 
-            keyCloakAccount,
-            otpEnabled, 
-            otpVerified
-        }){
-    
-        dataTableHandle.row.add([
+        addUserRow: function({
+		user, 
             email,
-            keyCloakAccount, 
+	created,	
+            keyCloakAccount,
             otpEnabled,
             otpVerified
-        ]).draw( false )
-      }
+        }) {
+
+            dataTableHandle.row.add([
+		    user, 
+                email,
+		    created, 
+                keyCloakAccount
+            ]).draw(false)
+        }
 
     }
 
 })()
 
-const keyCloakUsers = (function(){
+const keyCloakUsers = (function() {
     let userProfiles = []
 
     return {
-        showUsers:function(userData){ 
-            userProfiles = userData
+        showUsers: function(userData) {
             $('#userSelectionTable').empty()
             userData.forEach(userProfile => {
-                if('notFound' in userProfile){
-                    users.addUserRow({
-                        email: userProfile.email, 
-                        keyCloakAccount: 'no', 
-                        otpEnabled: 'N/A', 
-                        otpVerified: 'N/A', 
-                    })
-//                    $('#userSelectionTable').append(`<tr><td>${userProfile.email}</td><td>No</td></tr>`)
-                    //${emailVerified}${otpVerified}${enableOTP}</tr>`)
-                }
-                if('id' in userProfile){
-                    let otpEnabled = userProfile.disableableCredentialTypes.includes('otp') || userProfile.requiredActions.includes('CONFIGURE_TOTP')
-                    let emailVerified = `<td>${userProfile.emailVerified}</td>`
-                    let otpVerified = `<td>${userProfile.disableableCredentialTypes.includes('otp')}</td>`
-                    users.addUserRow({
-                            email: userProfile.email, 
-                            keyCloakAccount: 'yes', 
-                            otpEnabled: `${otpEnabled?'Yes':'No'}`,
-                            otpVerified, 
-                    })
-//                    $('#userSelectionTable').append(`<tr><td>${userProfile.email}</td><td>Yes</td>${otpStatus}${otpVerified}${enableOTP}</tr>`)
-                }
-            })
+		storeUsers.addUserRow({
+			user: userProfile.username, 
+			email: userProfile.email,
+			created: userProfile.created_at, 
+			keyCloakAccount: 'keyCloakAccount' in userProfile && 'id' in userProfile.keyCloakAccount ? userProfile.keyCloakAccount.id : 'no'
+		})
+           })
         }
     }
 })()
 
 module.exports = {
-    storeUsers, 
-    keyCloakUsers 
+    storeUsers,
+    keyCloakUsers
 }

@@ -3,28 +3,29 @@
  * 
  *************************************************************************/
 
- "use strict"
+"use strict"
 
- const userActions = (function(){
+const userActions = (function() {
 
-    let actions = [
-        { action: 'enforceOTP', route:'enforceOTP' } 
-    ]
+    let actions = [{
+        action: 'enforceOTP',
+        route: 'enforceOTP'
+    }]
     return {
-        update: function(userEmailList, actionList){
+        update: function(userEmailList, actionList) {
             //giving a liste of user addresses
             //enact actions of those users
             let actions = ['enforceOTP']
             let inputData = {
-               users: userEmailList 
+                users: userEmailList
             }
-            $.post('/enforceOTP', inputData, function(data){
+            $.post('/enforceOTP', inputData, function(data) {
 
             })
         }
     }
- })()
+})()
 
- module.exports = {
-     userActions
- }
+module.exports = {
+    userActions
+}
