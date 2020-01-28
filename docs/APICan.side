@@ -1,0 +1,137 @@
+{
+  "id": "609d362f-77f2-4774-bf98-48074fa6d7f9",
+  "version": "2.0",
+  "name": "APICan",
+  "url": "http://localhost:3000",
+  "tests": [{
+    "id": "ef5bbe2e-f550-4536-8c45-4502d5af6088",
+    "name": "create a new user group",
+    "commands": [{
+      "id": "b8b8165f-6135-4a02-a755-3b323fcbfa39",
+      "comment": "",
+      "command": "open",
+      "target": "/",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "b48ed9d1-afba-467f-abe4-cd1e6e520a25",
+      "comment": "",
+      "command": "setWindowSize",
+      "target": "1096x1936",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "4ad1354f-5d3a-42da-868e-e942150f77cc",
+      "comment": "",
+      "command": "click",
+      "target": "css=.fa-users",
+      "targets": [
+        ["css=.fa-users", "css:finder"],
+        ["xpath=//a[@id='manageUsersBtn']/i", "xpath:idRelative"],
+        ["xpath=//a[3]/i", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "b0c2f2f2-910e-4c58-a64b-af94b9fee17b",
+      "comment": "",
+      "command": "click",
+      "target": "id=userGroupName",
+      "targets": [
+        ["id=userGroupName", "id"],
+        ["css=#userGroupName", "css:finder"],
+        ["xpath=//input[@id='userGroupName']", "xpath:attributes"],
+        ["xpath=//div[@id='userGroupsModal']/div/div/div/div/form/div/div/input", "xpath:idRelative"],
+        ["xpath=//input", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "4b658a8c-0758-4cc5-bd8e-33711c06f974",
+      "comment": "",
+      "command": "type",
+      "target": "id=userGroupName",
+      "targets": [
+        ["id=userGroupName", "id"],
+        ["css=#userGroupName", "css:finder"],
+        ["xpath=//input[@id='userGroupName']", "xpath:attributes"],
+        ["xpath=//div[@id='userGroupsModal']/div/div/div/div/form/div/div/input", "xpath:idRelative"],
+        ["xpath=//input", "xpath:position"]
+      ],
+      "value": "testGroup"
+    }, {
+      "id": "2c92e646-049c-4fd7-addb-a9f405104370",
+      "comment": "",
+      "command": "type",
+      "target": "id=userGroupDescription",
+      "targets": [
+        ["id=userGroupDescription", "id"],
+        ["css=#userGroupDescription", "css:finder"],
+        ["xpath=//textarea[@id='userGroupDescription']", "xpath:attributes"],
+        ["xpath=//div[@id='userGroupsModal']/div/div/div/div/form/div/div/textarea", "xpath:idRelative"],
+        ["xpath=//textarea", "xpath:position"]
+      ],
+      "value": "A new group of users"
+    }, {
+      "id": "429e4b9a-4c0d-4c29-83be-ff13c6eae2d2",
+      "comment": "",
+      "command": "click",
+      "target": "id=selectAllTenants",
+      "targets": [
+        ["id=selectAllTenants", "id"],
+        ["css=#selectAllTenants", "css:finder"],
+        ["xpath=//button[@id='selectAllTenants']", "xpath:attributes"],
+        ["xpath=//div[@id='userGroupsModal']/div/div/div/div/form/div/div[2]/button", "xpath:idRelative"],
+        ["xpath=//div[2]/button", "xpath:position"],
+        ["xpath=//button[contains(.,'select all')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "0f304c0e-792a-4c3f-bb26-79c59823a298",
+      "comment": "",
+      "command": "click",
+      "target": "id=cra-arcSearchSelect",
+      "targets": [
+        ["id=cra-arcSearchSelect", "id"],
+        ["css=#cra-arcSearchSelect", "css:finder"],
+        ["xpath=//input[@id='cra-arcSearchSelect']", "xpath:attributes"],
+        ["xpath=//table[@id='tenantSelectionTable']/tr[2]/td[2]/input", "xpath:idRelative"],
+        ["xpath=//tr[2]/td[2]/input", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "c56fc06a-3136-48ba-ad11-7164425d7b7e",
+      "comment": "",
+      "command": "click",
+      "target": "id=createNewGroup",
+      "targets": [
+        ["id=createNewGroup", "id"],
+        ["css=#createNewGroup", "css:finder"],
+        ["xpath=//button[@id='createNewGroup']", "xpath:attributes"],
+        ["xpath=//div[@id='userGroupsModal']/div/div/div/div/form/div[2]/button", "xpath:idRelative"],
+        ["xpath=//form/div[2]/button", "xpath:position"],
+        ["xpath=//button[contains(.,'create')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "226d6ec5-972f-4dc7-a523-a2cbcc506716",
+      "comment": "",
+      "command": "click",
+      "target": "css=.apiCanModal .fa",
+      "targets": [
+        ["css=.apiCanModal .fa", "css:finder"],
+        ["xpath=//div[@id='userGroupsModal']/div/div/div/div/span/i", "xpath:idRelative"],
+        ["xpath=//div[2]/div/div/div/div/span/i", "xpath:position"]
+      ],
+      "value": ""
+    }]
+  }],
+  "suites": [{
+    "id": "61b7c653-df2a-4106-a1a4-ee9b480c733c",
+    "name": "Default Suite",
+    "persistSession": false,
+    "parallel": false,
+    "timeout": 300,
+    "tests": ["ef5bbe2e-f550-4536-8c45-4502d5af6088"]
+  }],
+  "urls": ["http://localhost:3000/"],
+  "plugins": []
+}

@@ -2,21 +2,23 @@
  * Franck Binard, ISED
  * Canadian Gov. API Store middleware
  * -------------------------------------
- *  app.js
+ *  server/routes/appRoot.js
  *
- *  Server setup
+ *  Serves site root
  *******************************************************************************/
+"use strict"
 
+/******************************************************************************/
 const tenantsManager = require('@services/tenantsManager').tenantsManager
 const queryManager = require('@routes/queryManager').queryManager
 const appTimer = require('@src/cron/timer').cacheManage
-
 const accessLog = require('@server/logs').logs.accessLog
 const messages = require('@server/messages').messages
 const appStatus = require('@server/appStatus').appStatus
-
 const users = require('@users/users').users
-let groups = require('@users/groups').groups
+const groups = require('@users/groups').groups
+/******************************************************************************/
+
 
 const appRoot = (function(){
 

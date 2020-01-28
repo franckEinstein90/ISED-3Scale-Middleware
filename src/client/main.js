@@ -16,38 +16,6 @@ const storeUsers = require('./storeUsers').storeUsers
 const userActions = require('./userActions').userActions
 /******************************************************************************/
 
-const selectedUsers = (function() {
-
-    let userStore = new Map()
-
-    let toEmailList = function() {
-        let userList = []
-        userStore.forEach((_, userEmail) => userList.push(userEmail))
-        return userList
-    }
-
-    let displayCurrentUserSelection = function() {
-        $('#individuallySelectedUsers').text(toEmailList().join(';'))
-    }
-
-    return {
-
-        toggleSelectedUser: function(userEmail) {
-            if (userStore.has(userEmail)) {
-                userStore.delete(userEmail)
-            } else {
-                userStore.set(userEmail, 1)
-            }
-            displayCurrentUserSelection()
-        },
-
-        applySelectedActions: function() {
-            userActions.update(toEmailList())
-        }
-
-    }
-})()
-
 
 $(function() {
 
@@ -90,10 +58,7 @@ $(function() {
     }
 
 
-    socket.on('updateBottomStatusInfo', function(data){
-        $('#bottomStatusBar').text(data.message)
-    })
-
+  
     socket.on('refresh page', function(tenants){
 
     })
@@ -104,12 +69,7 @@ $(function() {
         document.getElementById('id01').style.display='block'
     }) 
 
-    $('#selectedUsersList tbody').on('click', 'tr', function(){
-		$(this).toggleClass('selected')
-		let selectedUserEmail = users.selectUserFromSelectedTableRow(this) 
-		selectedUsers.toggleSelectedUser(selectedUserEmail)
-    })
-
+  
     $('#userActions').click(function(event){
         event.preventDefault()
         let emails = []

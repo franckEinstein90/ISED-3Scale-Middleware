@@ -12,6 +12,7 @@
 
 /******************************************************************************/
 const APICan = require('./APICan').APICan
+const ui = require('./ui').ui
 const userActions = require('./userActions').userActions
 const dataExchangeStatus = require('./dataExchangeStatus').dataExchangeStatus
 const tenants = require('./tenants').tenants
@@ -61,7 +62,7 @@ const storeUsers = (function() {
 
     let _groups = new Map()
 
-    let dataTableHandle = null	//table that displays user information
+    let dataTableHandle = null //table that displays user information
     let newGroupDefaultName = _ => `group_${groups.size}`
 
     let displayGroupsListInForm = function(groupName, groupID) {
@@ -150,6 +151,7 @@ const storeUsers = (function() {
                 dataExchangeStatus.setInactive()
                 dataTableHandle.clear().draw()
                 keyCloakUsers.showUsers(data)
+		ui.scrollToSection("userTableSection")
             })
         },
 
@@ -173,18 +175,18 @@ const storeUsers = (function() {
         },
 
         addUserRow: function({
-		user, 
+            user,
             email,
-	created,	
+            created,
             keyCloakAccount,
             otpEnabled,
             otpVerified
         }) {
 
             dataTableHandle.row.add([
-		    user, 
+                user,
                 email,
-		    created, 
+                created,
                 keyCloakAccount
             ]).draw(false)
         }
@@ -200,13 +202,13 @@ const keyCloakUsers = (function() {
         showUsers: function(userData) {
             $('#userSelectionTable').empty()
             userData.forEach(userProfile => {
-		storeUsers.addUserRow({
-			user: userProfile.username, 
-			email: userProfile.email,
-			created: userProfile.created_at, 
-			keyCloakAccount: 'keyCloakAccount' in userProfile && 'id' in userProfile.keyCloakAccount ? userProfile.keyCloakAccount.id : 'no'
-		})
-           })
+                storeUsers.addUserRow({
+                    user: userProfile.username,
+                    email: userProfile.email,
+                    created: userProfile.created_at,
+                    keyCloakAccount: 'keyCloakAccount' in userProfile && 'id' in userProfile.keyCloakAccount ? userProfile.keyCloakAccount.id : 'no'
+                })
+            })
         }
     }
 })()

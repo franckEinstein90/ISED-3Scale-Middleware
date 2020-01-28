@@ -9,6 +9,7 @@
  *  APICan.js: client app admin
  *
  ******************************************************************************/
+
 "use strict"
 
 /******************************************************************************/
@@ -16,7 +17,40 @@ const tenants = require('./tenants').tenants
 const storeUsers = require('./storeUsers').storeUsers
 const timer = require('./timer.js').timer
 const userGroupsDialog = require('./dialogs/userGroupsDialog').userGroupsDialog
+const ui = require('./ui').ui
 /******************************************************************************/
+
+const selectedUsers = (function() {
+
+    let userStore = new Map()
+
+    let toEmailList = function() {
+        let userList = []
+        userStore.forEach((_, userEmail) => userList.push(userEmail))
+        return userList
+    }
+
+    let displayCurrentUserSelection = function() {
+        $('#individuallySelectedUsers').text(toEmailList().join("\n"))
+    }
+
+    return {
+
+        toggleSelectedUser: function(userEmail) {
+            if (userStore.has(userEmail)) {
+                userStore.delete(userEmail)
+            } else {
+                userStore.set(userEmail, 1)
+            }
+            displayCurrentUserSelection()
+        },
+     
+        applySelectedActions: function() {
+            userActions.update(toEmailList())
+        }
+
+    }
+})()
 
 const APICan = (function() {
     let socket = null
@@ -33,17 +67,31 @@ const APICan = (function() {
         $('.groupCmdRow').each(function(grpCmds) {
             debugger
         })
+
+        $('#visibleAPISelect').on('change', function() {
+            ui.showVisibleAPITable(this.value)
+        })  
+        $('#selectedUsersList tbody').on('click', 'tr', function(){
+            $(this).toggleClass('selected')
+            let selectedUserEmail = storeUsers.selectUserFromSelectedTableRow(this) 
+            selectedUsers.toggleSelectedUser(selectedUserEmail)
+        })
     }
 
     return {
         init: function() {
             socket = io()
+            socket.on('updateBottomStatusInfo', function(data){
+                $('#bottomStatusBar').text(data.message)
+            })
+        
             tenants.onReady(setUI)
             storeUsers.onReady({
                 userDisplayList: $('#selectedUsersList')
             })
             timer.eachMinute()
             setInterval(timer.eachMinute, 10000)
+            
         },
         run: function() {
 
@@ -55,7 +103,8 @@ const APICan = (function() {
 module.exports = {
     APICan
 }
-},{"./dialogs/userGroupsDialog":3,"./storeUsers":5,"./tenants":6,"./timer.js":7}],2:[function(require,module,exports){
+
+},{"./dialogs/userGroupsDialog":3,"./storeUsers":5,"./tenants":6,"./timer.js":7,"./ui":8}],2:[function(require,module,exports){
 "use strict"
 
 
@@ -153,38 +202,6 @@ const storeUsers = require('./storeUsers').storeUsers
 const userActions = require('./userActions').userActions
 /******************************************************************************/
 
-const selectedUsers = (function() {
-
-    let userStore = new Map()
-
-    let toEmailList = function() {
-        let userList = []
-        userStore.forEach((_, userEmail) => userList.push(userEmail))
-        return userList
-    }
-
-    let displayCurrentUserSelection = function() {
-        $('#individuallySelectedUsers').text(toEmailList().join(';'))
-    }
-
-    return {
-
-        toggleSelectedUser: function(userEmail) {
-            if (userStore.has(userEmail)) {
-                userStore.delete(userEmail)
-            } else {
-                userStore.set(userEmail, 1)
-            }
-            displayCurrentUserSelection()
-        },
-
-        applySelectedActions: function() {
-            userActions.update(toEmailList())
-        }
-
-    }
-})()
-
 
 $(function() {
 
@@ -227,10 +244,7 @@ $(function() {
     }
 
 
-    socket.on('updateBottomStatusInfo', function(data){
-        $('#bottomStatusBar').text(data.message)
-    })
-
+  
     socket.on('refresh page', function(tenants){
 
     })
@@ -241,12 +255,7 @@ $(function() {
         document.getElementById('id01').style.display='block'
     }) 
 
-    $('#selectedUsersList tbody').on('click', 'tr', function(){
-		$(this).toggleClass('selected')
-		let selectedUserEmail = users.selectUserFromSelectedTableRow(this) 
-		selectedUsers.toggleSelectedUser(selectedUserEmail)
-    })
-
+  
     $('#userActions').click(function(event){
         event.preventDefault()
         let emails = []
@@ -291,7 +300,7 @@ $(function() {
         $.get('/findUsers', parameters, keyCloakUsers.showUsers)
     })
 */
-},{"./APICan":1,"./storeUsers":5,"./userActions":8}],5:[function(require,module,exports){
+},{"./APICan":1,"./storeUsers":5,"./userActions":9}],5:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
@@ -306,6 +315,7 @@ $(function() {
 
 /******************************************************************************/
 const APICan = require('./APICan').APICan
+const ui = require('./ui').ui
 const userActions = require('./userActions').userActions
 const dataExchangeStatus = require('./dataExchangeStatus').dataExchangeStatus
 const tenants = require('./tenants').tenants
@@ -355,7 +365,7 @@ const storeUsers = (function() {
 
     let _groups = new Map()
 
-    let dataTableHandle = null	//table that displays user information
+    let dataTableHandle = null //table that displays user information
     let newGroupDefaultName = _ => `group_${groups.size}`
 
     let displayGroupsListInForm = function(groupName, groupID) {
@@ -444,6 +454,7 @@ const storeUsers = (function() {
                 dataExchangeStatus.setInactive()
                 dataTableHandle.clear().draw()
                 keyCloakUsers.showUsers(data)
+		ui.scrollToSection("userTableSection")
             })
         },
 
@@ -467,18 +478,18 @@ const storeUsers = (function() {
         },
 
         addUserRow: function({
-		user, 
+            user,
             email,
-	created,	
+            created,
             keyCloakAccount,
             otpEnabled,
             otpVerified
         }) {
 
             dataTableHandle.row.add([
-		    user, 
+                user,
                 email,
-		    created, 
+                created,
                 keyCloakAccount
             ]).draw(false)
         }
@@ -494,13 +505,13 @@ const keyCloakUsers = (function() {
         showUsers: function(userData) {
             $('#userSelectionTable').empty()
             userData.forEach(userProfile => {
-		storeUsers.addUserRow({
-			user: userProfile.username, 
-			email: userProfile.email,
-			created: userProfile.created_at, 
-			keyCloakAccount: 'keyCloakAccount' in userProfile && 'id' in userProfile.keyCloakAccount ? userProfile.keyCloakAccount.id : 'no'
-		})
-           })
+                storeUsers.addUserRow({
+                    user: userProfile.username,
+                    email: userProfile.email,
+                    created: userProfile.created_at,
+                    keyCloakAccount: 'keyCloakAccount' in userProfile && 'id' in userProfile.keyCloakAccount ? userProfile.keyCloakAccount.id : 'no'
+                })
+            })
         }
     }
 })()
@@ -510,7 +521,7 @@ module.exports = {
     keyCloakUsers
 }
 
-},{"./APICan":1,"./dataExchangeStatus":2,"./tenants":6,"./userActions":8}],6:[function(require,module,exports){
+},{"./APICan":1,"./dataExchangeStatus":2,"./tenants":6,"./ui":8,"./userActions":9}],6:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
@@ -587,6 +598,42 @@ module.exports = {
     timer
 }
 },{}],8:[function(require,module,exports){
+/*******************************************************************************
+ * Franck Binard, ISED (FranckEinstein90)
+ *
+ * APICan application - 2020
+ * -------------------------------------
+ *  Canadian Gov. API Store middleware - client side
+ *
+ *  main.js: entry point 
+ *
+ ******************************************************************************/
+"use strict"
+
+/******************************************************************************/
+/******************************************************************************/
+
+const ui = (function(){
+    return {
+        scrollToSection: function( sectionID ){
+            let hash = $('#' + sectionID)
+            $('html, body').animate({
+                scrollTop: hash.offset().top
+            }, 800, _ => window.location.hash = hash)
+        }, 
+        showVisibleAPITable: function(tenant, event){
+            $('.tenantsVisibleAPI').hide()
+            let apiPaneID = tenant + 'VisibleAPI'
+            $('#' + apiPaneID).show()
+
+        }
+    }
+})()
+
+module.exports = {
+    ui
+}
+},{}],9:[function(require,module,exports){
 /*************************************************************************
  * Client side, trigger user actions
  * 

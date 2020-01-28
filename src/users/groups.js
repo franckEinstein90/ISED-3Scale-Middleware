@@ -12,6 +12,7 @@
 const db = require('@server/db').appDatabase
 const tenantsManager = require('@src/services/tenantsManager').tenantsManager
 const users = require('@users/users').users
+const messages = require('@server/messages').messages
 /*****************************************************************************/
 
 const getGroupMembers = function({
@@ -150,6 +151,9 @@ const groups = (function() {
                 emailPattern: group.emailPattern
             })
             .then(tenantGroups=> {
+                if (tenantGroups.length === 0) {
+                    messages.emitRefreshBottomStatusBar(`no users were found for this request`)
+                } 
                 tenantGroups = tenantGroups.filter(tenant => typeof tenant !== 'undefined')
                 tenantGroups.forEach(tenantGroup=>{
                     tenantGroup.forEach(u =>{
@@ -158,6 +162,7 @@ const groups = (function() {
                             userAccounts.push(userInfo)
                         }
                     })
+                    messages.emitRefreshBottomStatusBar(`${userAccounts.length} users match criteria`)
                 })
                 if(group.emailPattern.length > 0){
                     //filter by email pattern
@@ -167,12 +172,19 @@ const groups = (function() {
                 return 'ok'
             })
             .then( _ =>{
+                if(userAccounts.length === 0){
+                    return []
+                }
                 if( group.properties.includes('keyCloakAccount') ){
+                    messages.emitRefreshBottomStatusBar(`Getting ${userAccounts.length} keycloak accounts`)
                     let keyCloakProfiles = userAccounts.map( user => users.getUserList(user.email))
                     return Promise.all(keyCloakProfiles) 
                 }
             })
             .then(userList =>{
+                if(userList.length === 0){
+                    return userAccounts
+                }
                 userList.forEach(kclkAccount => {
                     let account = userAccounts.find( user => user.email === kclkAccount.email)
                     if(typeof account !== 'undefined'){

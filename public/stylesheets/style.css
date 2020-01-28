@@ -1,10 +1,17 @@
 
 :root {
   --mainColor: #94DF00;
-  --formBackground: #31B4B4;
+  --formBackground: rgb(32, 88, 88);
   --comp1: #1982C4;
 
 }
+html {
+  scroll-behavior: smooth;
+  }
+html,body,h1,h2,h3,h4,h5 {
+  font-family: "Raleway", sans-serif
+}
+
 #userFormGroupList{
   width:100%
 }
@@ -14,6 +21,15 @@
 
 .groupCreationLabel{
   color: var(--mainColor);
+}
+
+.tenant-card {
+  border: black 1 px;
+  background-color: var(--formBackground);
+  height:60px; 
+  color:white;
+  font-family: "Raleway", sans-serif;
+  font-size:1.2em; 
 }
 
 .loader {
@@ -32,7 +48,8 @@
   }
 
 #leftNav {
-  background-color: black; 
+  background-color: black;
+  width:250px; 
   color:white;
   text-decoration:bold;
   font-size: 1em;

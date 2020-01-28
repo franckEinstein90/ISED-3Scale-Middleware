@@ -1,7 +1,7 @@
 
   <!-- Sidebar/menu -->
-<nav    class="w3-sidebar w3-collapse w3-animate-left w3-center" 
-        style="z-index:3;width:250px;" id="leftNav">
+<nav    class="w3-sidebar w3-small w3-hide-small w3-hide-medium w3-animate-left w3-center" 
+        id="leftNav">
 <a href="#" class="w3-bar-item w3-button w3-padding-large w3-hover-opacity w3-hover-black leftNavItem">
     <i class="fa fa-home w3-xxlarge leftNavIcon"></i>
     <p>TENANTS</p>
@@ -27,26 +27,18 @@
     <i class="fa fa-eye w3-xxlarge leftNavIcon"></i>
     <p>SELECTED</p>
   </a>
-  <hr  class="w3-bar-item"/>
-  <h2>Users</h2>
-   <a  href="" 
-    class="w3-bar-item w3-button w3-padding-large w3-hover-black" >
-    <i class="fa fa-code w3-xxlarge leftNavIcon"></i>
-    <p>IMPERSONATE</p>
-  </a>
-  <a  href="" 
-    class="w3-bar-item w3-button w3-padding-large w3-hover-black" >
-    <i class="fa fa-code w3-xxlarge leftNavIcon"></i>
-    <p>SUPPORT</p>
-  </a>
-  <hr  class="w3-bar-item"/>
+
+
+  {{> leftNav/users}}
+
+<!--  <hr  class="w3-bar-item"/>
   <h2>API Store</h2>
    <a  href="" 
     class="w3-bar-item w3-button w3-padding-large w3-hover-black" >
     <i class="fa fa-code w3-xxlarge leftNavIcon"></i>
     <p>TEST</p>
   </a>
- 
+--> 
   <hr  class="w3-bar-item"/>
   <h2>APIs</h2>
   <a  href="" 
