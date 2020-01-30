@@ -1,0 +1,17 @@
+digraph G {
+	node [shape=circle];
+	user; 
+	node [shape=box];
+	node [shape=oval];
+	keyCloak; 
+	"3Scale" -> APICan;
+	node [shape=box,style=filled,color=".7 .3 1.0"];
+	keyCloak -> Timer;  
+	Timer -> keyCloak; 
+	Timer -> APICan; 
+	Timer -> "3Scale"; 
+	"3Scale" -> Timer; 
+	APICan -> Timer; 
+	APICan  -> "3Scale"; 
+	keyCloak -> user; 
+}

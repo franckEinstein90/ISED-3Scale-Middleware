@@ -1,0 +1,24 @@
+digraph G {
+	node [shape=circle];
+	user
+	node [shape=box];
+	APICan; 
+	node [shape=oval];	
+	"3Scale" -> APICan;
+	user -> APIStore [style=bold,label="http-1"]; 
+//	APICan -> keyCloak;
+//	APICan -> Jira; 
+//	APICan -> APIStore; 
+//	APICan -> "3Scale";
+	node [shape=box,style=filled,color=".7 .3 1.0"];
+	Storage;
+	Timer -> APICan; 
+	Timer -> Storage;
+	Timer -> "3Scale" [style=bold,label="get every x mins"];
+	"3Scale" -> Timer; 
+	Storage -> Timer;  
+	APICan -> Storage[style=bold,label="tenant info only "];
+	APICan  -> "3Scale" [style=bold,label="get-2 (user info)"];
+	APIStore -> APICan[style=bold,label="get-3"]; 
+	APICan -> APIStore [style=bold,label="post-4"];
+}
