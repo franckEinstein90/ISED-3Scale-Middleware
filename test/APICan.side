@@ -271,6 +271,183 @@
       ],
       "value": ""
     }]
+  }, {
+    "id": "da22a652-5d4a-4f04-a3f7-23aa4c787d11",
+    "name": "Open user group dialog",
+    "commands": [{
+      "id": "dffea294-91dc-49d3-a246-5a27ed468850",
+      "comment": "",
+      "command": "open",
+      "target": "/",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "93699957-641f-43d0-bf42-945a255d9fec",
+      "comment": "",
+      "command": "setWindowSize",
+      "target": "1936x1096",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "00af33cb-f2f4-4adb-a52c-f4df2b9d90d8",
+      "comment": "",
+      "command": "click",
+      "target": "css=.fa-users",
+      "targets": [
+        ["css=.fa-users", "css:finder"],
+        ["xpath=//a[@id='manageUsersBtn']/i", "xpath:idRelative"],
+        ["xpath=//a[3]/i", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "ecee72fc-2e2c-4d11-9440-ab3e5126cc82",
+      "comment": "",
+      "command": "close",
+      "target": "",
+      "targets": [],
+      "value": ""
+    }]
+  }, {
+    "id": "3eae95a8-74b3-49f2-bce6-e73264327dc9",
+    "name": "open service inspect modal",
+    "commands": [{
+      "id": "7564fd7d-cec8-4719-aea0-b3fd0924959a",
+      "comment": "",
+      "command": "open",
+      "target": "/",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "4f0d3505-915b-4a5b-a088-8c53b1f2163c",
+      "comment": "",
+      "command": "setWindowSize",
+      "target": "1936x1096",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "bfcedad7-3c10-44bd-af79-8955340d0556",
+      "comment": "",
+      "command": "click",
+      "target": "id=visibleAPISelect",
+      "targets": [
+        ["id=visibleAPISelect", "id"],
+        ["name=option", "name"],
+        ["css=#visibleAPISelect", "css:finder"],
+        ["xpath=//select[@id='visibleAPISelect']", "xpath:attributes"],
+        ["xpath=//div[@id='APIntel']/select", "xpath:idRelative"],
+        ["xpath=//select", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "c00bd653-5365-42d1-8d63-dde4a40fe8c0",
+      "comment": "",
+      "command": "select",
+      "target": "id=visibleAPISelect",
+      "targets": [],
+      "value": "label=ised-isde (6)"
+    }, {
+      "id": "c9ca0cad-f023-4e0f-8c7e-61820e0ebf5c",
+      "comment": "",
+      "command": "click",
+      "target": "id=visibleAPISelect",
+      "targets": [
+        ["id=visibleAPISelect", "id"],
+        ["name=option", "name"],
+        ["css=#visibleAPISelect", "css:finder"],
+        ["xpath=//select[@id='visibleAPISelect']", "xpath:attributes"],
+        ["xpath=//div[@id='APIntel']/select", "xpath:idRelative"],
+        ["xpath=//select", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "a613211d-cff8-47f4-9750-4cbae6fd0181",
+      "comment": "",
+      "command": "click",
+      "target": "css=#ised-isdeVisibleAPI .serviceInspect:nth-child(1) > .serviceName",
+      "targets": [
+        ["css=#ised-isdeVisibleAPI .serviceInspect:nth-child(1) > .serviceName", "css:finder"],
+        ["xpath=//table[@id='ised-isdeVisibleAPI']/tbody/tr/td", "xpath:idRelative"],
+        ["xpath=//table[11]/tbody/tr/td", "xpath:position"]
+      ],
+      "value": ""
+    }]
+  }, {
+    "id": "29d32dac-cf2e-4993-b503-45ab3c1b6bf4",
+    "name": "apiHitChart",
+    "commands": [{
+      "id": "8c564b8d-2c08-4481-98cd-1a98511b13ce",
+      "comment": "",
+      "command": "open",
+      "target": "/",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "706e408c-7778-4849-97ea-b7a5460e18ea",
+      "comment": "",
+      "command": "setWindowSize",
+      "target": "1096x1936",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "977bec2f-6bf3-4d71-ab07-55f7f6a91e70",
+      "comment": "",
+      "command": "click",
+      "target": "id=visibleAPISelect",
+      "targets": [
+        ["id=visibleAPISelect", "id"],
+        ["name=option", "name"],
+        ["css=#visibleAPISelect", "css:finder"],
+        ["xpath=//select[@id='visibleAPISelect']", "xpath:attributes"],
+        ["xpath=//div[@id='APIntel']/select", "xpath:idRelative"],
+        ["xpath=//select", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "9b4f0179-4871-4207-968a-c7ada087dde7",
+      "comment": "",
+      "command": "select",
+      "target": "id=visibleAPISelect",
+      "targets": [],
+      "value": "label=ised-isde (6)"
+    }, {
+      "id": "e5885e58-af9c-478b-a0a7-0985bfd380f0",
+      "comment": "",
+      "command": "click",
+      "target": "id=visibleAPISelect",
+      "targets": [
+        ["id=visibleAPISelect", "id"],
+        ["name=option", "name"],
+        ["css=#visibleAPISelect", "css:finder"],
+        ["xpath=//select[@id='visibleAPISelect']", "xpath:attributes"],
+        ["xpath=//div[@id='APIntel']/select", "xpath:idRelative"],
+        ["xpath=//select", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "b05d8105-f615-4b4b-a0bf-547f4048a318",
+      "comment": "",
+      "command": "click",
+      "target": "css=#ised-isdeVisibleAPI .serviceInspect:nth-child(3) > .serviceName",
+      "targets": [
+        ["css=#ised-isdeVisibleAPI .serviceInspect:nth-child(3) > .serviceName", "css:finder"],
+        ["xpath=//table[@id='ised-isdeVisibleAPI']/tbody/tr[3]/td", "xpath:idRelative"],
+        ["xpath=//table[11]/tbody/tr[3]/td", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "a99b1265-aea7-45b3-bcfd-d539acc613c2",
+      "comment": "",
+      "command": "click",
+      "target": "css=.tablink:nth-child(2)",
+      "targets": [
+        ["css=.tablink:nth-child(2)", "css:finder"],
+        ["xpath=//button[@onclick=\"openCity(event, 'Stats')\"]", "xpath:attributes"],
+        ["xpath=//div[@id='serviceInspectModal']/div/div/button[2]", "xpath:idRelative"],
+        ["xpath=//div[4]/div/div[2]/div/div/button[2]", "xpath:position"],
+        ["xpath=//button[contains(.,'Stats')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }]
   }],
   "suites": [{
     "id": "61b7c653-df2a-4106-a1a4-ee9b480c733c",
