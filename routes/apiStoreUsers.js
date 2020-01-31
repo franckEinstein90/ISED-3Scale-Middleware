@@ -108,10 +108,13 @@ const apiStoreUserRoutes =  (function (){
                 let sanitized = fieldValue.replace(/[^a-zA-Z0-9(),/.@'\-?" ]/g, " ")
                 sanitized = sanitized.replace(/"/g, "'")
                 return sanitized
+            }   
+            let logMessage = {
+                message: `jira support request ${queryManager.requestLogMessage(req)}`
             }
+            accessLog.log('info', logMessage.message)
 	        //creates a jira support ticket for the api store
             res.header("Content-Type", "application/json; charset=utf-8")
-            
             let summary = sanitize(req.body.summary || "no summary")
             let description = sanitize(req.body.description || "no description")
             let user = sanitize(req.body.user || "no user name")

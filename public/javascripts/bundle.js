@@ -15,6 +15,8 @@
 /******************************************************************************/
 const tenants = require('./tenants').tenants
 const storeUsers = require('./storeUsers').storeUsers
+const storeServices = require('./storeServices').storeServices
+/******************************************************************************/
 const timer = require('./timer.js').timer
 const userGroupsDialog = require('./dialogs/userGroupsDialog').userGroupsDialog
 const ui = require('./ui').ui
@@ -44,7 +46,7 @@ const selectedUsers = (function() {
             }
             displayCurrentUserSelection()
         },
-     
+
         applySelectedActions: function() {
             userActions.update(toEmailList())
         }
@@ -68,30 +70,48 @@ const APICan = (function() {
             debugger
         })
 
-        $('#visibleAPISelect').on('change', function() {
-            ui.showVisibleAPITable(this.value)
-        })  
-        $('#selectedUsersList tbody').on('click', 'tr', function(){
+        $('#selectedUsersList tbody').on('click', 'tr', function() {
             $(this).toggleClass('selected')
-            let selectedUserEmail = storeUsers.selectUserFromSelectedTableRow(this) 
+            let selectedUserEmail = storeUsers.selectUserFromSelectedTableRow(this)
             selectedUsers.toggleSelectedUser(selectedUserEmail)
         })
+
+        $('#showScheduler').on('click', function(event){
+            event.preventDefault()
+            document.getElementById('scheduleInspectModal').style.display = 'block'
+            $.get('/schedule', {}, function(events) {
+                $('#scheduleInfo tbody').empty()
+                events.forEach(info => {
+                $('#scheduleInfo tbody').append(`<tr><td>${info.id}</td><td>${info.eventTitle}</td><td>${info.description}</td><td>${info.frequency}</td><td>${info.lastRefresh}</td></tr>`)
+                })
+            })
+        })
+    }
+
+
+    let storeModulesReady = function() {
+        storeUsers.onReady({
+            userDisplayList: $('#selectedUsersList')
+        })
+
+        storeServices.onReady({
+
+        })
+
     }
 
     return {
         init: function() {
             socket = io()
-            socket.on('updateBottomStatusInfo', function(data){
+            socket.on('updateBottomStatusInfo', function(data) {
                 $('#bottomStatusBar').text(data.message)
             })
-        
+
             tenants.onReady(setUI)
-            storeUsers.onReady({
-                userDisplayList: $('#selectedUsersList')
-            })
+            storeModulesReady()
             timer.eachMinute()
             setInterval(timer.eachMinute, 10000)
-            
+
         },
         run: function() {
 
@@ -104,7 +124,7 @@ module.exports = {
     APICan
 }
 
-},{"./dialogs/userGroupsDialog":3,"./storeUsers":5,"./tenants":6,"./timer.js":7,"./ui":8}],2:[function(require,module,exports){
+},{"./dialogs/userGroupsDialog":3,"./storeServices":5,"./storeUsers":6,"./tenants":7,"./timer.js":8,"./ui":9}],2:[function(require,module,exports){
 "use strict"
 
 
@@ -183,7 +203,7 @@ module.exports = {
     userGroupsDialog
 }
 
-},{"../storeUsers":5,"../tenants":6}],4:[function(require,module,exports){
+},{"../storeUsers":6,"../tenants":7}],4:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
@@ -300,7 +320,108 @@ $(function() {
         $.get('/findUsers', parameters, keyCloakUsers.showUsers)
     })
 */
-},{"./APICan":1,"./storeUsers":5,"./userActions":9}],5:[function(require,module,exports){
+},{"./APICan":1,"./storeUsers":6,"./userActions":10}],5:[function(require,module,exports){
+/*******************************************************************************
+ * Franck Binard, ISED (FranckEinstein90)
+ *
+ * APICan application - 2020
+ * -------------------------------------
+ *  Canadian Gov. API Store middleware - client side
+ *
+ *  storeService.js: client api services module 
+ *
+ ******************************************************************************/
+
+"use strict"
+
+/******************************************************************************/
+const ui = require('./ui').ui
+/******************************************************************************/
+
+let drawGraph = function(stats){
+	let ctx = document.getElementById('statsGraph').getContext('2d')
+	let myChart = new Chart(ctx, {
+		type: 'bar',
+		data:{
+			labels:[
+				'june','july','aug','sept','oct','nov','dec','jan','feb'
+			],
+			datasets:[{
+				label:'hits per month',
+				data:stats.values
+			}], 
+			backgroundColor: stats.values.map(s => 'rgba(255, 0, 0, 0.7)'), 
+			borderColor: stats.values.map(s => 'rgba(0, 255, 0, 0.7)') 
+            
+		},
+		options:{}
+	})
+}
+let openServiceInspectDialog = function({
+	tenant, 
+	serviceID
+	}){
+
+	document.getElementById('serviceInspectModal').style.display = 'block'
+	$('#serviceModalTenantName').text(tenant)
+	$('#serviceModalID').text(serviceID) 
+	$.get('/serviceInspect', {tenant, service:serviceID}, function(apiInfo) {
+
+		$('#apiInspectFormState').val(apiInfo.state)
+		$('#apiInspectFormTenantName').val(apiInfo.tenantName)
+		$('#apiInspectFormServiceID').val(apiInfo.serviceID)
+		$('#apiInspectFormSystemName').val(apiInfo.systemName)
+		$('#apiInspectFormLastUpdate').val(apiInfo.updatedAt)
+		$('#apiInspectFormCreationDate').val(apiInfo.created_at)
+		$('#apiInspectFormFeatures').html(`${apiInfo.features.map(x => x.name).join('<br/>')}`)
+		$('#englishDoc').val(apiInfo.documentation[0].docSet.body)
+		$('#frenchDoc').val(apiInfo.documentation[1].docSet.body)
+		let tags =[]
+		apiInfo.documentation.forEach(d => {
+			if('tags' in d.docSet){
+				d.docSet.tags.forEach(t => tags.push(t))
+			}
+		})
+		$('#apiTags').text(tags.join(','))
+		if('stats' in apiInfo) drawGraph(apiInfo.stats)
+	})
+	.fail(error => {
+		debugger
+	})
+}
+
+const storeServices = (function() {
+
+    let _setUI = function() {
+        $('#visibleAPISelect').on('change', function() {
+            ui.showVisibleAPITable(this.value)
+        })
+		  $('.serviceInspect').click( event => {
+				event.preventDefault()
+			   let parentTable = event.currentTarget.offsetParent 
+			   let tenant = parentTable.id.replace('VisibleAPI', '')
+			   let serviceID = Number((event.currentTarget.cells[1]).innerText)
+			   openServiceInspectDialog({
+					tenant, 
+					serviceID
+				})
+		  })
+    }
+
+    return {
+        onReady: function(options) {
+            _setUI()
+        }
+
+    }
+
+})()
+
+module.exports = {
+    storeServices
+}
+
+},{"./ui":9}],6:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
@@ -454,7 +575,7 @@ const storeUsers = (function() {
                 dataExchangeStatus.setInactive()
                 dataTableHandle.clear().draw()
                 keyCloakUsers.showUsers(data)
-		ui.scrollToSection("userTableSection")
+                ui.scrollToSection("userTableSection")
             })
         },
 
@@ -520,8 +641,7 @@ module.exports = {
     storeUsers,
     keyCloakUsers
 }
-
-},{"./APICan":1,"./dataExchangeStatus":2,"./tenants":6,"./ui":8,"./userActions":9}],6:[function(require,module,exports){
+},{"./APICan":1,"./dataExchangeStatus":2,"./tenants":7,"./ui":9,"./userActions":10}],7:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
@@ -567,7 +687,7 @@ const tenants = (function() {
 module.exports = {
     tenants
 }
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
@@ -597,7 +717,7 @@ const timer = (function() {
 module.exports = {
     timer
 }
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
@@ -613,15 +733,15 @@ module.exports = {
 /******************************************************************************/
 /******************************************************************************/
 
-const ui = (function(){
+const ui = (function() {
     return {
-        scrollToSection: function( sectionID ){
+        scrollToSection: function(sectionID) {
             let hash = $('#' + sectionID)
             $('html, body').animate({
                 scrollTop: hash.offset().top
             }, 800, _ => window.location.hash = hash)
-        }, 
-        showVisibleAPITable: function(tenant, event){
+        },
+        showVisibleAPITable: function(tenant, event) {
             $('.tenantsVisibleAPI').hide()
             let apiPaneID = tenant + 'VisibleAPI'
             $('#' + apiPaneID).show()
@@ -633,7 +753,7 @@ const ui = (function(){
 module.exports = {
     ui
 }
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 /*************************************************************************
  * Client side, trigger user actions
  * 

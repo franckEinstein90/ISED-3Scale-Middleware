@@ -25,7 +25,10 @@ const messages = (function() {
                     name: t.name,
                     id: t.id,
                     lastUpdate: tenantsManager.lastTenantUpdate(t.name),
-                    numServices: t.services.length(), 
+                    numServices: t.services.length(),
+                    numVisibleServices: t.services.length({
+                        visibleOnly: 1
+                    }),
                     services: t.services.listServices()
                 }
             })

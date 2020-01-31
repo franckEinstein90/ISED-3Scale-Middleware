@@ -20,26 +20,26 @@ const groups = require('@users/groups').groups
 /******************************************************************************/
 
 
-const appRoot = (function(){
+const appRoot = (function() {
 
     let router = null
 
-    return{
-        render: function(req, res, next){
+    return {
+        render: function(req, res, next) {
             let pageData = {
-                title: "APICan", 
-                state: 'initializing' , 
-                tenants: messages.tenantInfo(), 
+                title: "APICan",
+                state: 'initializing',
+                tenants: messages.tenantInfo(),
                 definedUserGroups: groups.definedGroups()
             }
-        
-            if(appStatus.isRunning()){
+
+            if (appStatus.isRunning()) {
                 pageData.state = 'running'
             }
             res.render('index', pageData)
         }
     }
-    
+
 })()
 
 module.exports = {

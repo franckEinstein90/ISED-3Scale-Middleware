@@ -48,8 +48,9 @@ const appEvents = (function() {
         let tenants = tenantsManager.tenants()
             .map(t => t.name)
             .filter(tenantName => tenantName !== 'cra-arc')
+
         getProviderAccountUsers(tenants)
-            .then(tenantAdminAccounts => {
+        .then(tenantAdminAccounts => {
                 let userEmails = []
                 tenantAdminAccounts.forEach(adminAccounts => {
                     adminAccounts.forEach(account => {
@@ -60,8 +61,8 @@ const appEvents = (function() {
                 })
                 let keyCloakProfiles = userEmails.map(email => users.getUserList(email))
                 return Promise.all(keyCloakProfiles)
-            })
-            .then(keycloakAccounts => {
+        })
+        .then(keycloakAccounts => {
                 let userEmails = keycloakAccounts
                     .filter(account => 'totp' in account && account.totp === false)
                     .filter(account => !(account.requiredActions.includes('CONFIGURE_TOTP')))
@@ -69,7 +70,7 @@ const appEvents = (function() {
                     .map(account => account.email)
                 return Promise.all(userEmails.map(email => users.enforceTwoFactorAuthentication(email)))
             })
-            .then(x => {
+        .then(x => {
                 console.log('fdsa')
             })
         //enforces otp for API Store users
@@ -78,12 +79,16 @@ const appEvents = (function() {
     return {
         configureTenantRefresh: function(frequency) {
             return scheduler.newEvent({
-                frequency,
-                callback: updateTenants
+               eventTitle: 'tenant info refresh', 
+               description: 'refreshes service info for each tenant', 
+               frequency,
+               callback: updateTenants
             })
         },
         configureOTPEnforce: function(frequency) {
             return scheduler.newEvent({
+                eventTitle: 'Enforce otp', 
+                description: 'Enforces 2FA for tenant admins (xcpt cra)', 
                 frequency,
                 callback: otpEnforce
             })

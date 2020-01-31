@@ -13,15 +13,15 @@
 /******************************************************************************/
 /******************************************************************************/
 
-const ui = (function(){
+const ui = (function() {
     return {
-        scrollToSection: function( sectionID ){
+        scrollToSection: function(sectionID) {
             let hash = $('#' + sectionID)
             $('html, body').animate({
                 scrollTop: hash.offset().top
             }, 800, _ => window.location.hash = hash)
-        }, 
-        showVisibleAPITable: function(tenant, event){
+        },
+        showVisibleAPITable: function(tenant, event) {
             $('.tenantsVisibleAPI').hide()
             let apiPaneID = tenant + 'VisibleAPI'
             $('#' + apiPaneID).show()

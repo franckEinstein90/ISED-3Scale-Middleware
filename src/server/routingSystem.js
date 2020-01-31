@@ -4,30 +4,37 @@
  * -------------------------------------
  *  routingSystem.js
  *
- *  Sets up the routing for the app
+ *  Sets up the api plumbing for the app
  ******************************************************************************/
 
 "use strict"
 
 /*****************************************************************************/
-
 const express = require('express')
 const cors = require('cors')
-
 const tenantRoutes = require('@routes/tenants').tenantRoutes
+/*****************************************************************************/
 const appRoot = require('@server/routes/appRoot').appRoot
-
 const apiStoreUserRoutes = require('@routes/apiStoreUsers').apiStoreUserRoutes
 const userGroupRoutes = require('@server/routes/userGroupRoutes').userGroupRoutes
-
+const serviceInspectRoutes = require('@server/routes/serviceInspectRoutes').serviceInspectRoutes
+/*****************************************************************************/
 const appStatus = require('@server/appStatus').appStatus
-
+const scheduler = require('@src/cron/timer').scheduler
+const logs = require('@server/logs').logs
+/*****************************************************************************/
 
 const routingSystem = function({
     app
+
 }) {
 
     let router = express.Router()
+
+    let _setServiceInspectRoutes = () => {
+        router.get('/serviceInspect', serviceInspectRoutes.getServiceInfo)
+    }
+
     let whiteList = ['https://dev.api.canada.ca', 'https://api.canada.ca']
     let corsOptions = {
         origin: function(origin, callback) {
@@ -47,6 +54,10 @@ const routingSystem = function({
     router.get('/tenants', tenantRoutes.getTenants)
     router.get('/getTenantAccounts', tenantRoutes.getTenantAccounts)
 
+    _setServiceInspectRoutes()
+    router.get('/schedule', scheduler.getSchedule)
+    router.get('/logs', logs.getLogs)
+	    
     //get sets of users based on various criteria           
     router.get('/findUsers', userGroupRoutes.findUsers)
     router.get('/groupUsers', userGroupRoutes.getGroupUsers)

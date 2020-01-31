@@ -6,18 +6,18 @@
  *  timer.js : handle recurring events set to run every x minutes 
  *
  ******************************************************************************/
+
 "use strict"
 
-
+/******************************************************************************/
 const uuidv4 = require('uuid/v4')
 const cronJob = require('node-cron')
-
+/******************************************************************************/
 
 
 const scheduler = (function(){
 
     let runningTimeMinutes = 0
-  
     let events = []
   
     return {
@@ -25,13 +25,18 @@ const scheduler = (function(){
       start : function(){ 
         cronJob.schedule('* * * * *', scheduler.cronUpdate)
       }, 
-  
+ 
+
       newEvent : function({
+	eventTitle, 
+	description, 
         frequency, //minutes
         callback
       }){
           let ev ={
             id: uuidv4(), 
+	    eventTitle, 
+	    description, 
             frequency, 
             lastRefresh: 0, 
             callback
@@ -51,9 +56,9 @@ const scheduler = (function(){
       }, 
 
       cronUpdate: function(){
+
         runningTimeMinutes += 1
         console.log(`Running time: ${runningTimeMinutes} (min)`)
-  
         events.forEach(event => {
             event.lastRefresh += 1
             if( event.lastRefresh >=  event.frequency ){
@@ -61,10 +66,15 @@ const scheduler = (function(){
               return event.callback()
             } 
         })
-      }
-  
-  
+
+      },
+
+      getSchedule: function(req, res, next){
+        res.send(events)
+  }
+
     }
+
   })()
  
 

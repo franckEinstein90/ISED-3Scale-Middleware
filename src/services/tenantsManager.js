@@ -8,34 +8,31 @@
  *  - replies to API requests userInfo.json and apiInfo.json
  *  - updates the tenant and service information on a schedule
  **********************************************************************************/
-
-
 "use strict"
 
+ /**********************************************************************************/
 const APICanData = require('@src/APICanData').APICanData
 const t = require('@src/responses').tenants
 const UserAccount = require('@src/accounts').accounts.UserAccount
 const errors = require('@src/errors').errors
 const moment = require('moment')
 const db = require('@server/db').appDatabase
+ /**********************************************************************************/
 
 const tenantsManager = (function() {
 
-    let userInfoResponse, tenantToApiInfo,
-        userApiInfoResponse
 
     let _applicationAPIURI = null
-
     let tenants = []
     let updateRegister = new Map()
 
-    userInfoResponse = function(user, language) {
+    let userInfoResponse = function(user, language) {
         let JSONResponse = {
             userEmail: user.email,
             tenants: []
         }
 
-        let applicationInfo = (application, service) => {
+    let applicationInfo = (application, service) => {
             let serviceDocumentation = service.outputAPIDescription(language)
             let links = application.links
             links.push({
@@ -82,7 +79,7 @@ const tenantsManager = (function() {
         return JSON.stringify(JSONResponse)
     }
 
-    userApiInfoResponse = function(requestResult, user, language) {
+    let userApiInfoResponse = function(requestResult, user, language) {
         let response = []
 
         tenants.forEach(tenant => {
@@ -128,6 +125,9 @@ const tenantsManager = (function() {
 
     return {
 
+        getTenantByName: tenantName => tenants.find(t => t.name === tenantName),
+        tenants: () => tenants,
+
         configure: function(dataJSON) {
             let env = APICanData.env() 
             _applicationAPIURI = (env === "dev" ? ".dev" : "") + ".api.canada.ca/admin/applications/"
@@ -142,14 +142,6 @@ const tenantsManager = (function() {
             //set up index by name
             tenants.forEach( tenant => updateRegister.set(tenant.name, null))
             db.setTenants( tenants.map(t => t.name)  )
-        },
-
-        getTenantByName: function(tenantName) {
-            let tenant = tenants.find(t => t.name === tenantName)
-            return tenant
-        },
-        tenants: function() {
-            return tenants
         },
 
         lastTenantUpdate: function(tenantName) {

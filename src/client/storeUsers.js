@@ -151,7 +151,7 @@ const storeUsers = (function() {
                 dataExchangeStatus.setInactive()
                 dataTableHandle.clear().draw()
                 keyCloakUsers.showUsers(data)
-		ui.scrollToSection("userTableSection")
+                ui.scrollToSection("userTableSection")
             })
         },
 

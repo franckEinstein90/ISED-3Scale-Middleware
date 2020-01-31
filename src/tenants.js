@@ -3,7 +3,7 @@
  * Canadian Gov. API Store middleware
  * Application APICan
  * -------------------------------------
- *  tenants.js : Defines the tenant class, 
+ *  tenants.js : Defines tenant class
  *  used in various parts of this application
  *
  ******************************************************************************/
@@ -11,14 +11,13 @@
 "use strict"
 
 /*****************************************************************************/
-
-
 const utils = require('@src/utils').utils
 const log = require('@src/utils').utils.log
 const errHandle = require('@errors').errors.errorHandler
 const accounts = require('@src/accounts').accounts
 const TenantProto = require('@src/tenants/tenantProto').TenantProto
 
+/*****************************************************************************/
 const tenants = (function() {
 
     return {

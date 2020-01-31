@@ -14,6 +14,8 @@ const validator = require('validator')
 const errors = require('@errors').errors
 const alwaysResolve = require('@utils/alwaysResolve').alwaysResolve
 const ServiceRegister = require('@src/services/serviceRegister').ServiceRegister
+/*****************************************************************************/
+
 class TenantProto {
     constructor({
         accessToken,

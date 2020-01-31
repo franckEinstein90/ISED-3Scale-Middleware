@@ -14,6 +14,8 @@
 /******************************************************************************/
 const tenants = require('./tenants').tenants
 const storeUsers = require('./storeUsers').storeUsers
+const storeServices = require('./storeServices').storeServices
+/******************************************************************************/
 const timer = require('./timer.js').timer
 const userGroupsDialog = require('./dialogs/userGroupsDialog').userGroupsDialog
 const ui = require('./ui').ui
@@ -43,7 +45,7 @@ const selectedUsers = (function() {
             }
             displayCurrentUserSelection()
         },
-     
+
         applySelectedActions: function() {
             userActions.update(toEmailList())
         }
@@ -67,30 +69,48 @@ const APICan = (function() {
             debugger
         })
 
-        $('#visibleAPISelect').on('change', function() {
-            ui.showVisibleAPITable(this.value)
-        })  
-        $('#selectedUsersList tbody').on('click', 'tr', function(){
+        $('#selectedUsersList tbody').on('click', 'tr', function() {
             $(this).toggleClass('selected')
-            let selectedUserEmail = storeUsers.selectUserFromSelectedTableRow(this) 
+            let selectedUserEmail = storeUsers.selectUserFromSelectedTableRow(this)
             selectedUsers.toggleSelectedUser(selectedUserEmail)
         })
+
+        $('#showScheduler').on('click', function(event){
+            event.preventDefault()
+            document.getElementById('scheduleInspectModal').style.display = 'block'
+            $.get('/schedule', {}, function(events) {
+                $('#scheduleInfo tbody').empty()
+                events.forEach(info => {
+                $('#scheduleInfo tbody').append(`<tr><td>${info.id}</td><td>${info.eventTitle}</td><td>${info.description}</td><td>${info.frequency}</td><td>${info.lastRefresh}</td></tr>`)
+                })
+            })
+        })
+    }
+
+
+    let storeModulesReady = function() {
+        storeUsers.onReady({
+            userDisplayList: $('#selectedUsersList')
+        })
+
+        storeServices.onReady({
+
+        })
+
     }
 
     return {
         init: function() {
             socket = io()
-            socket.on('updateBottomStatusInfo', function(data){
+            socket.on('updateBottomStatusInfo', function(data) {
                 $('#bottomStatusBar').text(data.message)
             })
-        
+
             tenants.onReady(setUI)
-            storeUsers.onReady({
-                userDisplayList: $('#selectedUsersList')
-            })
+            storeModulesReady()
             timer.eachMinute()
             setInterval(timer.eachMinute, 10000)
-            
+
         },
         run: function() {
 

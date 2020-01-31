@@ -136,36 +136,35 @@ const appDatabase = (function() {
         },
 
 
-        deleteUserGroup: function( {
+        deleteUserGroup: function({
             groupID,
             groupName
-         }) {
+        }) {
             let checkGroupInDb = _ => {
                 return new Promise((resolve, reject) => {
                     let SQLStatement = `SELECT * FROM groups WHERE ID=${groupID}`
-                    db.all(SQLStatement, function(err, rows){
-                    if(err){
-                        reject(err)
-                    }
-                    else{
-                        return resolve(rows[0])
+                    db.all(SQLStatement, function(err, rows) {
+                        if (err) {
+                            reject(err)
+                        } else {
+                            return resolve(rows[0])
                         }
                     })
                 })
             }
             return checkGroupInDb()
-            .then(groupRow =>{ //found database entry for this group
-                return new Promise((resolve, reject) => {
-                    let deleteGroupDefinitionSQL = `DELETE FROM groups WHERE ID=${groupID}`
-                    db.run(deleteGroupDefinitionSQL, function(err){
-                        if( err ){
-                            reject( err )
-                        } else {
-                            return resolve('ok')
-                        }
+                .then(groupRow => { //found database entry for this group
+                    return new Promise((resolve, reject) => {
+                        let deleteGroupDefinitionSQL = `DELETE FROM groups WHERE ID=${groupID}`
+                        db.run(deleteGroupDefinitionSQL, function(err) {
+                            if (err) {
+                                reject(err)
+                            } else {
+                                return resolve('ok')
+                            }
+                        })
                     })
                 })
-            })
         },
 
         newUserGroup: function({

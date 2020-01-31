@@ -1,6 +1,6 @@
 
 :root {
-  --mainColor: #94DF00;
+  --mainColor: rgb(0, 52, 223);
   --formBackground: rgb(32, 88, 88);
   --comp1: #1982C4;
 
@@ -26,7 +26,7 @@ html,body,h1,h2,h3,h4,h5 {
 .tenant-card {
   border: black 1 px;
   background-color: var(--formBackground);
-  height:60px; 
+  height:50px; 
   color:white;
   font-family: "Raleway", sans-serif;
   font-size:1.2em; 

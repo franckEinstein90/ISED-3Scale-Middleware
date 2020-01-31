@@ -8,7 +8,6 @@
  *  class definition and implementation for services 
  *
  ******************************************************************************/
-
 "use strict"
 
 /*****************************************************************************/
@@ -172,6 +171,22 @@ services.Service.prototype.updateFeatureInfo = async function(serviceUpdateRepor
     return alwaysResolve(apiCall, {good: processGoodResponse, bad: serviceUpdateReport })
 }
 
+services.Service.prototype.getServiceUsageMetrics = async function(){
+    let thisServiceID = this.id
+    let apiCall = [
+        `https://${this.tenant.adminDomain}/stats/services/${thisServiceID}/`, 
+        `usage.json?access_token=`, 
+        `c527a90b5735f5148ff0de902bb4fba6dcef628523e5a66ae6811b415febedfb&`, 
+        'metric_name=hits&since=2019-06-01&until=2020-02-20&granularity=month&skip_change=true'
+    ].join('')
+    let processGoodResponse = function(body){
+        if (validator.isJSON( body )){
+            return  JSON.parse(body)
+        }
+    }
+    let bad = null
+    return alwaysResolve(apiCall, {good: processGoodResponse, bad})
+}
 services.Service.prototype.servicePlanAccess = function() {
     let servicePlanAccess = {
         public: true,

@@ -12,10 +12,10 @@
 "use strict"
 
 /*****************************************************************************/
-
 const moment = require('moment')
 const services = require('@src/services').services
 const errors = require('@errors').errors
+/*****************************************************************************/
 
 class ServiceRegister {
     constructor(tenant) {
@@ -24,7 +24,14 @@ class ServiceRegister {
         this.register = new Map() //(serviceID => (serviceDef x serviceDoc))
     }
 }
-ServiceRegister.prototype.length = function() {
+
+ServiceRegister.prototype.length = function( options ) {
+	 if( options && 'visibleOnly' in options){ 
+		 let numVisible = 0
+		 this.forEach( service => 
+			 numVisible += service.hasBillingualDoc( ) ? 1 : 0 )
+		 return numVisible
+	 }
     return this.serviceIDs.length
 }
 
@@ -41,8 +48,10 @@ ServiceRegister.prototype.forEach = function(callback) {
 }
 
 ServiceRegister.prototype.listServices = function() {
-    //returns a list of service description in an array
+//returns a list of service description in an array
+
     let result = []
+
     this.forEach((service, serviceID) => {
         result.push({
             id: serviceID,
@@ -53,6 +62,7 @@ ServiceRegister.prototype.listServices = function() {
             state: service.state
         })
     })
+
     return result
 }
 

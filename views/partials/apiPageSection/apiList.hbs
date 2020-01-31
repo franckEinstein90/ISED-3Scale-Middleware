@@ -1,23 +1,27 @@
- <div ID='APIntel' style="width:30%; margin-left:10px">
+{{>modalServiceInspect/frame}}
+<div ID='APIntel' style="width:30%; margin-left:10px">
 	<center><h2>Visible APIs</h2></center>
-    <select id="visibleAPISelect" class="w3-select" name='option'>
 
+    <select id="visibleAPISelect" class="w3-select" name='option'>
         {{#each tenants}}
-        <option value='{{this.name}}'>{{this.name}}</option>
+        <option value='{{this.name}}'>
+            {{this.name}} ({{this.numVisibleServices}})
+        </option>
         {{/each}}
     </select>
+
 	{{#each tenants}}
-    <table  class='w3-table w3-bordered tenantsVisibleAPI' 
+    <table  class='w3-table w3-bordered w3-hoverable tenantsVisibleAPI' 
             style='display:none' 
             id='{{this.name}}VisibleAPI' width="100%">
 
 		{{#each this.services}}
-        <tr>
 			{{#if this.billingualDoc}}
-			<td>{{this.name}}</td>
-            <td>{{this.id}}</td>
+             <tr class="serviceInspect">
+			    <td class="serviceName">{{this.name}}</td>
+                <td class="serviceID">{{this.id}}</td>
+            </tr>
 			{{/if}}
-        </tr>
         {{/each}}
     </table>
 	{{/each}}

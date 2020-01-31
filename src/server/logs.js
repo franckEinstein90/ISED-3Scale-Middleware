@@ -8,10 +8,13 @@
 "use strict"
 
 
+/******************************************************************************/
+const fs = require('fs')
+const path = require('path')
 const winston = require('winston')
 
 const logs = (function() {
-
+    let _logFile = 'logs/access.log'
     let requestLogger = winston.createLogger({
         format: winston.format.combine(
             winston.format.json(),
@@ -19,13 +22,19 @@ const logs = (function() {
         ),
         transports: [
             new winston.transports.File({
-                filename: 'logs/access.log'
+                filename: _logFile 
             })
         ]
     })
 
     return {
-        accessLog: requestLogger
+        accessLog: requestLogger, 
+        getLogs: async function(req, res, next){ 
+            let filePath = path.normalize(__dirname + `/../../${_logFile}`)
+            fs.readFile(filePath, (err, data) => {
+                res.send(data)
+            })
+        }
     }
 })()
 

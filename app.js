@@ -82,10 +82,10 @@ let setTimerRefresh = function() {
 }
 
 
-const db = require('@server/db').appDatabase
-const APICan = require('@src/APICan').APICan
-const users = require('@users/users').users
-const groups = require('@users/groups').groups
+const db        = require('@server/db').appDatabase
+const APICan    = require('@src/APICan').APICan
+const users     = require('@users/users').users
+const groups    = require('@users/groups').groups
 
 db.configure({
         filePath: './settings.db'
