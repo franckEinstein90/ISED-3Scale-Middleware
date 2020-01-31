@@ -16,6 +16,7 @@
 const tenants = require('./tenants').tenants
 const storeUsers = require('./storeUsers').storeUsers
 const storeServices = require('./storeServices').storeServices
+const storeNewsArticles = require('./store/storeNewsArticles').storeNewsArticles
 /******************************************************************************/
 const timer = require('./timer.js').timer
 const userGroupsDialog = require('./dialogs/userGroupsDialog').userGroupsDialog
@@ -98,6 +99,8 @@ const APICan = (function() {
 
         })
 
+        storeNewsArticles.onReady()
+
     }
 
     return {
@@ -124,7 +127,7 @@ module.exports = {
     APICan
 }
 
-},{"./dialogs/userGroupsDialog":3,"./storeServices":5,"./storeUsers":6,"./tenants":7,"./timer.js":8,"./ui":9}],2:[function(require,module,exports){
+},{"./dialogs/userGroupsDialog":3,"./store/storeNewsArticles":7,"./storeServices":5,"./storeUsers":6,"./tenants":8,"./timer.js":9,"./ui":10}],2:[function(require,module,exports){
 "use strict"
 
 
@@ -203,7 +206,7 @@ module.exports = {
     userGroupsDialog
 }
 
-},{"../storeUsers":6,"../tenants":7}],4:[function(require,module,exports){
+},{"../storeUsers":6,"../tenants":8}],4:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
@@ -320,7 +323,7 @@ $(function() {
         $.get('/findUsers', parameters, keyCloakUsers.showUsers)
     })
 */
-},{"./APICan":1,"./storeUsers":6,"./userActions":10}],5:[function(require,module,exports){
+},{"./APICan":1,"./storeUsers":6,"./userActions":11}],5:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
@@ -421,7 +424,7 @@ module.exports = {
     storeServices
 }
 
-},{"./ui":9}],6:[function(require,module,exports){
+},{"./ui":10}],6:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
@@ -641,7 +644,35 @@ module.exports = {
     storeUsers,
     keyCloakUsers
 }
-},{"./APICan":1,"./dataExchangeStatus":2,"./tenants":7,"./ui":9,"./userActions":10}],7:[function(require,module,exports){
+},{"./APICan":1,"./dataExchangeStatus":2,"./tenants":8,"./ui":10,"./userActions":11}],7:[function(require,module,exports){
+/*******************************************************************************
+ * Franck Binard, ISED (FranckEinstein90)
+ *
+ * APICan application - 2020
+ * -------------------------------------
+ *  Canadian Gov. API Store middleware - client side
+ *
+ *  storeNewsArticles.js: entry point 
+ *  create and publish articles for the store 
+ ******************************************************************************/
+"use strict"
+
+/******************************************************************************/
+/******************************************************************************/
+const storeNewsArticles = (function(){
+
+    return {
+        onReady: function(){
+            $('#testH3').text('dfhwjask')
+        }
+    }
+})()
+
+module.exports = {
+    storeNewsArticles
+}
+
+},{}],8:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
@@ -687,7 +718,7 @@ const tenants = (function() {
 module.exports = {
     tenants
 }
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
@@ -717,7 +748,7 @@ const timer = (function() {
 module.exports = {
     timer
 }
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
@@ -753,7 +784,7 @@ const ui = (function() {
 module.exports = {
     ui
 }
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 /*************************************************************************
  * Client side, trigger user actions
  * 

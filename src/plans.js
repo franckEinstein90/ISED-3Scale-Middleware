@@ -1,5 +1,5 @@
 "use strict"
-const Feature = require('@src/features').features.Feature
+const Feature = require('@services/features').features.Feature
 
 const plans = (function(){
     return {

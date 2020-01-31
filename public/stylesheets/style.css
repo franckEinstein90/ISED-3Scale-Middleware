@@ -3,7 +3,7 @@
   --mainColor: rgb(0, 52, 223);
   --formBackground: rgb(32, 88, 88);
   --comp1: #1982C4;
-
+  --pop: #379390;
 }
 html {
   scroll-behavior: smooth;
@@ -18,7 +18,9 @@ html,body,h1,h2,h3,h4,h5 {
 .apiCanModal{
   background-color: var(--formBackground);
 }
-
+.modalContent{
+  color:var(--pop);
+}
 .groupCreationLabel{
   color: var(--mainColor);
 }

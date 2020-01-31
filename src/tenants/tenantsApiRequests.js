@@ -15,7 +15,7 @@
 
 const validator = require('validator')
 const errors = require('@errors').errors
-const tenants = require('@src/tenants').tenants
+const tenants = require('@tenants/tenants').tenants
 const parseXML = require('xml2js').parseString
 const alwaysResolve = require('@utils/alwaysResolve').alwaysResolve
 const Application = require('@src/applications').applications.Application

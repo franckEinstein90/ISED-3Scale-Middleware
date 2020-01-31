@@ -7,20 +7,17 @@
  *  userRoutes.js 
  *
  ******************************************************************************/
-
 "use strict"
 
 /*****************************************************************************/
-
-
-const tenantsManager = require('@services/tenantsManager').tenantsManager
-const messages = require('@server/messages').messages
-const appStatus = require('@server/appStatus').appStatus
-const users = require('@users/users').users
-const userGroups = require('@users/groups').groups
-const queryManager = require('@routes/queryManager').queryManager
-const accessLog = require('@server/logs').logs.accessLog
-const supportRequest = require('@apiStore/supportRequest.js').jiraInterface
+const tenantsManager    = require('@tenants/tenantsManager').tenantsManager
+const messages          = require('@server/messages').messages
+const appStatus         = require('@server/appStatus').appStatus
+const users             = require('@users/users').users
+const queryManager      = require('@routes/queryManager').queryManager
+const accessLog         = require('@server/logs').logs.accessLog
+const supportRequest    = require('@apiStore/supportRequest.js').jiraInterface
+/*****************************************************************************/
 
 const apiStoreUserRoutes =  (function (){
 

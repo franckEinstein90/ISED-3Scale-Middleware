@@ -13,7 +13,7 @@
 
 /*****************************************************************************/
 const moment = require('moment')
-const services = require('@src/services').services
+const services = require('@services/services').services
 const errors = require('@errors').errors
 /*****************************************************************************/
 

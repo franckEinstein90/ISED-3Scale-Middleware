@@ -1,8 +1,13 @@
 #!/usr/bin/env node
 
 /*******************************************************************************
- * Franck Binard, ISED
- * Canadian Gov. API Store middleware
+ * Franck Binard, ISED - 2020
+ * FranckEinstein90 - franck.binard@canada.ca
+ * Prototype Code - Canadian Gov. API Store middleware
+ * Used for demos, new features, experiments
+ * 
+ * Production application code at: https://github.com/ised-isde-canada/apican
+ * 
  * Application APICan
  * -------------------------------------
  *  app.js : entry point
@@ -47,7 +52,7 @@ const logger = require('morgan')
 
 const appStatus = require('@server/appStatus').appStatus
 appLogger.log('info', 'Initializing application')
-const tenantsManager = require('@services/tenantsManager').tenantsManager
+const tenantsManager = require('@tenants/tenantsManager').tenantsManager
 
 let correctFetchErrors = (tenantsUpdateReport) => {
     let tenantUpdateErrors = [] //ist of tenants for which there was an error during the update

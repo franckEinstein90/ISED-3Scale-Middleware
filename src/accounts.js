@@ -3,7 +3,6 @@ const moment = require('moment')
 const validator = require('validator')
 const alwaysResolve = require('@src/utils').utils.alwaysResolve
 const Plan = require('@src/plans').plans.Plan
-const Feature = require('@src/features').features.Feature
 
 const accounts = (function() {
     return {

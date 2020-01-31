@@ -10,7 +10,7 @@
 "use strict"
 
 /*****************************************************************************/
-const tenantsManager = require('@src/services/tenantsManager').tenantsManager
+const tenantsManager = require('@tenants/tenantsManager').tenantsManager
 /*****************************************************************************/
 const serviceInspectRoutes = (function() {
 

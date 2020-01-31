@@ -10,7 +10,7 @@
  
 /*****************************************************************************/
 const db = require('@server/db').appDatabase
-const tenantsManager = require('@src/services/tenantsManager').tenantsManager
+const tenantsManager = require('@tenants/tenantsManager').tenantsManager
 const users = require('@users/users').users
 const messages = require('@server/messages').messages
 /*****************************************************************************/

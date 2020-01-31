@@ -1,0 +1,724 @@
+{
+  "id": "609d362f-77f2-4774-bf98-48074fa6d7f9",
+  "version": "2.0",
+  "name": "APICan",
+  "url": "http://localhost:3000/",
+  "tests": [{
+    "id": "da22a652-5d4a-4f04-a3f7-23aa4c787d11",
+    "name": "Groups -  Dialog  open",
+    "commands": [{
+      "id": "dffea294-91dc-49d3-a246-5a27ed468850",
+      "comment": "",
+      "command": "open",
+      "target": "/",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "93699957-641f-43d0-bf42-945a255d9fec",
+      "comment": "",
+      "command": "setWindowSize",
+      "target": "1936x1096",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "00af33cb-f2f4-4adb-a52c-f4df2b9d90d8",
+      "comment": "",
+      "command": "click",
+      "target": "css=.fa-users",
+      "targets": [
+        ["css=.fa-users", "css:finder"],
+        ["xpath=//a[@id='manageUsersBtn']/i", "xpath:idRelative"],
+        ["xpath=//a[3]/i", "xpath:position"]
+      ],
+      "value": ""
+    }]
+  }, {
+    "id": "3eae95a8-74b3-49f2-bce6-e73264327dc9",
+    "name": "Service Inspect - Open",
+    "commands": [{
+      "id": "7564fd7d-cec8-4719-aea0-b3fd0924959a",
+      "comment": "",
+      "command": "open",
+      "target": "/",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "4f0d3505-915b-4a5b-a088-8c53b1f2163c",
+      "comment": "",
+      "command": "setWindowSize",
+      "target": "1936x1096",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "bfcedad7-3c10-44bd-af79-8955340d0556",
+      "comment": "",
+      "command": "click",
+      "target": "id=visibleAPISelect",
+      "targets": [
+        ["id=visibleAPISelect", "id"],
+        ["name=option", "name"],
+        ["css=#visibleAPISelect", "css:finder"],
+        ["xpath=//select[@id='visibleAPISelect']", "xpath:attributes"],
+        ["xpath=//div[@id='APIntel']/select", "xpath:idRelative"],
+        ["xpath=//select", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "c00bd653-5365-42d1-8d63-dde4a40fe8c0",
+      "comment": "",
+      "command": "select",
+      "target": "id=visibleAPISelect",
+      "targets": [],
+      "value": "label=ised-isde (6)"
+    }, {
+      "id": "c9ca0cad-f023-4e0f-8c7e-61820e0ebf5c",
+      "comment": "",
+      "command": "click",
+      "target": "id=visibleAPISelect",
+      "targets": [
+        ["id=visibleAPISelect", "id"],
+        ["name=option", "name"],
+        ["css=#visibleAPISelect", "css:finder"],
+        ["xpath=//select[@id='visibleAPISelect']", "xpath:attributes"],
+        ["xpath=//div[@id='APIntel']/select", "xpath:idRelative"],
+        ["xpath=//select", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "a613211d-cff8-47f4-9750-4cbae6fd0181",
+      "comment": "",
+      "command": "click",
+      "target": "css=#ised-isdeVisibleAPI .serviceInspect:nth-child(1) > .serviceName",
+      "targets": [
+        ["css=#ised-isdeVisibleAPI .serviceInspect:nth-child(1) > .serviceName", "css:finder"],
+        ["xpath=//table[@id='ised-isdeVisibleAPI']/tbody/tr/td", "xpath:idRelative"],
+        ["xpath=//table[11]/tbody/tr/td", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "0302a4d7-f12e-4c08-8783-ac3111c18c2f",
+      "comment": "",
+      "command": "click",
+      "target": "css=.tablink:nth-child(1)",
+      "targets": [
+        ["css=.tablink:nth-child(1)", "css:finder"],
+        ["xpath=//button[@onclick=\"openCity(event, 'Essentials')\"]", "xpath:attributes"],
+        ["xpath=//div[@id='serviceInspectModal']/div/div/button", "xpath:idRelative"],
+        ["xpath=//div[4]/div/div[2]/div/div/button", "xpath:position"],
+        ["xpath=//button[contains(.,'Essentials')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }]
+  }, {
+    "id": "395f47c2-2968-4dd0-9d16-ecafa7b52e07",
+    "name": "App - Open",
+    "commands": [{
+      "id": "a51df250-0fa7-4227-98a0-bcb06f4b86d2",
+      "comment": "",
+      "command": "open",
+      "target": "/",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "51eb26e6-b41c-4246-a501-0af4179d6ac8",
+      "comment": "",
+      "command": "setWindowSize",
+      "target": "1936x1096",
+      "targets": [],
+      "value": ""
+    }]
+  }, {
+    "id": "3f8398a4-d81a-4ca7-a4a3-e9cf12d93868",
+    "name": "Logs - Obtain",
+    "commands": [{
+      "id": "c1efce5c-e12f-421a-a80b-a48ecd4b5769",
+      "comment": "",
+      "command": "open",
+      "target": "/",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "7f0d81de-3c00-4114-add1-467fdf1c55a2",
+      "comment": "",
+      "command": "setWindowSize",
+      "target": "1936x1096",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "35af0642-64af-400e-aa25-2e83014fb264",
+      "comment": "",
+      "command": "click",
+      "target": "css=.fa-laptop",
+      "targets": [
+        ["css=.fa-laptop", "css:finder"],
+        ["xpath=//nav[@id='leftNav']/a[3]/i", "xpath:idRelative"],
+        ["xpath=//a[3]/i", "xpath:position"]
+      ],
+      "value": ""
+    }]
+  }, {
+    "id": "cf535763-6200-4bbc-8ced-a4850a419b61",
+    "name": "Open Tenant Info  - services",
+    "commands": [{
+      "id": "171b75b5-1ed7-4666-9f11-00e26356a70c",
+      "comment": "",
+      "command": "open",
+      "target": "/",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "765701ed-fee0-4015-a537-4b0f0a7e4bec",
+      "comment": "",
+      "command": "setWindowSize",
+      "target": "1936x1096",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "7f58b70f-b6a2-493c-ae8b-645e97720e46",
+      "comment": "",
+      "command": "click",
+      "target": "id=ised-isdeTenantCard",
+      "targets": [
+        ["id=ised-isdeTenantCard", "id"],
+        ["css=#ised-isdeTenantCard", "css:finder"],
+        ["xpath=//button[@id='ised-isdeTenantCard']", "xpath:attributes"],
+        ["xpath=//div[@id='tenantCards']/button[11]", "xpath:idRelative"],
+        ["xpath=//button[11]", "xpath:position"]
+      ],
+      "value": ""
+    }]
+  }, {
+    "id": "c8681ec3-86bb-4240-a589-88ea292f74bc",
+    "name": "Open Tenant Info - accounts",
+    "commands": [{
+      "id": "b251c08a-5ea5-4de1-9deb-bbac2300ba58",
+      "comment": "",
+      "command": "open",
+      "target": "/",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "276d9f69-f18a-4e30-b95a-2eb1e45f6158",
+      "comment": "",
+      "command": "setWindowSize",
+      "target": "1936x1096",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "2d1deb9e-a6aa-4286-a706-c89e200170e0",
+      "comment": "",
+      "command": "click",
+      "target": "id=ised-isdeTenantCard",
+      "targets": [
+        ["id=ised-isdeTenantCard", "id"],
+        ["css=#ised-isdeTenantCard", "css:finder"],
+        ["xpath=//button[@id='ised-isdeTenantCard']", "xpath:attributes"],
+        ["xpath=//div[@id='tenantCards']/button[11]", "xpath:idRelative"],
+        ["xpath=//button[11]", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "426396fb-9899-48a3-98c0-4348dab8ec05",
+      "comment": "",
+      "command": "click",
+      "target": "id=ised-isdeAccountsTabLink",
+      "targets": [
+        ["id=ised-isdeAccountsTabLink", "id"],
+        ["css=#ised-isdeAccountsTabLink", "css:finder"],
+        ["xpath=//button[@id='ised-isdeAccountsTabLink']", "xpath:attributes"],
+        ["xpath=//div[@id='ised-isde']/div/button[2]", "xpath:idRelative"],
+        ["xpath=//div[11]/div/div/button[2]", "xpath:position"]
+      ],
+      "value": ""
+    }]
+  }, {
+    "id": "3cc0ebc1-e83e-4997-aa09-7235fc3725c3",
+    "name": "Scheduler - Open",
+    "commands": [{
+      "id": "db582a19-e56a-458a-a001-543cd36c13ce",
+      "comment": "",
+      "command": "open",
+      "target": "/",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "59782ead-0feb-4510-bb43-e194564ac1ac",
+      "comment": "",
+      "command": "setWindowSize",
+      "target": "1936x1096",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "971a0e63-7c14-44cb-8f2b-0c9731d3f393",
+      "comment": "",
+      "command": "click",
+      "target": "css=.fa-clock-o",
+      "targets": [
+        ["css=.fa-clock-o", "css:finder"],
+        ["xpath=//button[@id='showScheduler']/i", "xpath:idRelative"],
+        ["xpath=//button[2]/i", "xpath:position"]
+      ],
+      "value": ""
+    }]
+  }, {
+    "id": "29ef58d3-5589-4da0-b3cc-74dd93528767",
+    "name": "Service Inspect - Open Stats",
+    "commands": [{
+      "id": "d3b87fd0-b4a9-46e3-9afc-bf45861a20e5",
+      "comment": "",
+      "command": "open",
+      "target": "/",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "b9d961ac-8c1d-4e7b-9322-c57e7470a616",
+      "comment": "",
+      "command": "setWindowSize",
+      "target": "1936x1096",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "71e4f551-a477-45b1-9325-a6e2772c6438",
+      "comment": "",
+      "command": "click",
+      "target": "id=visibleAPISelect",
+      "targets": [
+        ["id=visibleAPISelect", "id"],
+        ["name=option", "name"],
+        ["css=#visibleAPISelect", "css:finder"],
+        ["xpath=//select[@id='visibleAPISelect']", "xpath:attributes"],
+        ["xpath=//div[@id='APIntel']/select", "xpath:idRelative"],
+        ["xpath=//select", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "8fe85c57-249e-4b0d-b593-f436830a5bd3",
+      "comment": "",
+      "command": "select",
+      "target": "id=visibleAPISelect",
+      "targets": [],
+      "value": "label=ised-isde (6)"
+    }, {
+      "id": "1d649226-b065-4009-b2e1-ffec4b2799af",
+      "comment": "",
+      "command": "click",
+      "target": "id=visibleAPISelect",
+      "targets": [
+        ["id=visibleAPISelect", "id"],
+        ["name=option", "name"],
+        ["css=#visibleAPISelect", "css:finder"],
+        ["xpath=//select[@id='visibleAPISelect']", "xpath:attributes"],
+        ["xpath=//div[@id='APIntel']/select", "xpath:idRelative"],
+        ["xpath=//select", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "06c12a93-e0a6-4d8f-8503-0c81b8eec215",
+      "comment": "",
+      "command": "click",
+      "target": "css=#ised-isdeVisibleAPI .serviceInspect:nth-child(1) > .serviceName",
+      "targets": [
+        ["css=#ised-isdeVisibleAPI .serviceInspect:nth-child(1) > .serviceName", "css:finder"],
+        ["xpath=//table[@id='ised-isdeVisibleAPI']/tbody/tr/td", "xpath:idRelative"],
+        ["xpath=//table[11]/tbody/tr/td", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "a1f3e293-2d71-4a36-8b91-103af54cbe4b",
+      "comment": "",
+      "command": "click",
+      "target": "css=.tablink:nth-child(2)",
+      "targets": [
+        ["css=.tablink:nth-child(2)", "css:finder"],
+        ["xpath=//button[@onclick=\"openCity(event, 'Stats')\"]", "xpath:attributes"],
+        ["xpath=//div[@id='serviceInspectModal']/div/div/button[2]", "xpath:idRelative"],
+        ["xpath=//div[4]/div/div[2]/div/div/button[2]", "xpath:position"],
+        ["xpath=//button[contains(.,'Stats')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }]
+  }, {
+    "id": "8381b67f-f82b-4f06-94a4-6b2285c8e178",
+    "name": "Groups - Load",
+    "commands": [{
+      "id": "6c985170-317c-4d7b-9ad3-24936055632a",
+      "comment": "",
+      "command": "open",
+      "target": "/",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "fc0983e5-3db2-4f48-81f6-ebf5f5eaba4c",
+      "comment": "",
+      "command": "setWindowSize",
+      "target": "1936x1096",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "c227bbe6-4cca-4b87-a1db-5847fa13283c",
+      "comment": "",
+      "command": "click",
+      "target": "id=testGroup4View",
+      "targets": [
+        ["id=testGroup4View", "id"],
+        ["css=#testGroup4View", "css:finder"],
+        ["xpath=//i[@id='testGroup4View']", "xpath:attributes"],
+        ["xpath=//table[@id='userFormGroupList']/tbody/tr[4]/td[2]/i", "xpath:idRelative"],
+        ["xpath=//tr[4]/td[2]/i", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "065812b7-6221-49ff-b065-11b9c5aed1bb",
+      "comment": "",
+      "command": "click",
+      "target": "name=selectedUsersList_length",
+      "targets": [
+        ["name=selectedUsersList_length", "name"],
+        ["css=select:nth-child(1)", "css:finder"],
+        ["xpath=//select[@name='selectedUsersList_length']", "xpath:attributes"],
+        ["xpath=//div[@id='selectedUsersList_length']/label/select", "xpath:idRelative"],
+        ["xpath=//label/select", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "f1a5c65d-470d-42f6-b8bc-dd1df5b01ab3",
+      "comment": "",
+      "command": "select",
+      "target": "name=selectedUsersList_length",
+      "targets": [],
+      "value": "label=100"
+    }, {
+      "id": "e48b1ba5-e6a7-49c7-98a8-1d852310745c",
+      "comment": "",
+      "command": "click",
+      "target": "name=selectedUsersList_length",
+      "targets": [
+        ["name=selectedUsersList_length", "name"],
+        ["css=select:nth-child(1)", "css:finder"],
+        ["xpath=//select[@name='selectedUsersList_length']", "xpath:attributes"],
+        ["xpath=//div[@id='selectedUsersList_length']/label/select", "xpath:idRelative"],
+        ["xpath=//label/select", "xpath:position"]
+      ],
+      "value": ""
+    }]
+  }, {
+    "id": "9ea598f4-cd54-4595-878b-336191c3796a",
+    "name": "Support - Create (postman)",
+    "commands": []
+  }, {
+    "id": "c0521e4a-795a-42cf-8e63-af004739c9f9",
+    "name": "API Store Feed - api.json (postman)",
+    "commands": []
+  }, {
+    "id": "6a791525-1458-46bb-926f-19039451b6b7",
+    "name": "API Store Feed - user-info (postman) ",
+    "commands": []
+  }, {
+    "id": "7f5c3a4f-d66d-4fc5-9341-3284f62efbf5",
+    "name": "Z - Documentation",
+    "commands": [{
+      "id": "3145cacd-a138-4d90-9dea-c9b489dd90df",
+      "comment": "",
+      "command": "open",
+      "target": "https://wiki.ised-isde.canada.ca/#all-updates",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "79056f72-62d3-4d13-8458-35f8a9fc8bf7",
+      "comment": "",
+      "command": "setWindowSize",
+      "target": "1920x1080",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "ca2e98bb-47ea-4382-ba55-f264958fbd6c",
+      "comment": "",
+      "command": "click",
+      "target": "id=login-link",
+      "targets": [
+        ["id=login-link", "id"],
+        ["linkText=Log in", "linkText"],
+        ["css=#login-link", "css:finder"],
+        ["xpath=//a[contains(text(),'Log in')]", "xpath:link"],
+        ["xpath=//a[@id='login-link']", "xpath:attributes"],
+        ["xpath=//header[@id='header']/nav/div/div[3]/ul/li[6]/a", "xpath:idRelative"],
+        ["xpath=//a[contains(@href, '/login.action?os_destination=%2F')]", "xpath:href"],
+        ["xpath=//div[3]/ul/li[6]/a", "xpath:position"],
+        ["xpath=//a[contains(.,'Log in')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "b7c4787f-5f55-4048-b056-5d09a7f8d105",
+      "comment": "",
+      "command": "mouseOver",
+      "target": "id=login-link",
+      "targets": [
+        ["id=login-link", "id"],
+        ["linkText=Log in", "linkText"],
+        ["css=#login-link", "css:finder"],
+        ["xpath=//a[contains(text(),'Log in')]", "xpath:link"],
+        ["xpath=//a[@id='login-link']", "xpath:attributes"],
+        ["xpath=//header[@id='header']/nav/div/div[3]/ul/li[6]/a", "xpath:idRelative"],
+        ["xpath=//a[contains(@href, '/login.action?os_destination=%2F')]", "xpath:href"],
+        ["xpath=//div[3]/ul/li[6]/a", "xpath:position"],
+        ["xpath=//a[contains(.,'Log in')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "70d0d71b-9de7-47dd-8a40-e2d33b46f846",
+      "comment": "",
+      "command": "click",
+      "target": "id=loginButton",
+      "targets": [
+        ["id=loginButton", "id"],
+        ["name=login", "name"],
+        ["css=#loginButton", "css:finder"],
+        ["xpath=//input[@id='loginButton']", "xpath:attributes"],
+        ["xpath=//div[@id='login-container']/div/form/fieldset/div[4]/input", "xpath:idRelative"],
+        ["xpath=//div[4]/input", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "d273c91c-20d2-4839-a983-8c20578c61f1",
+      "comment": "",
+      "command": "runScript",
+      "target": "window.scrollTo(0,136.36363220214844)",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "72c7958a-803f-4e92-88ae-336112fded96",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=Franck binard",
+      "targets": [
+        ["linkText=Franck binard", "linkText"],
+        ["css=.item > .aui-nav-item", "css:finder"],
+        ["xpath=//div[@id='sidebar-spaces']/div/ul/li/a", "xpath:idRelative"],
+        ["xpath=(//a[contains(@href, '/spaces/viewspace.action?key=~franck.binard@canada.ca')])[2]", "xpath:href"],
+        ["xpath=//div[3]/div/ul/li/a", "xpath:position"],
+        ["xpath=//a[contains(.,'Franck binard')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "e3bdaee0-f464-4b7c-9802-0de56c96812b",
+      "comment": "",
+      "command": "mouseOver",
+      "target": "css=.item .aui-nav-item-label",
+      "targets": [
+        ["css=.item .aui-nav-item-label", "css:finder"],
+        ["xpath=//div[@id='sidebar-spaces']/div/ul/li/a/span[2]", "xpath:idRelative"],
+        ["xpath=//div[3]/div/ul/li/a/span[2]", "xpath:position"],
+        ["xpath=//span[contains(.,'Franck binard')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "4a014905-ea65-4ff1-bcb0-ac550eddc1b8",
+      "comment": "",
+      "command": "mouseOut",
+      "target": "css=.item .aui-nav-item-label",
+      "targets": [
+        ["css=.item .aui-nav-item-label", "css:finder"],
+        ["xpath=//div[@id='sidebar-spaces']/div/ul/li/a/span[2]", "xpath:idRelative"],
+        ["xpath=//div[3]/div/ul/li/a/span[2]", "xpath:position"],
+        ["xpath=//span[contains(.,'Franck binard')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "87b34091-f858-4163-97d5-cf3a2f82855a",
+      "comment": "",
+      "command": "click",
+      "target": "id=plusminus15728761-0",
+      "targets": [
+        ["id=plusminus15728761-0", "id"],
+        ["css=#plusminus15728761-0", "css:finder"],
+        ["xpath=//a[@id='plusminus15728761-0']", "xpath:attributes"],
+        ["xpath=//ul[@id='child_ul15728751-0']/li/div/a", "xpath:idRelative"],
+        ["xpath=(//a[contains(@href, '')])[45]", "xpath:href"],
+        ["xpath=//li/div/a", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "465452a9-0426-4e1e-85a7-11fb3ddb35f5",
+      "comment": "",
+      "command": "click",
+      "target": "id=plusminus15728808-0",
+      "targets": [
+        ["id=plusminus15728808-0", "id"],
+        ["css=#plusminus15728808-0", "css:finder"],
+        ["xpath=//a[@id='plusminus15728808-0']", "xpath:attributes"],
+        ["xpath=//ul[@id='child_ul15728761-0']/li[2]/div/a", "xpath:idRelative"],
+        ["xpath=(//a[contains(@href, '')])[49]", "xpath:href"],
+        ["xpath=//li[2]/div/a", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "2222e114-fa74-4726-bbc3-45659e890a6a",
+      "comment": "",
+      "command": "mouseOver",
+      "target": "id=plusminus15728808-0",
+      "targets": [
+        ["id=plusminus15728808-0", "id"],
+        ["css=#plusminus15728808-0", "css:finder"],
+        ["xpath=//a[@id='plusminus15728808-0']", "xpath:attributes"],
+        ["xpath=//ul[@id='child_ul15728761-0']/li[2]/div/a", "xpath:idRelative"],
+        ["xpath=(//a[contains(@href, '')])[49]", "xpath:href"],
+        ["xpath=//li[2]/div/a", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "785a1c75-7804-45b3-97db-8f84596f1a65",
+      "comment": "",
+      "command": "mouseOut",
+      "target": "id=plusminus15728808-0",
+      "targets": [
+        ["id=plusminus15728808-0", "id"],
+        ["css=#plusminus15728808-0", "css:finder"],
+        ["xpath=//a[@id='plusminus15728808-0']", "xpath:attributes"],
+        ["xpath=//ul[@id='child_ul15728761-0']/li[2]/div/a", "xpath:idRelative"],
+        ["xpath=(//a[contains(@href, '')])[49]", "xpath:href"],
+        ["xpath=//li[2]/div/a", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "db5f57b0-869a-4b2d-ac85-06d082f07a8b",
+      "comment": "",
+      "command": "click",
+      "target": "id=plusminus15728844-0",
+      "targets": [
+        ["id=plusminus15728844-0", "id"],
+        ["css=#plusminus15728844-0", "css:finder"],
+        ["xpath=//a[@id='plusminus15728844-0']", "xpath:attributes"],
+        ["xpath=//ul[@id='child_ul15728808-0']/li[2]/div/a", "xpath:idRelative"],
+        ["xpath=(//a[contains(@href, '')])[53]", "xpath:href"],
+        ["xpath=//li[2]/div[3]/ul/li[2]/div/a", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "8f477053-948b-4077-b825-5f36fdbcf2d7",
+      "comment": "",
+      "command": "mouseOver",
+      "target": "id=plusminus15728844-0",
+      "targets": [
+        ["id=plusminus15728844-0", "id"],
+        ["css=#plusminus15728844-0", "css:finder"],
+        ["xpath=//a[@id='plusminus15728844-0']", "xpath:attributes"],
+        ["xpath=//ul[@id='child_ul15728808-0']/li[2]/div/a", "xpath:idRelative"],
+        ["xpath=(//a[contains(@href, '')])[53]", "xpath:href"],
+        ["xpath=//li[2]/div[3]/ul/li[2]/div/a", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "d2f62b6d-4591-49d3-af6b-30670a04f824",
+      "comment": "",
+      "command": "mouseOut",
+      "target": "id=plusminus15728844-0",
+      "targets": [
+        ["id=plusminus15728844-0", "id"],
+        ["css=#plusminus15728844-0", "css:finder"],
+        ["xpath=//a[@id='plusminus15728844-0']", "xpath:attributes"],
+        ["xpath=//ul[@id='child_ul15728808-0']/li[2]/div/a", "xpath:idRelative"],
+        ["xpath=(//a[contains(@href, '')])[53]", "xpath:href"],
+        ["xpath=//li[2]/div[3]/ul/li[2]/div/a", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "b9f8a218-5456-4a6e-b657-2c9686143ac2",
+      "comment": "",
+      "command": "click",
+      "target": "id=plusminus18022646-0",
+      "targets": [
+        ["id=plusminus18022646-0", "id"],
+        ["css=#plusminus18022646-0", "css:finder"],
+        ["xpath=//a[@id='plusminus18022646-0']", "xpath:attributes"],
+        ["xpath=//ul[@id='child_ul15728844-0']/li[2]/div/a", "xpath:idRelative"],
+        ["xpath=(//a[contains(@href, '')])[57]", "xpath:href"],
+        ["xpath=//li[2]/div[3]/ul/li[2]/div[3]/ul/li[2]/div/a", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "0e902873-915b-4971-abec-92caf3dfaa10",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=02 - Business Objects",
+      "targets": [
+        ["linkText=02 - Business Objects", "linkText"],
+        ["css=#childrenspan18022646-0 > a", "css:finder"],
+        ["xpath=//a[contains(text(),'02 - Business Objects')]", "xpath:link"],
+        ["xpath=//span[@id='childrenspan18022646-0']/a", "xpath:idRelative"],
+        ["xpath=//a[contains(@href, '/display/~franck.binard@canada.ca/02+-+Business+Objects?src=contextnavpagetreemode')]", "xpath:href"],
+        ["xpath=//li[2]/div[3]/ul/li[2]/div[3]/ul/li[2]/div[2]/span/a", "xpath:position"],
+        ["xpath=//a[contains(.,'02 - Business Objects')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "a93e165f-19f6-4ee4-82c4-de99d7ce58e8",
+      "comment": "",
+      "command": "mouseOver",
+      "target": "linkText=02 - Business Objects",
+      "targets": [
+        ["linkText=02 - Business Objects", "linkText"],
+        ["css=#childrenspan18022646-0 > a", "css:finder"],
+        ["xpath=//a[contains(text(),'02 - Business Objects')]", "xpath:link"],
+        ["xpath=//span[@id='childrenspan18022646-0']/a", "xpath:idRelative"],
+        ["xpath=//a[contains(@href, '/display/~franck.binard@canada.ca/02+-+Business+Objects?src=contextnavpagetreemode')]", "xpath:href"],
+        ["xpath=//li[2]/div[3]/ul/li[2]/div[3]/ul/li[2]/div[2]/span/a", "xpath:position"],
+        ["xpath=//a[contains(.,'02 - Business Objects')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "f33fb401-6e2f-4425-9bbb-9f9df36bd104",
+      "comment": "",
+      "command": "mouseOut",
+      "target": "linkText=02 - Business Objects",
+      "targets": [
+        ["linkText=02 - Business Objects", "linkText"],
+        ["css=#childrenspan18022646-0 > a", "css:finder"],
+        ["xpath=//a[contains(text(),'02 - Business Objects')]", "xpath:link"],
+        ["xpath=//span[@id='childrenspan18022646-0']/a", "xpath:idRelative"],
+        ["xpath=//a[contains(@href, '/display/~franck.binard@canada.ca/02+-+Business+Objects?src=contextnavpagetreemode')]", "xpath:href"],
+        ["xpath=//li[2]/div[3]/ul/li[2]/div[3]/ul/li[2]/div[2]/span/a", "xpath:position"],
+        ["xpath=//a[contains(.,'02 - Business Objects')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }]
+  }, {
+    "id": "648a5240-3707-4b13-89b2-2129297ee6d4",
+    "name": "News - Dialog Open",
+    "commands": [{
+      "id": "5d589d7a-1c5b-4487-8ea0-c00645766d0f",
+      "comment": "",
+      "command": "open",
+      "target": "/",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "e9385f15-cb2d-4627-83b4-c6b17b9efde9",
+      "comment": "",
+      "command": "setWindowSize",
+      "target": "1936x1096",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "6c57e0b0-e78e-4183-a78c-3eacc891a1c2",
+      "comment": "",
+      "command": "click",
+      "target": "css=.fa-wifi",
+      "targets": [
+        ["css=.fa-wifi", "css:finder"],
+        ["xpath=//a[@id='manageStoreNews']/i", "xpath:idRelative"],
+        ["xpath=//a[7]/i", "xpath:position"]
+      ],
+      "value": ""
+    }]
+  }],
+  "suites": [{
+    "id": "61b7c653-df2a-4106-a1a4-ee9b480c733c",
+    "name": "Default Suite",
+    "persistSession": false,
+    "parallel": false,
+    "timeout": 300,
+    "tests": []
+  }],
+  "urls": ["http://localhost:3000/"],
+  "plugins": []
+}

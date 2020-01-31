@@ -18,6 +18,7 @@ const appRoot = require('@server/routes/appRoot').appRoot
 const apiStoreUserRoutes = require('@routes/apiStoreUsers').apiStoreUserRoutes
 const userGroupRoutes = require('@server/routes/userGroupRoutes').userGroupRoutes
 const serviceInspectRoutes = require('@server/routes/serviceInspectRoutes').serviceInspectRoutes
+const newsArticle = require('@apiStore/newsArticle').newsArticle
 /*****************************************************************************/
 const appStatus = require('@server/appStatus').appStatus
 const scheduler = require('@src/cron/timer').scheduler
@@ -33,6 +34,11 @@ const routingSystem = function({
 
     let _setServiceInspectRoutes = () => {
         router.get('/serviceInspect', serviceInspectRoutes.getServiceInfo)
+    }
+
+    let _setNewsArticleRoutes = () => {
+        router.post('/newsArticle', newsArticle.postNewArticle)
+        router.get('/newsArticle', newsArticle.getStoredArticles)
     }
 
     let whiteList = ['https://dev.api.canada.ca', 'https://api.canada.ca']
@@ -55,6 +61,8 @@ const routingSystem = function({
     router.get('/getTenantAccounts', tenantRoutes.getTenantAccounts)
 
     _setServiceInspectRoutes()
+    _setNewsArticleRoutes()
+
     router.get('/schedule', scheduler.getSchedule)
     router.get('/logs', logs.getLogs)
 	    

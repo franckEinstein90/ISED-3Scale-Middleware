@@ -8,9 +8,11 @@
  ******************************************************************************/
 "use strict"
 
+ /*****************************************************************************/
 const scheduler = require('@src/cron/timer.js').scheduler
-const tenantsManager = require('@services/tenantsManager').tenantsManager
+const tenantsManager = require('@tenants/tenantsManager').tenantsManager
 const users = require('@users/users').users
+ /*****************************************************************************/
 
 let checkResults = function(updateResults) {
     let updateErrors = []

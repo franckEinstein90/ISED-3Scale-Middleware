@@ -2,12 +2,15 @@
  * Franck Binard, ISED
  * Canadian Gov. API Store middleware
  * -------------------------------------
- *  app.js
+ *  db.js
  *
  *  database setup
  ******************************************************************************/
 "use strict"
+
+/*****************************************************************************/
 const sqlite3 = require('sqlite3').verbose();
+/*****************************************************************************/
 
 const appDatabase = (function() {
 
@@ -166,6 +169,44 @@ const appDatabase = (function() {
                     })
                 })
         },
+
+        getAllTableRows: function({
+            table
+        }){
+            return new Promise((resolve, reject) => {
+                let SQLStatement = `SELECT * FROM ${table};`
+                db.all(SQLStatement, (err, rows)=>{
+                    if(err){
+                        reject(err)
+                    } else {
+                       resolve( rows ) 
+                    }
+                })
+            })
+        }, 
+
+        insertInTable: function({ 
+            table, 
+            values
+        }){
+            let fields = []
+            let fieldValues = []
+            let valArray = Object.entries(values)
+            valArray.forEach(field => {
+                fields.push( `'${field[0]}'` )
+                fieldValues.push( `'${field[1]}'` )
+            })
+            return new Promise((resolve, reject) => {
+                let SQLStatement =  `INSERT INTO ${table} (${fields.join(',')}) VALUES (${fieldValues.join(',')});` 
+                db.run(SQLStatement, function( err ){
+                    if( err ){
+                        return reject(err)
+                    } else {
+                        return resolve('ok')
+                    }
+                })
+            })
+        }, 
 
         newUserGroup: function({
             groupName,

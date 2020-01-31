@@ -9,7 +9,7 @@
 "use strict"
 
 /******************************************************************************/
-const tenantsManager = require('@services/tenantsManager').tenantsManager
+const tenantsManager = require('@tenants/tenantsManager').tenantsManager
 /******************************************************************************/
 
 const messages = (function() {

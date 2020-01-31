@@ -15,6 +15,7 @@
 const tenants = require('./tenants').tenants
 const storeUsers = require('./storeUsers').storeUsers
 const storeServices = require('./storeServices').storeServices
+const storeNewsArticles = require('./store/storeNewsArticles').storeNewsArticles
 /******************************************************************************/
 const timer = require('./timer.js').timer
 const userGroupsDialog = require('./dialogs/userGroupsDialog').userGroupsDialog
@@ -96,6 +97,8 @@ const APICan = (function() {
         storeServices.onReady({
 
         })
+
+        storeNewsArticles.onReady()
 
     }
 

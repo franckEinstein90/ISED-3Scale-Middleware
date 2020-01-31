@@ -1,7 +1,7 @@
 "use strict"
 
 const tenants = require('@src/tenants/tenantsApiRequests').tenants
-const tenantServices = require('@src/services').services
+const tenantServices = require('@services/services').services
 
 const log = require('@src/utils').utils.log
 const errors = require('@errors').errors

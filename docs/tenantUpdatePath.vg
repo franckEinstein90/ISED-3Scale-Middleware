@@ -1,0 +1,33 @@
+digraph G {
+
+	subgraph clusterTenants{
+		node [shape=oval, style=filled, color=white];
+		style=filled;
+		color=lightgrey; 
+		tenant1 -> tenant2 -> "..." ->tenantN;
+	}
+	subgraph clusterApiInfo {
+		 "updateApiInfo(tenant1)";
+		 "updateApiInfo(tenant2)";
+		 "updateApiInfo(...)";
+		 "updateApiInfo(tenantN)";
+	}
+	subgraph clusterServices {
+		Service1; 
+		Service2; 
+		ServiceM; 	
+	}
+	node [shape=rectangle];
+	tenantsManager->tenant1;
+
+	tenant1 -> "updateApiInfo(tenant1)";
+	tenant2 -> "updateApiInfo(tenant2)";
+	"..."	-> "updateApiInfo(...)";
+	tenantN -> "updateApiInfo(tenantN)";
+
+	"updateApiInfo(tenant1)" -> Service1; 
+	"updateApiInfo(tenant1)" -> Service2; 
+	"updateApiInfo(tenant1)" -> ServiceM; 
+
+	Service1 -> ".updateFeatureInfo()"; 
+}
