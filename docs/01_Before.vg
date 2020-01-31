@@ -1,0 +1,16 @@
+digraph G {
+	node [shape=circle];
+	user
+	node [shape=oval];
+	user->APIStore[style=bold,label="http"];
+	node [shape=oval];	
+//	APICan -> keyCloak;
+//	APICan -> Jira; 
+//	APICan -> APIStore; 
+//	APICan -> "3Scale";
+	node [shape=rectangle];
+	"3Scale" -> APICan; 
+	APICan  -> "3Scale"; 
+	APIStore -> APICan;
+	APICan -> APIStore; 
+}
