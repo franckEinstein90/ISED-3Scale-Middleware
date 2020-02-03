@@ -1,7 +1,21 @@
+/*******************************************************************************
+* Franck Binard, ISED - 2020
+* FranckEinstein90 - franck.binard@canada.ca
+* Prototype Code - Canadian Gov. API Store middleware
+* Used for demos, new features, experiments
+* 
+* Production application code at: https://github.com/ised-isde-canada/apican
+* -------------------------------------
+* alwaysResolve.js
+*  
+* Handlers for requests that always need to resolve
+******************************************************************************/
 "use strict"
 
+/*****************************************************************************/
 const request = require('request')
 const validator = require('validator')
+/*****************************************************************************/
 
 const alwaysResolve = function (apiCall, options = {
         good,

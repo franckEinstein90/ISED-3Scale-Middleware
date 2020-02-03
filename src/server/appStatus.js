@@ -9,6 +9,9 @@
 
 "use strict"
 
+/*******************************************************************************/
+const config = require('config')
+/*******************************************************************************/
 const scheduler = require('@src/cron/timer').scheduler
 
 const statusCodes = {
@@ -16,13 +19,22 @@ const statusCodes = {
     running: "running"
 }
 
+
 const appStatus = (function() {
 
     let currentState = statusCodes.init
     let keyCloakEnabled = false
-    let _tenantRefreshEventID = null
 
+    let _managedTenants = null
+    let _configDataEnv = null
+    let _tenantRefreshEventID = null
     return {
+        ready: function( ){
+            let configData = config.get('master')
+            _configDataEnv = configData.env
+            _managedTenants = configData.tenants.map(t => t.name)
+        }, 
+
         configure: function({
             tenantRefreshEventID
         }) {
@@ -37,16 +49,18 @@ const appStatus = (function() {
             currentState = statusCodes.running
         },
 
-        output: async function(req, res, next) {
+        getStatus: async function(req, res, next) {
             let nextTenantRefresh = 0
             if (_tenantRefreshEventID) nextTenantRefresh = scheduler.nextRefresh(_tenantRefreshEventID)
-            let statusOut = {
+            let reqResponse = {
                 runningTime: scheduler.runningTime(),
+                env: _configDataEnv, 
                 state: 'initializing',
-                nextTenantRefresh
+                nextTenantRefresh, 
+                managedTenants: _managedTenants
             }
-            if (appStatus.isRunning()) statusOut.state = 'running'
-            res.send(statusOut)
+            if (appStatus.isRunning()) reqResponse.state = 'running'
+            res.send( reqResponse )
         }
 
     }

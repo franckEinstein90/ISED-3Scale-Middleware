@@ -202,7 +202,7 @@ const appDatabase = (function() {
                     if( err ){
                         return reject(err)
                     } else {
-                        return resolve('ok')
+                        return resolve( this.lastID )
                     }
                 })
             })

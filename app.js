@@ -50,8 +50,12 @@ const logger = require('morgan')
 
 
 
-const appStatus = require('@server/appStatus').appStatus
+
 appLogger.log('info', 'Initializing application')
+
+const appStatus = require('@server/appStatus').appStatus
+appStatus.ready()
+
 const tenantsManager = require('@tenants/tenantsManager').tenantsManager
 
 let correctFetchErrors = (tenantsUpdateReport) => {

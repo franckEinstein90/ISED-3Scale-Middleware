@@ -37,8 +37,8 @@ const routingSystem = function({
     }
 
     let _setNewsArticleRoutes = () => {
-        router.post('/newsArticle', newsArticle.postNewArticle)
-        router.get('/newsArticle', newsArticle.getStoredArticles)
+        router.post('/article', newsArticle.postNewArticle)
+        router.get('/article', newsArticle.getStoredArticles)
     }
 
     let whiteList = ['https://dev.api.canada.ca', 'https://api.canada.ca']
@@ -54,7 +54,7 @@ const routingSystem = function({
 
     app.use('/', router)
     router.get('/', appRoot.render)
-    router.get('/appStatus', appStatus.output)
+    router.get('/appStatus', appStatus.getStatus)
 
     //tenant information
     router.get('/tenants', tenantRoutes.getTenants)

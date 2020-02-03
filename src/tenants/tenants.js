@@ -98,7 +98,10 @@ tenants.Tenant.prototype.publicAPIList = function(language) {
     let returnedAPIs = billingualApis.filter(
         service => {
             if (!('features' in service)) return true
-            if (service.features.length === 0) return true
+            let serviceFeatures = service.features.filter(feature =>{
+                return feature.scope === "service_plan"
+            } )
+            if (serviceFeatures.length === 0) return true
             return false
         })
     let listOfApis = []

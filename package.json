@@ -9,6 +9,7 @@
   "_moduleAliases": {
     "@src": "src",
     "@routes": "routes",
+    "@tenants"  : "src/tenants",
     "@utils": "src/utils",
     "@services": "src/services",
     "@server": "src/server",
