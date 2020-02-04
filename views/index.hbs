@@ -66,15 +66,16 @@
 
 </script>
 
-	<div ID="containerFlex" style="display:flex">
-    	<div ID="tenantCards" style="width:60%">
+	<div class="flex-container">
+    	<div ID="tenantCards">
 			<center><h2>Tenants</h2></center>
 			{{#each tenants}}
 				{{>tenantCard}}
 			{{/each}}
      	</div>
-
+		<div id="apiInspectSection">
 		{{>apiPageSection/apiList}}	
+		</div>
 	</div>
 
 {{>userListView}}

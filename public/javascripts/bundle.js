@@ -17,6 +17,7 @@ const tenants = require('./tenants').tenants
 const storeUsers = require('./storeUsers').storeUsers
 const storeServices = require('./storeServices').storeServices
 const storeNewsArticles = require('./store/storeNewsArticles').storeNewsArticles
+const appStatusDialog = require('./dialogs/appStatusDialog').appStatusDialog
 /******************************************************************************/
 const timer = require('./timer.js').timer
 const userGroupsDialog = require('./dialogs/userGroupsDialog').userGroupsDialog
@@ -77,13 +78,13 @@ const APICan = (function() {
             selectedUsers.toggleSelectedUser(selectedUserEmail)
         })
 
-        $('#showScheduler').on('click', function(event){
+        $('#showScheduler').on('click', function(event) {
             event.preventDefault()
             document.getElementById('scheduleInspectModal').style.display = 'block'
             $.get('/schedule', {}, function(events) {
                 $('#scheduleInfo tbody').empty()
                 events.forEach(info => {
-                $('#scheduleInfo tbody').append(`<tr><td>${info.id}</td><td>${info.eventTitle}</td><td>${info.description}</td><td>${info.frequency}</td><td>${info.lastRefresh}</td></tr>`)
+                    $('#scheduleInfo tbody').append(`<tr><td>${info.id}</td><td>${info.eventTitle}</td><td>${info.description}</td><td>${info.frequency}</td><td>${info.lastRefresh}</td></tr>`)
                 })
             })
         })
@@ -105,6 +106,7 @@ const APICan = (function() {
 
     return {
         init: function() {
+            appStatusDialog.ready()
             socket = io()
             socket.on('updateBottomStatusInfo', function(data) {
                 $('#bottomStatusBar').text(data.message)
@@ -127,7 +129,7 @@ module.exports = {
     APICan
 }
 
-},{"./dialogs/userGroupsDialog":3,"./store/storeNewsArticles":7,"./storeServices":5,"./storeUsers":6,"./tenants":8,"./timer.js":9,"./ui":10}],2:[function(require,module,exports){
+},{"./dialogs/appStatusDialog":3,"./dialogs/userGroupsDialog":4,"./store/storeNewsArticles":8,"./storeServices":6,"./storeUsers":7,"./tenants":9,"./timer.js":10,"./ui":11}],2:[function(require,module,exports){
 "use strict"
 
 
@@ -149,6 +151,53 @@ module.exports = {
     dataExchangeStatus
 }
 },{}],3:[function(require,module,exports){
+/*******************************************************************************
+ * Franck Binard, ISED (FranckEinstein90)
+ *
+ * APICan application - 2020
+ * -------------------------------------
+ *  Canadian Gov. API Store middleware - client side
+ *
+ *  appStatusDialog.js: information and actions on app variables
+ *
+ ******************************************************************************/
+"use strict"
+/******************************************************************************/
+const appStatusDialog = (function(){
+
+	let _initUI = function(){
+		$('#btnRefreshTenants').click(function ( event ){
+			event.preventDefault()
+			$.get('/refreshTenants', {}, function(data) {
+				debugger	
+			})
+		})
+		$('#appStatus').click(function( event ) {
+			this.classList.toggle("active")
+			let statusDetailPaneHeight = $('#appStatusDetail').css('maxHeight')	
+			if( statusDetailPaneHeight === '0px' ){
+				let scrollHeight = $('#appStatusDetail').css('scrollHeight')
+				$('#appStatusDetail').css('maxHeight', '80px')
+			} else {
+				$('#appStatusDetail').css('maxHeight', '0px')
+			}
+		})
+	}
+	return {
+        ready: function(){
+				_initUI()
+		  }, 
+		  update: function(){
+
+		  }
+    }
+})()
+
+module.exports = {
+    appStatusDialog
+}
+
+},{}],4:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED
  * Canadian Gov. API Store middleware - 2020
@@ -206,7 +255,7 @@ module.exports = {
     userGroupsDialog
 }
 
-},{"../storeUsers":6,"../tenants":8}],4:[function(require,module,exports){
+},{"../storeUsers":7,"../tenants":9}],5:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
@@ -323,7 +372,7 @@ $(function() {
         $.get('/findUsers', parameters, keyCloakUsers.showUsers)
     })
 */
-},{"./APICan":1,"./storeUsers":6,"./userActions":11}],5:[function(require,module,exports){
+},{"./APICan":1,"./storeUsers":7,"./userActions":12}],6:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
@@ -341,56 +390,59 @@ $(function() {
 const ui = require('./ui').ui
 /******************************************************************************/
 
-let drawGraph = function(stats){
-	let ctx = document.getElementById('statsGraph').getContext('2d')
-	let myChart = new Chart(ctx, {
-		type: 'bar',
-		data:{
-			labels:[
-				'june','july','aug','sept','oct','nov','dec','jan','feb'
-			],
-			datasets:[{
-				label:'hits per month',
-				data:stats.values
-			}], 
-			backgroundColor: stats.values.map(s => 'rgba(255, 0, 0, 0.7)'), 
-			borderColor: stats.values.map(s => 'rgba(0, 255, 0, 0.7)') 
-            
-		},
-		options:{}
-	})
+let drawGraph = function(stats) {
+    let ctx = document.getElementById('statsGraph').getContext('2d')
+    let myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: [
+                'june', 'july', 'aug', 'sept', 'oct', 'nov', 'dec', 'jan', 'feb'
+            ],
+            datasets: [{
+                label: 'hits per month',
+                data: stats.values
+            }],
+            backgroundColor: stats.values.map(s => 'rgba(255, 0, 0, 0.7)'),
+            borderColor: stats.values.map(s => 'rgba(0, 255, 0, 0.7)')
+
+        },
+        options: {}
+    })
 }
 let openServiceInspectDialog = function({
-	tenant, 
-	serviceID
-	}){
+    tenant,
+    serviceID
+}) {
 
-	document.getElementById('serviceInspectModal').style.display = 'block'
-	$('#serviceModalTenantName').text(tenant)
-	$('#serviceModalID').text(serviceID) 
-	$.get('/serviceInspect', {tenant, service:serviceID}, function(apiInfo) {
+    document.getElementById('serviceInspectModal').style.display = 'block'
+    $('#serviceModalTenantName').text(tenant)
+    $('#serviceModalID').text(serviceID)
+    $.get('/serviceInspect', {
+            tenant,
+            service: serviceID
+        }, function(apiInfo) {
 
-		$('#apiInspectFormState').val(apiInfo.state)
-		$('#apiInspectFormTenantName').val(apiInfo.tenantName)
-		$('#apiInspectFormServiceID').val(apiInfo.serviceID)
-		$('#apiInspectFormSystemName').val(apiInfo.systemName)
-		$('#apiInspectFormLastUpdate').val(apiInfo.updatedAt)
-		$('#apiInspectFormCreationDate').val(apiInfo.created_at)
-		$('#apiInspectFormFeatures').html(`${apiInfo.features.map(x => x.name).join('<br/>')}`)
-		$('#englishDoc').val(apiInfo.documentation[0].docSet.body)
-		$('#frenchDoc').val(apiInfo.documentation[1].docSet.body)
-		let tags =[]
-		apiInfo.documentation.forEach(d => {
-			if('tags' in d.docSet){
-				d.docSet.tags.forEach(t => tags.push(t))
-			}
-		})
-		$('#apiTags').text(tags.join(','))
-		if('stats' in apiInfo) drawGraph(apiInfo.stats)
-	})
-	.fail(error => {
-		debugger
-	})
+            $('#apiInspectFormState').val(apiInfo.state)
+            $('#apiInspectFormTenantName').val(apiInfo.tenantName)
+            $('#apiInspectFormServiceID').val(apiInfo.serviceID)
+            $('#apiInspectFormSystemName').val(apiInfo.systemName)
+            $('#apiInspectFormLastUpdate').val(apiInfo.updatedAt)
+            $('#apiInspectFormCreationDate').val(apiInfo.created_at)
+            $('#apiInspectFormFeatures').html(`${apiInfo.features.map(x => x.name).join('<br/>')}`)
+            $('#englishDoc').val(apiInfo.documentation[0].docSet.body)
+            $('#frenchDoc').val(apiInfo.documentation[1].docSet.body)
+            let tags = []
+            apiInfo.documentation.forEach(d => {
+                if ('tags' in d.docSet) {
+                    d.docSet.tags.forEach(t => tags.push(t))
+                }
+            })
+            $('#apiTags').text(tags.join(','))
+            if ('stats' in apiInfo) drawGraph(apiInfo.stats)
+        })
+        .fail(error => {
+            debugger
+        })
 }
 
 const storeServices = (function() {
@@ -399,16 +451,16 @@ const storeServices = (function() {
         $('#visibleAPISelect').on('change', function() {
             ui.showVisibleAPITable(this.value)
         })
-		  $('.serviceInspect').click( event => {
-				event.preventDefault()
-			   let parentTable = event.currentTarget.offsetParent 
-			   let tenant = parentTable.id.replace('VisibleAPI', '')
-			   let serviceID = Number((event.currentTarget.cells[1]).innerText)
-			   openServiceInspectDialog({
-					tenant, 
-					serviceID
-				})
-		  })
+        $('.serviceInspect').click(event => {
+            event.preventDefault()
+            let parentTable = event.currentTarget.offsetParent
+            let tenant = parentTable.id.replace('VisibleAPI', '')
+            let serviceID = Number((event.currentTarget.cells[1]).innerText)
+            openServiceInspectDialog({
+                tenant,
+                serviceID
+            })
+        })
     }
 
     return {
@@ -423,8 +475,7 @@ const storeServices = (function() {
 module.exports = {
     storeServices
 }
-
-},{"./ui":10}],6:[function(require,module,exports){
+},{"./ui":11}],7:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
@@ -644,7 +695,7 @@ module.exports = {
     storeUsers,
     keyCloakUsers
 }
-},{"./APICan":1,"./dataExchangeStatus":2,"./tenants":8,"./ui":10,"./userActions":11}],7:[function(require,module,exports){
+},{"./APICan":1,"./dataExchangeStatus":2,"./tenants":9,"./ui":11,"./userActions":12}],8:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
@@ -672,7 +723,7 @@ module.exports = {
     storeNewsArticles
 }
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
@@ -718,7 +769,7 @@ const tenants = (function() {
 module.exports = {
     tenants
 }
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
@@ -730,15 +781,21 @@ module.exports = {
  *
  ******************************************************************************/
 "use strict"
+/*****************************************************************************/
+const appStatusDialog = require('./dialogs/appStatusDialog').appStatusDialog
+/*****************************************************************************/
+
 const timer = (function() {
     return {
         eachMinute: function() {
             $.get('/appStatus', {}, function(data) {
                 $('#appStatus').text(
                     [`ISED API Store Middleware - status ${data.state}`,
-                        `online: ${data.runningTime} mins`,
-                        `next refresh: ${data.nextTenantRefresh} mins`
+                        `online: ${data.runningTime} mins`
                     ].join(' - ')
+                )
+                $('#nextTenantRefresh').text(
+                   `(${data.nextTenantRefresh} mins) `
                 )
             })
         }
@@ -748,7 +805,7 @@ const timer = (function() {
 module.exports = {
     timer
 }
-},{}],10:[function(require,module,exports){
+},{"./dialogs/appStatusDialog":3}],11:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
@@ -784,7 +841,7 @@ const ui = (function() {
 module.exports = {
     ui
 }
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 /*************************************************************************
  * Client side, trigger user actions
  * 
@@ -816,4 +873,4 @@ const userActions = (function() {
 module.exports = {
     userActions
 }
-},{}]},{},[4]);
+},{}]},{},[5]);

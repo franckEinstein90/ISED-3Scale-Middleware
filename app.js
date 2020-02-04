@@ -14,13 +14,10 @@
  *
  *  Server setup
  ******************************************************************************/
-
 "use strict"
-
 /*****************************************************************************/
-
 require('module-alias/register')
-
+/*****************************************************************************/
 const features = {
     testGetUser: 1
 }
@@ -94,14 +91,16 @@ let setTimerRefresh = function() {
 const db        = require('@server/db').appDatabase
 const APICan    = require('@src/APICan').APICan
 const users     = require('@users/users').users
+const services  = require('@services/services').services
 const groups    = require('@users/groups').groups
 
 db.configure({
         filePath: './settings.db'
     }) //access the database
-    .then(APICan.configure) //configure the application engine
-    .then(users.onReady)
-    .then(groups.onReady)
+    .then( APICan.configure) //configure the application engine
+    .then( users.onReady)
+    .then( groups.onReady)
+    .then( services.ready )
     .then(x => {
         if (x) appStatus.enableKeyCloak()
     })

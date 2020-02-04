@@ -42,10 +42,16 @@ const apiStoreUserRoutes =  (function (){
         }, 
 
         getApi: async function(req, res, next) {
+        
             let logMessage = {
                 message: `api.json request ${queryManager.requestLogMessage(req)}`
             }
             let callArgs = queryManager.validate(req, logMessage)
+            if( 'tenant' in req.query ){
+                callArgs.tenantDomain = [req.query.tenant]
+            } else {
+                callArgs.tenantDomain = []
+            }
             accessLog.log('info', logMessage.message)
             res.header("Content-Type", "application/json; charset=utf-8")
             res.send(await tenantsManager.getApiInfo(callArgs))

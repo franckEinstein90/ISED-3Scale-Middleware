@@ -11,16 +11,28 @@
 "use strict"
 
 /*****************************************************************************/
-const log = require('@src/utils').utils.log
-const validator = require('validator')
+const log           = require('@src/utils').utils.log
+const validator     = require('validator')
 const alwaysResolve = require('@src/utils').utils.alwaysResolve
-const errors = require('@errors').errors
-const moment = require('moment')
+const errors        = require('@errors').errors
+const moment        = require('moment')
+const appDatabase   = require('@server/db').appDatabase
 /*****************************************************************************/
 
 const services = (function() {
+    let _features = []
 
     return {
+        ready: function(){
+            //read the features from the database
+            appDatabase.getAllTableRows({
+                table: 'tblFeatures'
+            })
+            .then(rows => {
+                debugger
+            })
+        },
+
         codes: {
             updateServiceFeaturesOk: "update service feature ok",
             updateServiceFeaturesNotOk: "update service feature not ok"

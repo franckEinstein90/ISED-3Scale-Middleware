@@ -16,6 +16,7 @@ const tenants = require('./tenants').tenants
 const storeUsers = require('./storeUsers').storeUsers
 const storeServices = require('./storeServices').storeServices
 const storeNewsArticles = require('./store/storeNewsArticles').storeNewsArticles
+const appStatusDialog = require('./dialogs/appStatusDialog').appStatusDialog
 /******************************************************************************/
 const timer = require('./timer.js').timer
 const userGroupsDialog = require('./dialogs/userGroupsDialog').userGroupsDialog
@@ -76,13 +77,13 @@ const APICan = (function() {
             selectedUsers.toggleSelectedUser(selectedUserEmail)
         })
 
-        $('#showScheduler').on('click', function(event){
+        $('#showScheduler').on('click', function(event) {
             event.preventDefault()
             document.getElementById('scheduleInspectModal').style.display = 'block'
             $.get('/schedule', {}, function(events) {
                 $('#scheduleInfo tbody').empty()
                 events.forEach(info => {
-                $('#scheduleInfo tbody').append(`<tr><td>${info.id}</td><td>${info.eventTitle}</td><td>${info.description}</td><td>${info.frequency}</td><td>${info.lastRefresh}</td></tr>`)
+                    $('#scheduleInfo tbody').append(`<tr><td>${info.id}</td><td>${info.eventTitle}</td><td>${info.description}</td><td>${info.frequency}</td><td>${info.lastRefresh}</td></tr>`)
                 })
             })
         })
@@ -104,6 +105,7 @@ const APICan = (function() {
 
     return {
         init: function() {
+            appStatusDialog.ready()
             socket = io()
             socket.on('updateBottomStatusInfo', function(data) {
                 $('#bottomStatusBar').text(data.message)

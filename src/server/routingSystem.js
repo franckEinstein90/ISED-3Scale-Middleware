@@ -12,8 +12,8 @@
 /*****************************************************************************/
 const express = require('express')
 const cors = require('cors')
-const tenantRoutes = require('@routes/tenants').tenantRoutes
 /*****************************************************************************/
+const tenantRoutes = require('@server/routes/tenantRoutes').tenantRoutes
 const appRoot = require('@server/routes/appRoot').appRoot
 const apiStoreUserRoutes = require('@routes/apiStoreUsers').apiStoreUserRoutes
 const userGroupRoutes = require('@server/routes/userGroupRoutes').userGroupRoutes
@@ -31,6 +31,12 @@ const routingSystem = function({
 }) {
 
     let router = express.Router()
+
+    let _setTenantRoutes = () => {
+        router.get('/tenants', tenantRoutes.getTenants)
+        router.get('/refreshTenants', tenantRoutes.getRefreshTenants)
+        router.get('/getTenantAccounts', tenantRoutes.getTenantAccounts)
+    }
 
     let _setServiceInspectRoutes = () => {
         router.get('/serviceInspect', serviceInspectRoutes.getServiceInfo)
@@ -56,10 +62,7 @@ const routingSystem = function({
     router.get('/', appRoot.render)
     router.get('/appStatus', appStatus.getStatus)
 
-    //tenant information
-    router.get('/tenants', tenantRoutes.getTenants)
-    router.get('/getTenantAccounts', tenantRoutes.getTenantAccounts)
-
+    _setTenantRoutes()
     _setServiceInspectRoutes()
     _setNewsArticleRoutes()
 

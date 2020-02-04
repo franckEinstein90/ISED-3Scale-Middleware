@@ -1,9 +1,10 @@
 
 :root {
-  --mainColor: rgb(0, 52, 223);
+  --mainColor: rgb(119, 131, 172);
   --formBackground: rgb(32, 88, 88);
   --comp1: #1982C4;
-  --pop: #379390;
+  --pop: #5acac6;
+  --crackle: #363133;
 }
 html {
   scroll-behavior: smooth;
@@ -12,6 +13,65 @@ html,body,h1,h2,h3,h4,h5 {
   font-family: "Raleway", sans-serif
 }
 
+#leftNav {
+  background-color: black;
+  width:250px; 
+  color:white;
+  text-decoration:bold;
+  font-size: 1em;
+  height:100%; 
+  overflow: auto;
+}
+
+div.appContent {
+  margin-left: 0px;
+  margin-top: 50px;
+  padding: 1px 16px;
+  height: 1000px;
+}
+#tenantCards {
+  width:50%
+}
+#apiInspectSection {
+  width:50%
+}
+@media screen and (max-width: 1200px) {
+  #leftNav{
+    display:none;
+    width: 100%;
+    height: auto;
+    position: relative;
+  }
+  #sidebar a {float: left;}
+  .topNav {
+    display:block; 
+  }
+  div.appContent {
+    margin-left: 0px;
+  }
+  #tenantCards {
+    width:100%
+  }
+  #apiInspectSection {
+    width: 100%
+  }
+}
+
+@media screen and (max-width: 1200px) {
+   #leftNav a {
+    text-align: center;
+    float: none;
+  }
+}
+
+#topNav {
+  z-index: 4;
+  background-color: var(--crackle);
+}
+.flex-container{
+  display:flex;
+  flex-wrap: wrap;  
+}
 #userFormGroupList{
   width:100%
 }
@@ -44,18 +104,33 @@ html,body,h1,h2,h3,h4,h5 {
     animation: spin 2s linear infinite;
   }
 
-  .tenantSelection{
+.tenantSelection{
     width:120px; 
     text-align:right 
-  }
-
-#leftNav {
-  background-color: black;
-  width:250px; 
-  color:white;
-  text-decoration:bold;
-  font-size: 1em;
 }
+
+
+#appStatus {
+  cursor: pointer;
+  background-color: var(--crackle); 
+  color: var(--pop); 
+  transition: 0.4s; 
+}
+
+#appStatus:hover{
+  background-color: var(--mainColor)
+}
+
+#appStatusDetail {
+  padding: 0 18px; 
+  background-color: white; 
+  max-height: 0;
+  width:100%;
+  overflow: hidden; 
+  transition: max-height 0.2s ease-out; 
+}
+
+
 .leftNavItem:hover{
   background-color:yellow !important;
 }

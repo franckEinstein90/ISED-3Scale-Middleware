@@ -9,15 +9,21 @@
  *
  ******************************************************************************/
 "use strict"
+/*****************************************************************************/
+const appStatusDialog = require('./dialogs/appStatusDialog').appStatusDialog
+/*****************************************************************************/
+
 const timer = (function() {
     return {
         eachMinute: function() {
             $.get('/appStatus', {}, function(data) {
                 $('#appStatus').text(
                     [`ISED API Store Middleware - status ${data.state}`,
-                        `online: ${data.runningTime} mins`,
-                        `next refresh: ${data.nextTenantRefresh} mins`
+                        `online: ${data.runningTime} mins`
                     ].join(' - ')
+                )
+                $('#nextTenantRefresh').text(
+                   `(${data.nextTenantRefresh} mins) `
                 )
             })
         }

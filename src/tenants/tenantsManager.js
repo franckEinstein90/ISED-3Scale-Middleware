@@ -167,7 +167,7 @@ const tenantsManager = (function() {
                 tenantsToUpdate = /*all*/ tenants
             }
 
-            let registerUpdatedTenants = (tenantsUpdateReport) => {
+            let registerUpdatedTenants = tenantsUpdateReport => {
                 tenantsUpdateReport.forEach(
                     updateReport => {
                         let currentTime = moment()
@@ -194,10 +194,20 @@ const tenantsManager = (function() {
 
         getApiInfo: function({
             userEmail,
-            language
+            language, 
+            tenantDomain
         }) {
             if (userEmail === null) {
-                return JSON.stringify(tenants.map(t => t.apiJsonAnswer(language)))
+                if( tenantDomain.length > 0){
+                    let tenantDomainTemp = tenantDomain.map(
+                        tName => {
+                            return tenants.find(t => t.name === tName)
+                        })
+                    tenantDomain = tenantDomainTemp
+                } else {
+                    tenantDomain = tenants 
+                }
+                return JSON.stringify(tenantDomain.map(t => t.apiJsonAnswer(language)))
             }
             //if there is an email associated with the request
             let user = new UserAccount(userEmail)

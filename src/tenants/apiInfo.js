@@ -82,7 +82,6 @@ tenants.Tenant.prototype.validateAPIs = async function(tenantUpdateReport) {
         return tenantUpdateReport
     }
 
-    let tenantName = this.name
     let promiseArray = billingualServicesReports.map(
         serviceUpdateReport => {
             let serviceID = parseInt((serviceUpdateReport.id.split('_'))[1])

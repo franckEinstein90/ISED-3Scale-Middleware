@@ -12,61 +12,54 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css">
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js"></script>
     <script type="text/javascript" charset="utf8" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.bundle.min.js"></script>
-    <style>
+
     
-    </style>
 
 
-  <script>
     
-  </script>
   <body class='w3-light-grey'>
 
-    <div class="w3-bar w3-top w3-black w3-large" style="z-index:4">
+    <div class="w3-bar w3-top w3-large" id="topNav">
          <button class="w3-bar-item w3-button w3-hide-large w3-hover-none w3-hover-text-light-grey" onclick="w3_open();">
           <i class="fa fa-bars"></i>  Menu
         </button>
         
 	       <button class="w3-bar-item w3-button w3-hover-none w3-hover-text-light-grey" id="showScheduler">
           <i class="fa fa-clock-o" class='w3-xxxlarge' style="color:red"></i>  
-        </button> <span class="w3-bar-item w3-right" ID='appStatus'>runningTime</span>
+        </button> 
+        
+
+        {{>topNav/appStatus}}
         {{>modalScheduler/frame}}
+        {{>topNav/tenantInfoRefresh}}
     </div>
 
     {{>navBottom}}
     {{>leftNav/navBar}}
 
 
-<!-- Overlay effect when opening sidebar on small screens -->
-<div class="w3-overlay w3-hide-large w3-animate-opacity" onclick="w3_close()" style="cursor:pointer"
- title="close side menu" id="myOverlay"></div>
 
-<div class="w3-main" style="margin-left:260px;margin-top:43px;margin-right:10px">
+<div class="appContent">
     {{{body}}}
 </div>
 
-<script>
-// Get the Sidebar
-var mySidebar = document.getElementById("leftNav");
-// Get the DIV with overlay effect
-var overlayBg = document.getElementById("myOverlay");
-// Toggle between showing and hiding the sidebar, and add overlay effect
-function w3_open() {
-  if (mySidebar.style.display === 'block') {
-    mySidebar.style.display = 'none';
-    overlayBg.style.display = "none";
-  } else {
-    mySidebar.style.display = 'block';
-    overlayBg.style.display = "block";
-  }
-}
-// Close the sidebar with the close button
-function w3_close() {
-  mySidebar.style.display = "none";
-  overlayBg.style.display = "none";
-}
-</script>
   <script src="/socket.io/socket.io.js"></script>
+  <script src="/javascripts/sortable.js"></script>
+  <script>
+    // Example 1 - Simple list
+new Sortable(example1, {
+  group: 'shared',
+	animation: 150,
+	ghostClass: 'blue-background-class'
+});
+
+new Sortable(example2, {
+  group: 'shared',
+	animation: 150,
+	ghostClass: 'blue-background-class'
+});
+
+  </script>
   <script src="/javascripts/bundle.js"></script>
   </body>
 </html>
