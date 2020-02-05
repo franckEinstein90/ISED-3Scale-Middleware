@@ -58,6 +58,7 @@ tenants.Tenant.prototype.validateAPIs = async function(tenantUpdateReport) {
     //At this stage, we've fetched the list of services from this tenant and
     //its set of documentation
     //if either the service list fetch or the active doc fetch returned errors 
+    //8
     if (tenantUpdateReport.fetches.serviceList !== errors.codes.Ok ||
         tenantUpdateReport.fetches.activeDocs !== errors.codes.Ok) {
         //report a failed update
@@ -78,6 +79,8 @@ tenants.Tenant.prototype.validateAPIs = async function(tenantUpdateReport) {
         })
 
     if (billingualServicesReports.length === 0) {
+        //doesn't have billingual documentation
+        //no need to process any further
         tenantUpdateReport.updateSuccess = errors.codes.Ok
         return tenantUpdateReport
     }
@@ -114,6 +117,7 @@ tenants.Tenant.prototype.updateApiInfo = async function() {
     //1. fetches information necessary to process all requests
     //2. returns an updateReport
 
+    //6
     let tenantUpdateReport = new TenantUpdateReport(this.name)
 
     let serviceListingPromise = new Promise((resolve, reject) => {
@@ -134,7 +138,10 @@ tenants.Tenant.prototype.updateApiInfo = async function() {
 
     //fulfills both promises in paralell
     return Promise.all([serviceListingPromise, activeDocsPromise])
-        .then(_ => this.validateAPIs(tenantUpdateReport))
+    .then(_ => {
+        //7
+        return this.validateAPIs(tenantUpdateReport)
+    })
 }
 
 module.exports = {

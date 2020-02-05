@@ -104,8 +104,15 @@ db.configure({
     .then(x => {
         if (x) appStatus.enableKeyCloak()
     })
-    .then(tenantsManager.configure)
-    .then(tenantsManager.updateTenantInformation)
+    .then(x => {
+        //1
+        return tenantsManager.configure()
+    })
+    .then(initMessage =>{
+        //4
+        console.log(initMessage)
+        return tenantsManager.updateTenantInformation()
+    })
     .then(correctFetchErrors)
     .then(setTimerRefresh)
 

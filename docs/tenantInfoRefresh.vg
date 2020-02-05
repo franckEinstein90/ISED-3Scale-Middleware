@@ -1,0 +1,24 @@
+digraph G {
+	subgraph cluster_0 {
+		tenant1p [label="tenant 1"];
+		tenant2p;
+		tenantsp [label="..."];
+		tenantnp [label="tenant n"];
+		label = "tenants.Tenant instances";
+	}
+	subgraph cluster_2 {
+		tenant1n [label="tenant 1"]; 
+		tenant2n; 
+		tenantsn [label="..."];
+		tenantnn [label="tenant n"];
+		label = "tenants.Tenant instances";
+	}	
+	tenant1p -> tenant1n [label =".updateApiInfo() - (apiInfo.js)"]; 
+	tenant2p -> tenant2n; 
+	tenantnp -> tenantnn; 
+	node [shape=box];
+	subgraph clusterTenantsManager {
+		".updateTenantInformation"->tenant1p;
+		label = "tenantsManager Module"
+	}
+}

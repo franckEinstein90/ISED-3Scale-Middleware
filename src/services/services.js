@@ -10,13 +10,12 @@
  ******************************************************************************/
 "use strict"
 
-/*****************************************************************************/
-const log           = require('@src/utils').utils.log
 const validator     = require('validator')
+/*****************************************************************************/
 const alwaysResolve = require('@src/utils').utils.alwaysResolve
 const errors        = require('@errors').errors
-const moment        = require('moment')
 const appDatabase   = require('@server/db').appDatabase
+const ServiceProto  = require('@services/serviceProto').ServiceProto
 /*****************************************************************************/
 
 const services = (function() {
@@ -29,7 +28,6 @@ const services = (function() {
                 table: 'tblFeatures'
             })
             .then(rows => {
-                debugger
             })
         },
 
@@ -62,11 +60,18 @@ const services = (function() {
             }
         },
 
-        Service: class {
+        Service: class extends ServiceProto{
             constructor(serviceID, tenant) {
-                this.id = serviceID
-                this.tenant = tenant
-                this.documentation = new Map()
+                super({
+                    id: serviceID, 
+                    serviceProvider: tenant
+                })
+               this.documentation = new Map()
+               this.servicePlanIDs = []
+               this.applicationPlanIDs = []
+            }
+            get tenant(){
+                return this.serviceProvider
             }
         },
 
@@ -180,7 +185,10 @@ services.Service.prototype.updateFeatureInfo = async function(serviceUpdateRepor
         }
         return serviceUpdateReport 
     }
-    return alwaysResolve(apiCall, {good: processGoodResponse, bad: serviceUpdateReport })
+    return alwaysResolve(apiCall, {
+        good: processGoodResponse, 
+        bad: serviceUpdateReport 
+    })
 }
 
 services.Service.prototype.getServiceUsageMetrics = async function(){

@@ -14,8 +14,9 @@
 const utils = require('@src/utils').utils
 const log = require('@src/utils').utils.log
 const errHandle = require('@errors').errors.errorHandler
-const accounts = require('@src/accounts').accounts
-const TenantProto = require('@src/tenants/tenantProto').TenantProto
+
+const accounts      = require('@users/accounts').accounts
+const TenantProto   = require('@src/tenants/serviceProvider').ServiceProvider
 
 /*****************************************************************************/
 const tenants = (function() {
@@ -67,13 +68,7 @@ const tenants = (function() {
                 }
                 this.accounts = new Map() //indexed by email addresses
                 this.visibleServices = []
-
-                this.baseURL = `https://${this.adminDomain}/admin/api/`
-                this.accountAdminBaseURL = {
-                    services: `https://${this.adminDomain}/admin/api/services.json?access_token=${this.accessToken}`,
-                    activeDocs: `${this.baseURL}active_docs.json?access_token=${this.accessToken}`,
-                    userPlans: email => `${this.baseURL}accounts/find?access_token=${this.accessToken}&email=${encodeURIComponent(email)}`
-                }
+              
             }
         }
     }

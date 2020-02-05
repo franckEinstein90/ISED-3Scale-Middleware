@@ -10,12 +10,14 @@
  **********************************************************************************/
 "use strict"
 
+const moment        = require('moment')
  /**********************************************************************************/
 const APICanData = require('@src/APICanData').APICanData
 const t = require('@src/responses').tenants
-const UserAccount = require('@src/accounts').accounts.UserAccount
-const errors = require('@src/errors').errors
-const moment = require('moment')
+
+const UserAccount   = require('@users/accounts').accounts.UserAccount
+const errors        = require('@src/errors').errors
+
 const db = require('@server/db').appDatabase
  /**********************************************************************************/
 
@@ -128,7 +130,8 @@ const tenantsManager = (function() {
         getTenantByName: tenantName => tenants.find(t => t.name === tenantName),
         tenants: () => tenants,
 
-        configure: function(dataJSON) {
+        configure: async function(dataJSON) {
+            //2
             let env = APICanData.env() 
             _applicationAPIURI = (env === "dev" ? ".dev" : "") + ".api.canada.ca/admin/applications/"
 
@@ -138,10 +141,15 @@ const tenantsManager = (function() {
                     tenants.push(newTenant)
                 }
             })
-            tenants.sort((t1, t2) => t1.name.localeCompare(t2.name))
-            //set up index by name
-            tenants.forEach( tenant => updateRegister.set(tenant.name, null))
-            db.setTenants( tenants.map(t => t.name)  )
+            return Promise.all(tenants.map(tenant => tenant.getBaseInfo()))
+            .then(fetchBaseInfo => {
+                tenants.sort((t1, t2) => t1.name.localeCompare(t2.name))
+                //set up index by name
+                tenants.forEach( tenant => updateRegister.set(tenant.name, null))
+                db.setTenants( tenants.map(t => t.name))
+                //3
+                return "initialized tenant base info"
+            })
         },
 
         lastTenantUpdate: function(tenantName) {
@@ -160,7 +168,7 @@ const tenantsManager = (function() {
 
             //if listToUpdate specified, tenant manager 
             //only updates specified tenants
-            let tenantsToUpdate = null
+            let tenantsToUpdate = null //5
             if (listToUpdate) {
                 tenantsToUpdate = listToUpdate.map(tName => tenants.find(t => t.name === tName))
             } else {
@@ -179,8 +187,12 @@ const tenantsManager = (function() {
                 return tenantsUpdateReport
             }
 
-            return Promise.all(tenantsToUpdate.map(t => t.updateApiInfo()))
-                .then(registerUpdatedTenants)
+            return Promise.all(tenantsToUpdate.map(tenant => {
+                return tenant.updateApiInfo()
+            }))
+            .then(updateReports => {
+                return registerUpdatedTenants(updateReports)
+            })
         },
 
         languages: {

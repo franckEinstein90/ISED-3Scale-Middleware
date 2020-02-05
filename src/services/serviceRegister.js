@@ -24,7 +24,19 @@ class ServiceRegister {
         this.register = new Map() //(serviceID => (serviceDef x serviceDoc))
     }
 }
+ServiceRegister.prototype.set = function({
+    id,
+    tenant  
+}){
+    this.register.set(id, new services.Service(id, tenant))
+}
 
+ServiceRegister.prototype.get = function(serviceID){
+    return this.register.get(serviceID)
+}
+ServiceRegister.prototype.has = function(serviceID){
+    return this.register.has(serviceID)
+}
 ServiceRegister.prototype.length = function( options ) {
 	 if( options && 'visibleOnly' in options){ 
 		 let numVisible = 0
