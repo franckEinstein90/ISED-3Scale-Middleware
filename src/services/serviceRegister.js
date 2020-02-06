@@ -13,38 +13,41 @@
 
 /*****************************************************************************/
 const moment = require('moment')
+/*****************************************************************************/
+const ServiceRegisterProto = require('@services/serviceRegisterProto').ServiceRegisterProto
 const services = require('@services/services').services
 const errors = require('@errors').errors
 /*****************************************************************************/
 
-class ServiceRegister {
+class ServiceRegister extends ServiceRegisterProto {
     constructor(tenant) {
+        super()
         this.tenant = tenant
-        this.serviceIDs = []
-        this.register = new Map() //(serviceID => (serviceDef x serviceDoc))
     }
-}
-ServiceRegister.prototype.set = function({
-    id,
-    tenant  
-}){
-    this.register.set(id, new services.Service(id, tenant))
-}
 
-ServiceRegister.prototype.get = function(serviceID){
-    return this.register.get(serviceID)
-}
-ServiceRegister.prototype.has = function(serviceID){
-    return this.register.has(serviceID)
-}
-ServiceRegister.prototype.length = function( options ) {
-	 if( options && 'visibleOnly' in options){ 
-		 let numVisible = 0
-		 this.forEach( service => 
-			 numVisible += service.hasBillingualDoc( ) ? 1 : 0 )
-		 return numVisible
-	 }
-    return this.serviceIDs.length
+    set({
+        id,
+        tenant
+    }) {
+        super.set({
+            id,
+            value: new services.Service(id, tenant)
+        })
+    }
+
+    length( options ){
+
+        if( options ){
+            if('bilingual' in options) {
+                let numBilingual = 0
+                this.forEach( service => {
+                    numBilingual += service.bilingual ? 1 : 0
+                })
+                return numBilingual
+            }
+        }
+        return super.length
+    }
 }
 
 ServiceRegister.prototype.mapIDs = function(callback) {
@@ -60,18 +63,26 @@ ServiceRegister.prototype.forEach = function(callback) {
 }
 
 ServiceRegister.prototype.listServices = function() {
-//returns a list of service description in an array
+    //returns a list of service description in an array
 
     let result = []
 
     this.forEach((service, serviceID) => {
+        let serviceFeatures = []
+        service.features.forEach((featureInfo, category)=> {
+           serviceFeatures.push({
+               category, 
+               featureInfo
+           })
+        })
         result.push({
             id: serviceID,
-            billingualDoc: service.hasBillingualDoc(),
+            bilingualDoc: service.bilingual,
             created: moment(service.created_at).format('YY/M/D'),
             updated: moment(service.updated_at).format('YY/M/D'),
             name: service.name,
-            state: service.state
+            state: service.state, 
+            serviceFeatures
         })
     })
 
@@ -107,20 +118,19 @@ ServiceRegister.prototype.updateServiceDefinition =
         //receives the result of a service definition fetch
         //and updates or create a new service object 
         //in this tenant service register
-        let serviceID, serviceObject
-        serviceID = serviceDefinitionObject.id
+        let serviceID           = serviceDefinitionObject.id
+        let serviceObject       = null
+        let serviceUpdateReport = null
 
-
-        if (!this.register.has(serviceID)) { //this service is not registered
+        if (! this.has(serviceID) ) { //this service is not registered
             serviceObject = new services.Service(serviceID, this.tenant)
-            this.register.set(serviceID, serviceObject)
-            this.serviceIDs.push(serviceID)
+            this.set(serviceID, serviceObject)
         } //now it is
 
-        serviceObject = this.register.get(serviceID)
+        serviceObject = this.get( serviceID )
         serviceObject.updateDefinition(serviceDefinitionObject)
 
-        let serviceUpdateReport = updateReport.serviceReport(serviceID)
+        serviceUpdateReport = updateReport.serviceReport(serviceID)
         serviceUpdateReport.serviceDefinitionUpdate = errors.codes.Ok
     }
 

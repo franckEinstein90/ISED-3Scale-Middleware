@@ -11,13 +11,11 @@
 "use strict"
 
 /*****************************************************************************/
-const utils = require('@src/utils').utils
-const log = require('@src/utils').utils.log
-const errHandle = require('@errors').errors.errorHandler
-
+const utils         = require('@src/utils').utils
+const errors        = require('@errors').errors
+const log           = require('@src/utils').utils.log
 const accounts      = require('@users/accounts').accounts
 const TenantProto   = require('@src/tenants/serviceProvider').ServiceProvider
-
 /*****************************************************************************/
 const tenants = (function() {
 
@@ -198,6 +196,85 @@ tenants.Tenant.prototype.getAllUsers = function(options) {
     }]
 }
 
+tenants.Tenant.prototype.updateServiceDefinitions = 
+    async function(tenantServiceListFetchResult, tenantUpdateReport) {
+    //if the service list update generated an error, return here
+    if (tenantUpdateReport.fetches.serviceList !== errors.codes.Ok) {
+        return
+    }
+    //flag the services that need to be removed from the list of registered services
+    let currentServiceIDs = tenantServiceListFetchResult.map(
+        service => service.service.id
+    )
+    this.services.forEach(
+        (service, serviceID) => {
+            if (!currentServiceIDs.includes(serviceID)) {
+                updateReport.servicesToRemove.push(serviceID)
+            }
+        })
+
+    log(`updating ${tenantServiceListFetchResult.length} service definitions for ${this.name}`)
+    tenantServiceListFetchResult.forEach(
+        service => this.services.updateServiceDefinition(service.service, tenantUpdateReport)
+    )
+}
+
+tenants.Tenant.prototype.validateAPIs = async function(tenantUpdateReport) {
+    //At this stage, we've fetched the list of services from this tenant and
+    //its set of documentation
+    //if either the service list fetch or the active doc fetch returned errors 
+    //8
+    if (tenantUpdateReport.fetches.serviceList !== errors.codes.Ok ||
+        tenantUpdateReport.fetches.activeDocs !== errors.codes.Ok) {
+        //report a failed update
+        return tenantUpdateReport //update Failed
+    }
+
+    //extract the services that have billingual documentation
+    //these are the only one worth fetching the features for
+    let billingualServicesReports = []
+    tenantUpdateReport.servicesUpdateReports.forEach(
+        serviceUpdateReport => {
+            if (serviceUpdateReport.languageUpdate.french === errors.codes.Ok &&
+                serviceUpdateReport.languageUpdate.english === errors.codes.Ok) {
+                billingualServicesReports.push(serviceUpdateReport)
+            } else {
+                serviceUpdateReport.updateSuccess = errors.codes.Ok
+            }
+        })
+
+    if (billingualServicesReports.length === 0) {
+        //doesn't have billingual documentation
+        //no need to process any further
+        tenantUpdateReport.updateSuccess = errors.codes.Ok
+        return tenantUpdateReport
+    }
+
+    let promiseArray = billingualServicesReports.map(
+        serviceUpdateReport => {
+            let serviceID = parseInt((serviceUpdateReport.id.split('_'))[1])
+            let service = this.services.register.get(serviceID)
+            return service.updatePlanAndFeatureInfo(serviceUpdateReport)
+        })
+
+    let reportUpdateResults = (servicesUpdateReports) => {
+        /*servicesUpdateReports.forEach(
+            serviceUpdateReport => {
+                if (serviceUpdateReport.featuresUpdate === errors.codes.Ok) {
+                    serviceUpdateReport.updateSuccess = errors.codes.Ok
+                }
+            })*/
+        let badServiceUpdateReport = tenantUpdateReport.servicesUpdateReports.find(
+            serviceUpdateReport => serviceUpdateReport.updateSuccess !== errors.codes.Ok
+        )
+        if (!badServiceUpdateReport) {
+            tenantUpdateReport.updateSuccess = errors.codes.Ok
+        }
+        return tenantUpdateReport
+    }
+    return Promise.all(promiseArray)
+        .then(reportUpdateResults)
+}
 
 module.exports = {
     tenants

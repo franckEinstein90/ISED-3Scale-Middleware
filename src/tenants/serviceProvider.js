@@ -10,10 +10,10 @@
 "use strict"
 
 /*****************************************************************************/
-const validator = require('validator')
-const errors = require('@errors').errors
-const alwaysResolve = require('@utils/alwaysResolve').alwaysResolve
-const ServiceRegister = require('@src/services/serviceRegister').ServiceRegister
+const validator         = require('validator')
+const errors            = require('@errors').errors
+const alwaysResolve     = require('@utils/alwaysResolve').alwaysResolve
+const ServiceRegister   = require('@src/services/serviceRegister').ServiceRegister
 /*****************************************************************************/
 let planJsonObjectToserviceID = function( planInfo ){
     let serviceLink = planInfo.links.find( link => {

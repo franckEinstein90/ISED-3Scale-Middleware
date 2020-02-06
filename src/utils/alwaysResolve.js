@@ -1,38 +1,46 @@
 /*******************************************************************************
-* Franck Binard, ISED - 2020
-* FranckEinstein90 - franck.binard@canada.ca
-* Prototype Code - Canadian Gov. API Store middleware
-* Used for demos, new features, experiments
-* 
-* Production application code at: https://github.com/ised-isde-canada/apican
-* -------------------------------------
-* alwaysResolve.js
-*  
-* Handlers for requests that always need to resolve
-******************************************************************************/
+ * FranckEinstein90 alwaysResolve 2010
+ *
+ * ------------------------------------------------
+ *  single function library alwaysResolve
+ *
+ *  When I use Promises.all for rest API calls, 
+ *  I keep on bumping into use cases
+ *  in which i need the promise to resolve 
+ *  no matter what, because the flow depends on it
+ *
+ * ****************************************************************************/
 "use strict"
 
-/*****************************************************************************/
+/******************************************************************************/
 const request = require('request')
 const validator = require('validator')
-/*****************************************************************************/
+/******************************************************************************/
 
 const alwaysResolve = function (apiCall, options = {
         good,
-        bad
+        bad, 
+        headers
     }) {
 
-            return new Promise((resolve, reject) => {
-               if(! validator.isURL(apiCall)){
-                 return resolve(options.bad("bad url"))
-               } 
+            let _callOptions = { }
+            let bad     = (typeof options.bad   === 'function')? options.bad    : x => options.bad 
+            let good    = (typeof options.good  === 'function')? options.good   : x => options.good
 
-               request(apiCall, function(err, response, body) {
-                    if (err) return resolve(options.bad)
-                    if (response && response.statusCode === 200 && response.statusMessage === "OK") {
-                        resolve(options.good(body))
+            _callOptions.url        = validator.isURL( apiCall ) ? apiCall : null
+            _callOptions.headers    = 'headers' in options       ? options.headers : null
+
+            return new Promise( resolve  => {
+
+               if(_callOptions.url === null) return resolve( bad ('bad url'))
+
+               request(_callOptions, (err, response, body) => {
+                    if (err) {
+                        return resolve( bad( err, response, body ) )
+                   } else if ( response && 'statusCode' in response && response.statusCode === 200 ){
+                        return resolve( good( body , response ))
                     } else {
-                        return resolve(options.bad)
+                        return resolve( bad ( err, response, body))
                     }
                })
             })

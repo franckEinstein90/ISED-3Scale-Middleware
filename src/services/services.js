@@ -10,25 +10,25 @@
  ******************************************************************************/
 "use strict"
 
-const validator     = require('validator')
+const validator = require('validator')
 /*****************************************************************************/
-const alwaysResolve = require('@src/utils').utils.alwaysResolve
-const errors        = require('@errors').errors
-const appDatabase   = require('@server/db').appDatabase
-const ServiceProto  = require('@services/serviceProto').ServiceProto
+const alwaysResolve     = require('@src/utils/alwaysResolve').alwaysResolve
+const errors            = require('@errors').errors
+const appDatabase       = require('@server/db').appDatabase
+const ServiceProto      = require('@services/serviceProto').ServiceProto
+const DocumentationSet  = require('@services/documentationSet').DocumentationSet
 /*****************************************************************************/
 
 const services = (function() {
     let _features = []
 
     return {
-        ready: function(){
+        ready: function() {
             //read the features from the database
             appDatabase.getAllTableRows({
-                table: 'tblFeatures'
-            })
-            .then(rows => {
-            })
+                    table: 'tblFeatures'
+                })
+                .then(rows => {})
         },
 
         codes: {
@@ -51,7 +51,7 @@ const services = (function() {
             }
         },
 
-      
+
         ServiceDocumentation: class {
             constructor(serviceID) {
                 this.serviceID = serviceID
@@ -60,30 +60,23 @@ const services = (function() {
             }
         },
 
-        Service: class extends ServiceProto{
+        Service: class extends ServiceProto {
             constructor(serviceID, tenant) {
                 super({
-                    id: serviceID, 
-                    serviceProvider: tenant
+                    id              : serviceID,
+                    serviceProvider : tenant
                 })
-               this.documentation = new Map()
-               this.servicePlanIDs = []
-               this.applicationPlanIDs = []
+                this.documentation      = new Map()
+                this.servicePlanIDs     = []
+                this.applicationPlanIDs = []
             }
-            get tenant(){
+
+            get tenant() {
                 return this.serviceProvider
             }
-        },
 
-        DocumentationSet: class {
-            constructor(docObj) {
-                if('body' in docObj && validator.isJSON(docObj.body)){
-                    let swaggerInfo = JSON.parse(docObj.body)
-                    if ('x-api-store-tags' in swaggerInfo){
-                       this.tags = swaggerInfo["x-api-store-tags"]
-                    }
-                }
-                Object.assign(this, docObj)
+            get bilingual() {
+                return this.documentation.size === 2
             }
         }
     }
@@ -110,14 +103,13 @@ services.Service.prototype.outputAPIDescription = function(language) {
                 `/detail?api=${this.system_name}`
             ].join('')
         }
-        if('tags' in docInfo){
-            if(Array.isArray(docInfo.tags)){
+        if ('tags' in docInfo) {
+            if (Array.isArray(docInfo.tags)) {
                 apiDescription.tags = docInfo.tags
-            }
-            else{
+            } else {
                 apiDescription.tags = [docInfo.tags]
             }
-        } 
+        }
         if (swaggerBody.info.contact) {
             apiDescription.contact = {
                 FN: swaggerBody.info.contact.name,
@@ -145,7 +137,7 @@ services.Service.prototype.updateDefinition = function(defObj) {
 
 services.Service.prototype.addDocumentationSet = function(docObj, tenantUpdateReport) {
 
-    let serviceReport = tenantUpdateReport.serviceReport( this.id )
+    let serviceReport = tenantUpdateReport.serviceReport(this.id)
     if (/\-fr$/i.test(docObj.system_name)) {
         //French documentation		
         serviceReport.languageUpdate.french = errors.codes.Ok
@@ -156,18 +148,30 @@ services.Service.prototype.addDocumentationSet = function(docObj, tenantUpdateRe
         //neither English nor French documentation
         return
     }
-    this.documentation.set(docObj.system_name.toLowerCase(), new services.DocumentationSet(docObj))
+    this.documentation.set(docObj.system_name.toLowerCase(), new DocumentationSet(docObj))
 
 }
 
-services.Service.prototype.hasBillingualDoc = function() {
-    if (this.documentation.size >= 2) {
-        return true
-    } //one french, one english
-    return false
-}
+services.Service.prototype.updatePlanAndFeatureInfo = async function(serviceUpdateReport = null) {
+    this.servicePlanIDs.forEach( planID => {
+    })
+    this.applicationPlanIDs.forEach( planID => {
+        this.tenant.getApplicationPlanFeatures( planID )
+        .then( planFeatureInfo => {
+            if( Array.isArray(planFeatureInfo) && planFeatureInfo.length > 0 ){
+                let features = planFeatureInfo.map(x => x.feature)
+                features.forEach(f =>{
+                    this.storeUpdateFeature({
+                        featureCategory: f.scope, 
+                        featureID: f.id, 
+                        featureName: f.system_name
+                    })
+                })
+            }
+        })
+    })
 
-services.Service.prototype.updateFeatureInfo = async function(serviceUpdateReport = null) {
+    /*
     let thisServiceID, that
     thisServiceID = this.id
     that = this
@@ -177,35 +181,38 @@ services.Service.prototype.updateFeatureInfo = async function(serviceUpdateRepor
 
     let processGoodResponse = function(body) {
         if (validator.isJSON(body)) {
-            if(serviceUpdateReport) {
+            if (serviceUpdateReport) {
                 serviceUpdateReport.featuresUpdate = errors.codes.Ok
             }
             let features = JSON.parse(body).features
             that.features = features.map(obj => obj.feature)
         }
-        return serviceUpdateReport 
+        return serviceUpdateReport
     }
     return alwaysResolve(apiCall, {
-        good: processGoodResponse, 
-        bad: serviceUpdateReport 
-    })
+        good: processGoodResponse,
+        bad: serviceUpdateReport
+    })*/
 }
 
-services.Service.prototype.getServiceUsageMetrics = async function(){
+services.Service.prototype.getServiceUsageMetrics = async function() {
     let thisServiceID = this.id
     let apiCall = [
-        `https://${this.tenant.adminDomain}/stats/services/${thisServiceID}/`, 
-        `usage.json?access_token=`, 
-        `c527a90b5735f5148ff0de902bb4fba6dcef628523e5a66ae6811b415febedfb&`, 
+        `https://${this.tenant.adminDomain}/stats/services/${thisServiceID}/`,
+        `usage.json?access_token=`,
+        `c527a90b5735f5148ff0de902bb4fba6dcef628523e5a66ae6811b415febedfb&`,
         'metric_name=hits&since=2019-06-01&until=2020-02-20&granularity=month&skip_change=true'
     ].join('')
-    let processGoodResponse = function(body){
-        if (validator.isJSON( body )){
-            return  JSON.parse(body)
+    let processGoodResponse = function(body) {
+        if (validator.isJSON(body)) {
+            return JSON.parse(body)
         }
     }
     let bad = null
-    return alwaysResolve(apiCall, {good: processGoodResponse, bad})
+    return alwaysResolve(apiCall, {
+        good: processGoodResponse,
+        bad
+    })
 }
 services.Service.prototype.servicePlanAccess = function() {
     let servicePlanAccess = {

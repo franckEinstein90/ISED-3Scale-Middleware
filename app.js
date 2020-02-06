@@ -101,15 +101,15 @@ db.configure({
     .then( users.onReady)
     .then( groups.onReady)
     .then( services.ready )
-    .then(x => {
-        if (x) appStatus.enableKeyCloak()
+    .then(initMessage => {
+        console.log(initMessage)
+        return appStatus.enableKeyCloak()
     })
-    .then(x => {
-        //1
+    .then(initMessage => {
+        console.log(initMessage)
         return tenantsManager.configure()
     })
     .then(initMessage =>{
-        //4
         console.log(initMessage)
         return tenantsManager.updateTenantInformation()
     })

@@ -1,11 +1,16 @@
 "use strict"
 
-const features = (function(){
-    return{
+const features = (function() {
+    return {
         Feature: class {
-            constructor({id, scope, system_name, visible}){
+            constructor({
+                id,
+                scope,
+                system_name,
+                visible
+            }) {
                 this.id = id
-                this.scope = scope 
+                this.scope = scope
                 this.system_name = system_name
                 this.visible = visible
             }
@@ -16,4 +21,3 @@ const features = (function(){
 module.exports = {
     features
 }
-

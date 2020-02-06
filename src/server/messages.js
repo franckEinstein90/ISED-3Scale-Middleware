@@ -21,11 +21,17 @@ const messages = (function() {
         tenantInfo: function() {
             //information on tenants passed to the front end
             return tenantsManager.tenants().map(t => {
+                let totalServiceCount           = t.services.length()
+                let bilingualServiceCount = t.services.length({
+                    bilingual : true
+                })
+
                 return {
                     name: t.name,
                     id: t.id,
                     lastUpdate: tenantsManager.lastTenantUpdate(t.name),
-                    numServices: t.services.length(),
+                    totalServiceCount,  
+                    bilingualServiceCount,
                     numVisibleServices: t.services.length({
                         visibleOnly: 1
                     }),

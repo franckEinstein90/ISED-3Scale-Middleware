@@ -5,23 +5,35 @@
     <select id="visibleAPISelect" class="w3-select" name='option'>
         {{#each tenants}}
         <option value='{{this.name}}'>
-            {{this.name}} ({{this.numVisibleServices}})
+            {{this.name}} ({{this.bilingualServiceCount}})
         </option>
         {{/each}}
     </select>
-
 	{{#each tenants}}
     <table  class='w3-table w3-bordered w3-hoverable tenantsVisibleAPI' 
-            style='display:none' 
+            style='display:block' 
             id='{{this.name}}VisibleAPI' width="100%">
-
+        <tr>
+            <th>name</th>
+            <th>id</th>
+            <th>bilingual</th>
+            <th>Plans</th>
+        </tr>
 		{{#each this.services}}
-			{{#if this.billingualDoc}}
+            {{#if this.bilingualDoc}}
              <tr class="serviceInspect">
 			    <td class="serviceName">{{this.name}}</td>
                 <td class="serviceID">{{this.id}}</td>
+                <td>{{this.bilingualDoc}}</td>
+                <td>{{#each this.serviceFeatures}}
+                        {{this.category}}
+                        {{#each this.featureInfo}}
+                        {{this.name}}
+                        {{/each}}
+                    {{/each}}
+                </td>
             </tr>
-			{{/if}}
+            {{/if}}
         {{/each}}
     </table>
 	{{/each}}

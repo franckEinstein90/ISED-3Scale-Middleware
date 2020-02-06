@@ -1,24 +1,23 @@
-/***********************************************************
+/*******************************************************************************
  * Franck Binard, ISED
  * Canadian Gov. API Store middleware
  * 2019-2020
- * -------------------------------------
- *
+ * --------------------------------------------------
  *  Module tenantsApiRequests.js
- *
- *  contains functions that call 3Scale API to fetch
- *  tenant related information
- **********************************************************/
-
-
+ * --------------------------------------------------
+ *  functions that retrieve various tenant information
+ *  through the rest APIs of various related system 
+ ******************************************************************************/
 "use strict"
 
+/*****************************************************************/
 const validator = require('validator')
-const errors = require('@errors').errors
-const tenants = require('@tenants/tenants').tenants
-const parseXML = require('xml2js').parseString
+const parseXML      = require('xml2js').parseString
+/*****************************************************************/
+const errors        = require('@errors').errors
+const tenants       = require('@tenants/tenants').tenants
 const alwaysResolve = require('@utils/alwaysResolve').alwaysResolve
-const Application = require('@src/applications').applications.Application
+const Application   = require('@src/applications/applications').applications.Application
 
 /***********************API Requests******************************* */
 tenants.Tenant.prototype.getUserAccount = function(clientEmail) {
@@ -91,32 +90,6 @@ tenants.Tenant.prototype.getUserAccountSubscriptions = function(tenantAccount) {
     })
 }
 
-/*
-tenants.Tenant.prototype.getServiceList = function(tenantUpdateReport = null) {
-
-    let apiCall = [`https://${this.adminDomain}/admin/api/`,
-        `services.json?access_token=${this.accessToken}`
-    ].join('')
-
-    let bad = tenants.codes.serviceUpdateError
-
-    let good = function(body) {
-        if (validator.isJSON(body)) {
-            let apis = JSON.parse(body).services
-            if (tenantUpdateReport) {
-                tenantUpdateReport.fetches.serviceList = errors.codes.Ok
-            }
-            return apis
-        }
-        return bad
-    }
-
-    return alwaysResolve(apiCall, {
-        good,
-        bad
-    })
-}
-*/
 tenants.Tenant.prototype.getActiveDocsList = function(tenantUpdateReport = null) {
     let apiCall = this.accountAdminBaseURL.activeDocs
 
@@ -157,7 +130,9 @@ tenants.Tenant.prototype.getUserPlans = function(tenantAccount) {
         bad: null
     })
 }
-
+/*******************************************************************************
+ * Plans and Features
+ ******************************************************************************/
 tenants.Tenant.prototype.getTenantPlanFeatures = function(planID) {
     let apiCall = [this.baseURL,
         `account_plans/${planID}/features.json?`,
@@ -172,6 +147,27 @@ tenants.Tenant.prototype.getTenantPlanFeatures = function(planID) {
     })
 }
 
+tenants.Tenant.prototype.getApplicationPlanFeatures = function( planID ){
+    let apiCall = [
+        `https://${this.adminDomain}/admin/api/`, 
+        `application_plans/${planID}/features.json?`, 
+        `access_token=${this.accessToken}`
+    ].join('')
+
+    let bad = null
+    let processGoodResponse = function(body){
+        let result = JSON.parse(body)
+        if('features' in result){
+            return result.features
+        } else{
+            return null
+        }
+    }
+    return alwaysResolve(apiCall, {
+        bad, 
+        good: processGoodResponse
+    })
+}
 tenants.Tenant.prototype.getAccountList = function() {
     //returns array all accounts for that tenant
     let apiCall = [`https://${this.adminDomain}/admin/api/`,
