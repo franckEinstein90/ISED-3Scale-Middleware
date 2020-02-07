@@ -14,19 +14,19 @@ const sqlite3 = require('sqlite3').verbose();
 
 const appDatabase = (function() {
 
-    let db = null
+    let _db = null
 
     return {
+
         configure: function({
             filePath
         }) {
             return new Promise((resolve, reject) => {
-                db = new sqlite3.Database(filePath, (err) => {
+                _db = new sqlite3.Database(filePath, (err) => {
                     if (err) {
                         reject(err)
                     } else {
-                        return resolve(1)
-
+                        return resolve( _db.open)
                     }
                 })
             })
@@ -52,20 +52,7 @@ const appDatabase = (function() {
                     }
                 })
         },
-        getGroupDefinitions: function() {
-            //gets the groups definitions and properties
-            //from the database
-            return new Promise((resolve, reject) => {
-                let SQLStatement = `SELECT ID, name, Description, emailPattern FROM groups`
-                db.all(SQLStatement, function(err, rows) {
-                    if (err) {
-                        reject(err)
-                    } else {
-                        return resolve(rows)
-                    }
-                })
-            })
-        },
+       
         getGroupID: function(groupName) {
             return new Promise((resolve, reject) => {
                 let SQLStatement = `SELECT ID FROM groups WHERE name='${groupName}'`
@@ -92,22 +79,7 @@ const appDatabase = (function() {
                 })
             })
         },
-        getGroupTenants: function(groupID) {
-            //returns the tenants associated with this group
-            return new Promise((resolve, reject) => {
-                let SQLStatement = `SELECT tenant FROM lnkGroupsTenants WHERE [group] = ${groupID};`
-                db.all(SQLStatement, function(err, rows) {
-                    if (err) {
-                        reject(err)
-                    } else {
-                        return resolve({
-                            groupID,
-                            data: rows
-                        })
-                    }
-                })
-            })
-        },
+
         setGroupProperties: function(groupID, groupProperties) {
             return new Promise((resolve, reject) => {
                 let rows = groupProperties.map(property => `(${groupID}, '${property}')`).join(',')
@@ -171,11 +143,16 @@ const appDatabase = (function() {
         },
 
         getAllTableRows: function({
-            table
+            table, 
+            where
         }){
+            let whereStatement = ''
+            if( where ) whereStatement = ` WHERE ${where}`
+
             return new Promise((resolve, reject) => {
-                let SQLStatement = `SELECT * FROM ${table};`
-                db.all(SQLStatement, (err, rows)=>{
+
+                let SQLStatement = `SELECT * FROM ${table} ${whereStatement};`
+                _db.all(SQLStatement, (err, rows)=>{
                     if(err){
                         reject(err)
                     } else {

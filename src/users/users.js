@@ -9,50 +9,50 @@
  **********************************************************/
 "use strict"
 
-const request = require('request')
-const validator = require('validator')
-const config = require('config')
-const appVariables = require('@server/appStatus').appVariables
+/**********************************************************/
+const request 		= require('request')
+const validator 	= require('validator')
+/**********************************************************/
 const jiraInterface = require('@apiStore/supportRequest.js').jiraInterface
+/**********************************************************/
+
 
 const users = (function() {
 
-    let keyCloakClientId = null
-    let keyCloakClientSecret = null
-    let keyCloakAccessToken = null
-    let ssoHostUrl = null
-
-    let configureSupportRequest = function() {
-        let username = config.get('jiraRequestUserName')
-        let password = config.get('jiraRequestPassword')
-        jiraInterface.configure({
-            username,
-            password
+    let _keycloakCredentials = null
+    let _keycloakTest = function(testUserName){
+        return new Promise((resolve, reject) =>{
+            users.getUserList(  testUserName )
+            .then (testResult =>{
+                return resolve(testResult.found)
+            })
         })
     }
+
     return {
 
-        onReady: function() {
-            configureSupportRequest()
+        configure: function( app ) {
 
-            ssoHostUrl = 'https://sso-dev.ised-isde.canada.ca'
-            keyCloakClientId = config.get('keyCloakClientId')
-            keyCloakClientSecret = config.get('keyCloakClientSecret')
-            //make a test call to confirm all works
-            let testEmail = 'ic.api_store-magasin_des_apis.ic@canada.ca'
-            return users.getUserList(testEmail)
-                .then(testCall => {
-                    if (typeof testCall === 'object' && 'email' in testCall && testCall.email === testEmail) {
-                        console.log('keycloak connect: ok')
-                        return true
-                    }
-                    console.log("keycloak thing didn't work")
-                    return false
+            jiraInterface.configure( app.data.jiraAuthCredentials )
+            _keycloakCredentials = app.data.keycloakCredentials
+
+            return new Promise((resolve, reject) =>{
+            //test to see if we can access keycloak user data
+            //by searching for the api store email 
+            _keycloakTest( app.data.apiStoreUserName )
+            .then(testResult => {
+                app.say(`keycloak access = ${testResult}`)
+                app.keycloakAccess = testResult 
+                return resolve(app)
                 })
+            })
         },
 
         getKeyCloakCredentials: function() {
-
+			let ssoHostUrl              = _keycloakCredentials.keycloakURL
+			let keyCloakClientId        = _keycloakCredentials.keycloakClient
+            let keyCloakClientSecret    = _keycloakCredentials.keycloakSecret
+            
             return new Promise((resolve, reject) => {
                 let options = {
                     url: `${ssoHostUrl}/auth/realms/gcapi/protocol/openid-connect/token`,
@@ -90,40 +90,18 @@ const users = (function() {
                 .then(function(token) {
                     return (users.getUserProfile(token, searchString))
                 })
-                .then(x => {
-                    if (x.length === 0) { //user not found
-                        return {
-                            email: searchString,
-                            notFound: true
-                        }
-                    } else if (Array.isArray(x)) {
-                        return x[0]
-                    } else {
-                        return {
-                            email: searchString,
-                            error: true
-                        }
+                .then( userList => {
+                    let returnValue = {
+                        search  : searchString, 
+                        found   : false, 
+                        results : []
                     }
+                    if(! Array.isArray( userList) ) return returnValue
+                    if(userList.length === 0) return returnValue
+                    returnValue.found   = true
+                    returnValue.results = userList
+                    return returnValue
                 })
-
-
-            /* let url ='https://sso-dev.ised-isde.canada.ca/auth/admin/realms/gcapi/users' 
-             let options ={
-                 url, 
-                 headers:{
-                     'Authorization': `Bearer ${token.access_token}`
-                 }
-             }
-
-             return new Promise((resolve, reject) => {
-                 request.get(options, function(error, response, body){
-                     if ( error ) return resolve( error )
-                     if ( validator.isJSON( body ) ){
-                         resolve(JSON.parse(body))
-                     }
-                     return resolve('invalid json response')
-                 })
-            })*/
         },
 
         enforceTwoFactorAuthentication: function(email) {
@@ -143,7 +121,7 @@ const users = (function() {
         },
 
         getUserProfile: function(token, email) {
-            let url = `${ssoHostUrl}/auth/admin/realms/gcapi/users?email=${encodeURIComponent(email)}`
+            let url = `${_keycloakCredentials.keycloakURL}/auth/admin/realms/gcapi/users?email=${encodeURIComponent(email)}`
             let options = {
                 url,
                 headers: {

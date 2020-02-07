@@ -18,43 +18,26 @@
 /*****************************************************************************/
 require('module-alias/register')
 /*****************************************************************************/
-const features = {
-    testGetUser: 1
-}
+const tenantsManager    = require('@tenants/tenantsManager').tenantsManager
+const users             = require('@users/users').users
+const groups            = require('@users/groups').groups
+/*****************************************************************************/
 
-const errors = require('@src/errors').errors
+require('@src/APICan').APICan({
+    root    : __dirname, 
+    database: 'settings.db'
+})
+.then( app => {
+    return tenantsManager.configure( app )
+})
+.then( app => {
+    return users.configure( app )
+})
+.then( app =>{
+   return groups.configure( app ) 
+})
 
-//initiate winston logger
-const winston = require('winston')
-const appLogger = winston.createLogger({
-    format: winston.format.json(),
-    transports: [
-        new winston.transports.Console(),
-        new winston.transports.File({
-            filename: 'info.log'
-        })
-    ]
-});
-
-const createError = require('http-errors')
-
-const Keycloak = require('keycloak-connect')
-const session = require('express-session')
-
-const path = require('path')
-const logger = require('morgan')
-
-
-
-
-
-appLogger.log('info', 'Initializing application')
-
-const appStatus = require('@server/appStatus').appStatus
-appStatus.ready()
-
-const tenantsManager = require('@tenants/tenantsManager').tenantsManager
-
+/************************** 
 let correctFetchErrors = (tenantsUpdateReport) => {
     let tenantUpdateErrors = [] //ist of tenants for which there was an error during the update
     tenantsUpdateReport.forEach(tenantReport => {
@@ -88,9 +71,8 @@ let setTimerRefresh = function() {
 }
 
 
-const db        = require('@server/db').appDatabase
-const APICan    = require('@src/APICan').APICan
-const users     = require('@users/users').users
+
+
 const services  = require('@services/services').services
 const groups    = require('@users/groups').groups
 
@@ -147,3 +129,4 @@ const server = require('@server/httpServer').httpServer({
 const io = require('socket.io')(server.server())
 const messages = require('@server/messages').messages
 messages.init(io)
+*/

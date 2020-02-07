@@ -10,30 +10,63 @@
  ******************************************************************************/
 "use strict"
 
+/*****************************************************************************/
 const config = require('config')
 const expect = require('chai').expect
+/*****************************************************************************/
 
+
+const getMasterConfigInfo = function(){
+	let tenantsConfigurationInfo = config.get('master')
+	expect(tenantsConfigurationInfo).to.exist
+	expect(typeof tenantsConfigurationInfo).to.eql('object')
+	return  tenantsConfigurationInfo
+}
+
+const getJiraAuthCredentials = function(){
+	return {
+		password			: config.get('jiraRequestPassword'), 
+		username			: config.get('jiraRequestUserName')
+	}
+}
+
+const getKeycloakCredentials = function( env ){
+	return {
+		keycloakURL		:	config.get('DeVssoHostUrl'),
+		keycloakClient	: 	config.get('keyCloakClientId'), 
+		keycloakSecret	: 	config.get('keyCloakClientSecret')
+	}
+}
 
 const APICanData = (function(){
 
- 	let _tenantsConfigurationInfo = null	
-	let _configurationEnv = null
+	let _appConfigurationData		= getMasterConfigInfo() 
+	let _tenantsConfigurationData	= new Map() 
+	let _configurationEnv			= _appConfigurationData.env
+	let _jiraAuthCredentials		= getJiraAuthCredentials()
+	let _keycloakCredentials		= getKeycloakCredentials( _configurationEnv )
+	let _APIStoreUserName			= config.get('APIStoreUserName')
+
+	_appConfigurationData.tenants.forEach(t => {
+		_tenantsConfigurationData.set(t.name, t)
+	})
 	
 	return{
 
-		configure : function({
-				 masterData 
-		}){
+		env					: _appConfigurationData, 
 
-	   		_tenantsConfigurationInfo  = masterData.tenants
-			_configurationEnv = masterData.env
+		apiStoreUserName	: _APIStoreUserName, 
 
-		},
+		jiraAuthCredentials	: _jiraAuthCredentials, 
 
-		tenantsConfigurationInfo : _ =>  _tenantsConfigurationInfo,
+		keycloakCredentials	: _keycloakCredentials, 
 
-		env : _ => _configurationEnv
-		
+		tenants				: {
+			count	: _tenantsConfigurationData.size, 
+			forEach	: function( callback ){
+							_tenantsConfigurationData.forEach( callback )
+			}
+		}
 	}
 	
 })()

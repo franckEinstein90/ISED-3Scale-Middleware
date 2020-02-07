@@ -9,10 +9,10 @@
 "use strict"
  
 /*****************************************************************************/
-const db = require('@server/db').appDatabase
-const tenantsManager = require('@tenants/tenantsManager').tenantsManager
-const users = require('@users/users').users
-const messages = require('@server/messages').messages
+const db                = require('@server/db').appDatabase
+const tenantsManager    = require('@tenants/tenantsManager').tenantsManager
+const users             = require('@users/users').users
+const messages          = require('@server/messages').messages
 /*****************************************************************************/
 
 const getGroupMembers = function({
@@ -32,49 +32,100 @@ const getGroupMembers = function({
     })) 
 }
 
+class UserGroup {
+    constructor({
+        id, 
+        name, 
+        description, 
+        emailPattern
+    }){
+        this.id             = id
+        this.name           = name
+        this.description    = description
+        this.emailPattern   = emailPattern
+        this.tenants        = []
+    }
+
+    addTenantAssociation(tenantName){
+        this.tenants.push(tenantName)
+    }
+
+}
 const groups = (function() {
 
     let _groups = new Map()
     let _groupNames = []
+    let _getGroupDefinitions = function() {
+        //gets the groups definitions and properties from database
+        return new Promise((resolve, reject) => {
+            db.getAllTableRows({
+                table: 'groups', 
+                where: null
+            })
+            .then( groupData => {
+               resolve( groupData ) 
+            })
+        })
+    }
+    let _getGroupTenants = function( groupArray ){
+        let ids = groupArray.map( group => `[group] = ${group.ID}`).join(' OR ')
+        return new Promise((resolve, reject) => {
+            db.getAllTableRows({
+                table: 'lnkGroupsTenants',  
+                where: ids
+            })
+        .then( groupData => {
+            resolve(groupData)
+            })
+        })
+    }
+    let _getGroupUserProperties = function ( groupIdArray ) {
+        return new Promise((resolve, reject) => {
 
+        })
+    }
     return {
 
-        onReady: function() {
+        configure: function( app ) {
             //get group information and store in _groups and _groupNames
-            db.getGroupDefinitions()
-                .then(groups => {
-                    groups.forEach(group => {
-                        _groups.set(group.ID, {
-                            name: group.name, 
-                            description: group.Description, 
+            _getGroupDefinitions()
+            .then( groups => {              //get group info from database
+                groups.forEach( group => {
+                    app.say(`Getting group data for ${group.name}`)
+                    _groups.set(group.ID, new UserGroup({
+                            id          : group.ID, 
+                            name        : group.name, 
+                            description : group.Description, 
                             emailPattern: group.emailPattern
-                        })
-                        _groupNames.push({
+                        }))
+
+                    _groupNames.push({
                             name: group.name,
                             ID: group.ID
                         })
                     })
                     return _groupNames
-                })
-                .then(groupArray => {
-                    return Promise.all(groupArray.map(group => db.getGroupTenants(group.ID)))
-                })
-                .then(groupTenants => {
-                    groupTenants.forEach(tenantGroup => {
-                        let tenantNames = tenantGroup.data.map(x => x.tenant)
-                        if (_groups.has(tenantGroup.groupID)) {
-                            (_groups.get(tenantGroup.groupID)).tenants = tenantNames
+            })
+            .then( groupArray => {
+                return _getGroupTenants(groupArray)
+            })
+            .then( groupTenants => {
+                groupTenants.forEach(tenantGroup => {
+                    let groupID     = tenantGroup.group
+                    let tenantName  = tenantGroup.tenant
+                    if ( _groups.has( groupID )) {
+                            (_groups.get( groupID )).addTenantAssociation( tenantName )
                         }
                     })
-                    return Promise.all(_groupNames.map(group => db.getGroupUserProperties(group.ID)))
-                })
-                .then(groupProperties => {
+                return Promise.all(_groupNames.map(group => _getGroupUserProperties(group.ID)))
+            })
+            .then(groupProperties => {
                     groupProperties.forEach(propertySet => {
                         if (_groups.has(propertySet.groupID)) {
                             (_groups.get(propertySet.groupID)).properties = propertySet.data.map(x => x.property)
                         }
                     })
-                })
+            })
         },
         getGroupList: function(){
             let list = []
