@@ -22,12 +22,11 @@ const appDatabase = require('@server/db').appDatabase
 const newAppLogger = function(fileName){
 	return winston.createLogger({
 		level		: 'info', 
-    	format		: winston.format.simple(), 
-    	transports	: [
-        	new winston.transports.Console()
-        ]
+    		format		: winston.format.simple(), 
+    		transports	: [
+        		new winston.transports.Console()
+        	]
 	})
-	
 }
 
 const APICan = function({
@@ -48,9 +47,9 @@ const APICan = function({
 			resolve ({
 				data			: APICanData, 
 				appDatabase		: dbStatus,
-				keycloakAccess	: false, 
-				say				: msg => _appLogger.info(msg), 
-				run				: () => {
+				keycloakAccess		: false, 
+				say : msg => _appLogger.info(msg), 
+				run : () => {
 				  	_appLogger.info('booting app')
 				}
 			})
