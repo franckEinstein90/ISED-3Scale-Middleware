@@ -63,7 +63,7 @@ const groups = (function() {
                 where: null
             })
             .then( groupData => {
-               resolve( groupData ) 
+               return resolve( groupData ) 
             })
         })
     }
@@ -88,6 +88,7 @@ const groups = (function() {
 
         configure: function( app ) {
             //get group information and store in _groups and _groupNames
+            return new Promise((resolve, reject) => {
             _getGroupDefinitions()
             .then( groups => {              //get group info from database
                 groups.forEach( group => {
@@ -109,7 +110,11 @@ const groups = (function() {
             .then( groupArray => {
                 return _getGroupTenants(groupArray)
             })
-            .then( groupTenants => {
+            .then(x => {
+                return resolve(app)
+            })
+            })
+/*            .then( groupTenants => {
                 groupTenants.forEach(tenantGroup => {
                     let groupID     = tenantGroup.group
                     let tenantName  = tenantGroup.tenant
@@ -125,7 +130,9 @@ const groups = (function() {
                             (_groups.get(propertySet.groupID)).properties = propertySet.data.map(x => x.property)
                         }
                     })
+                    return resolve(apiCan)
             })
+        })*/
         },
         getGroupList: function(){
             let list = []

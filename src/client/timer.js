@@ -14,8 +14,10 @@ const appStatusDialog = require('./dialogs/appStatusDialog').appStatusDialog
 /*****************************************************************************/
 
 const timer = (function() {
+
     return {
         eachMinute: function() {
+            /* update the app status to see if there's been any changes */
             $.get('/appStatus', {}, function(data) {
                 $('#appStatus').text(
                     [`ISED API Store Middleware - status ${data.state}`,

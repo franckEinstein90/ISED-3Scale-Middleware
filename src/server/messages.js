@@ -21,7 +21,7 @@ const messages = (function() {
         tenantInfo: function() {
             //information on tenants passed to the front end
             return tenantsManager.tenants().map(t => {
-                let totalServiceCount           = t.services.length()
+                let totalServiceCount     = t.services.length()
                 let bilingualServiceCount = t.services.length({
                     bilingual : true
                 })
@@ -29,7 +29,6 @@ const messages = (function() {
                 return {
                     name: t.name,
                     id: t.id,
-                    lastUpdate: tenantsManager.lastTenantUpdate(t.name),
                     totalServiceCount,  
                     bilingualServiceCount,
                     numVisibleServices: t.services.length({

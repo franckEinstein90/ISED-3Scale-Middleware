@@ -42,12 +42,9 @@ const tenantsManager = (function() {
              * memory. If listToUpdate specified, tenant manager 
              * only updates specified tenants
              * *****************************************************/
-            let tenantsToUpdate = null
-            if (listToUpdate) {
-                tenantsToUpdate = listToUpdate.map(tName => _tenants.find(t => t.name === tName))
-            } else {
-                tenantsToUpdate = /*all*/ _tenants
-            }
+            let tenantsToUpdate = listToUpdate 
+                    ? listToUpdate.map(tName => _tenants.find(t => t.name === tName))
+                    : /*all*/ _tenants
 
             let registerUpdatedTenants = tenantsUpdateReport => {
                 tenantsUpdateReport.forEach(updateReport => {

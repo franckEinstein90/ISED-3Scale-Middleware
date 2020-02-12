@@ -106,7 +106,7 @@ ServiceRegister.prototype.updateServiceDocs = function(docObj, updateReport) {
         this.register.set(
             serviceID,
             new services.Service(serviceID, this.tenant))
-        this.serviceIDs.push(serviceID)
+        this.ids.push(serviceID)
     }
 
     let service = this.register.get(serviceID)
@@ -124,7 +124,7 @@ ServiceRegister.prototype.updateServiceDefinition =
 
         if (! this.has(serviceID) ) { //this service is not registered
             serviceObject = new services.Service(serviceID, this.tenant)
-            this.set(serviceID, serviceObject)
+            this.register.set(serviceID, serviceObject)
         } //now it is
 
         serviceObject = this.get( serviceID )

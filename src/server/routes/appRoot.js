@@ -10,8 +10,9 @@
 
 /******************************************************************************/
 const messages  = require('@server/messages').messages
+/*
 const appStatus = require('@server/appStatus').appStatus
-const groups    = require('@users/groups').groups
+const groups    = require('@users/groups').groups*/
 /******************************************************************************/
 
 
@@ -25,12 +26,12 @@ const appRoot = (function() {
                 title: "APICan",
                 state: 'initializing',
                 tenants: messages.tenantInfo(),
-                definedUserGroups: groups.definedGroups()
+               // definedUserGroups: groups.definedGroups()
             }
 
-            if (appStatus.isRunning()) {
-                pageData.state = 'running'
-            }
+//            if (appStatus.isRunning()) {
+ //               pageData.state = 'running'
+  //          }
             res.render('index', pageData)
         }
     }

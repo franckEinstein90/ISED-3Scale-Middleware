@@ -11,11 +11,11 @@
 "use strict"
 
 /*****************************************************************************/
-const utils         = require('@src/utils').utils
-const errors        = require('@errors').errors
-const log           = require('@src/utils').utils.log
-const accounts      = require('@users/accounts').accounts
-const TenantProto   = require('@src/tenants/serviceProvider').ServiceProvider
+const utils = require('@src/utils').utils
+const errors = require('@errors').errors
+const log = require('@src/utils').utils.log
+const accounts = require('@users/accounts').accounts
+const TenantProto = require('@src/tenants/serviceProvider').ServiceProvider
 /*****************************************************************************/
 const tenants = (function() {
 
@@ -47,8 +47,8 @@ const tenants = (function() {
                 })
                 this.env = env
                 this.lastUpdateTime = "not updated"
-                this.maintainers = function(lang) {
-                    let maintainerObject = {
+                this.maintainerTag = lang => {
+                    return {
                         email: "ic.api_store-magasin_des_apis.ic@canada.ca",
                         url: "https://api.canada.ca",
                         fn: utils.langMsg(lang, {
@@ -56,31 +56,27 @@ const tenants = (function() {
                             en: "GC API Store Team"
                         })
                     }
-                    return maintainerObject
                 }
-
+                this.description = lang => lang === 'en' ? tenantJSONInfo.description_en : tenantJSONInfo.description_fr
 
                 this.domain = tenantJSONInfo.domain
-                this.tenantDescription = function(lang) {
-                    return (lang === 'en') ? tenantJSONInfo.description_en : tenantJSONInfo.description_fr
-                }
                 this.accounts = new Map() //indexed by email addresses
                 this.visibleServices = []
-              
+
             }
         }
     }
 
 })()
 
-tenants.Tenant.prototype.apiJsonAnswer = function(language) {
+/*tenants.Tenant.prototype.apiJsonAnswer = function(language) {
     return {
         name: this.name,
         description: this.tenantDescription(language),
         maintainers: this.maintainers(language),
         apis: this.publicAPIList(language)
     }
-}
+}*/
 
 tenants.Tenant.prototype.publicAPIList = function(language) {
     //returns an array of public services for this tenant
@@ -91,9 +87,9 @@ tenants.Tenant.prototype.publicAPIList = function(language) {
     let returnedAPIs = billingualApis.filter(
         service => {
             if (!('features' in service)) return true
-            let serviceFeatures = service.features.filter(feature =>{
+            let serviceFeatures = service.features.filter(feature => {
                 return feature.scope === "service_plan"
-            } )
+            })
             if (serviceFeatures.length === 0) return true
             return false
         })
@@ -196,28 +192,28 @@ tenants.Tenant.prototype.getAllUsers = function(options) {
     }]
 }
 
-tenants.Tenant.prototype.updateServiceDefinitions = 
+tenants.Tenant.prototype.updateServiceDefinitions =
     async function(tenantServiceListFetchResult, tenantUpdateReport) {
-    //if the service list update generated an error, return here
-    if (tenantUpdateReport.fetches.serviceList !== errors.codes.Ok) {
-        return
-    }
-    //flag the services that need to be removed from the list of registered services
-    let currentServiceIDs = tenantServiceListFetchResult.map(
-        service => service.service.id
-    )
-    this.services.forEach(
-        (service, serviceID) => {
-            if (!currentServiceIDs.includes(serviceID)) {
-                updateReport.servicesToRemove.push(serviceID)
-            }
-        })
+        //if the service list update generated an error, return here
+        if (tenantUpdateReport.fetches.serviceList !== errors.codes.Ok) {
+            return
+        }
+        //flag the services that need to be removed from the list of registered services
+        let currentServiceIDs = tenantServiceListFetchResult.map(
+            service => service.service.id
+        )
+        this.services.forEach(
+            (service, serviceID) => {
+                if (!currentServiceIDs.includes(serviceID)) {
+                    updateReport.servicesToRemove.push(serviceID)
+                }
+            })
 
-    log(`updating ${tenantServiceListFetchResult.length} service definitions for ${this.name}`)
-    tenantServiceListFetchResult.forEach(
-        service => this.services.updateServiceDefinition(service.service, tenantUpdateReport)
-    )
-}
+        log(`updating ${tenantServiceListFetchResult.length} service definitions for ${this.name}`)
+        tenantServiceListFetchResult.forEach(
+            service => this.services.updateServiceDefinition(service.service, tenantUpdateReport)
+        )
+    }
 
 tenants.Tenant.prototype.validateAPIs = async function(tenantUpdateReport) {
     //At this stage, we've fetched the list of services from this tenant and
@@ -258,12 +254,12 @@ tenants.Tenant.prototype.validateAPIs = async function(tenantUpdateReport) {
         })
 
     let reportUpdateResults = (servicesUpdateReports) => {
-        /*servicesUpdateReports.forEach(
+        servicesUpdateReports.forEach(
             serviceUpdateReport => {
                 if (serviceUpdateReport.featuresUpdate === errors.codes.Ok) {
                     serviceUpdateReport.updateSuccess = errors.codes.Ok
                 }
-            })*/
+            })
         let badServiceUpdateReport = tenantUpdateReport.servicesUpdateReports.find(
             serviceUpdateReport => serviceUpdateReport.updateSuccess !== errors.codes.Ok
         )
@@ -275,6 +271,40 @@ tenants.Tenant.prototype.validateAPIs = async function(tenantUpdateReport) {
     return Promise.all(promiseArray)
         .then(reportUpdateResults)
 }
+
+
+tenants.Tenant.prototype.updateApiInfo = async function() {
+    //called once per cron cycles 
+    //1. fetches information necessary to process all requests
+    //2. returns an updateReport
+
+    //6
+    let tenantUpdateReport = new errors.TenantUpdateReport(this.name)
+
+    let serviceListingPromise = new Promise((resolve, reject) => {
+        this.getServiceList(tenantUpdateReport)
+            .then(services => resolve(
+                this.updateServiceDefinitions(
+                    services,
+                    tenantUpdateReport)
+            ))
+    })
+
+    let activeDocsPromise = new Promise((resolve, reject) => {
+        this.getActiveDocsList(tenantUpdateReport)
+            .then(activeDocs => resolve(
+                this.updateActiveDocs(activeDocs, tenantUpdateReport)
+            ))
+    })
+
+    //fulfills both promises in paralell
+    return Promise.all([serviceListingPromise, activeDocsPromise])
+        .then(_ => {
+            //7
+            return this.validateAPIs(tenantUpdateReport)
+        })
+}
+
 
 module.exports = {
     tenants

@@ -12,53 +12,82 @@
 "use strict"
 
 /*****************************************************************************/
-const winston 	= require('winston')
+const winston = require('winston')
 /*****************************************************************************/
-const APICanData  = require('@src/APICanData').APICanData
+const APICanData = require('@src/APICanData').APICanData
 const appDatabase = require('@server/db').appDatabase
-
+const tenantsManager = require('@tenants/tenantsManager').tenantsManager
+const errors = require('@src/errors').errors
 /*****************************************************************************/
 
-const newAppLogger = function(fileName){
-	return winston.createLogger({
-		level		: 'info', 
-    	format		: winston.format.simple(), 
-    	transports	: [
-        	new winston.transports.Console()
-        ]
-	})
-	
+let correctFetchErrors = (tenantsUpdateReport) => {
+    let tenantUpdateErrors = [] //ist of tenants for which there was an error during the update
+    tenantsUpdateReport.forEach(tenantReport => {
+        if (tenantReport.updateOk()) {
+            return errors.codes.Ok
+        } else {
+            console.log(`There was an error updating ${tenantReport.tenantName}, recovering`)
+            tenantUpdateErrors.push(tenantReport.tenantName)
+        }
+    })
+    if (tenantUpdateErrors.length > 0) {
+        return tenantsManager.updateTenantInformation(tenantUpdateErrors)
+            .then(correctFetchErrors)
+    }
 }
 
-const APICan = function({
-	root, 
-	database
-	}){
 
-	let _appLogger = newAppLogger('info.log')	
-	let _appStatus = require('@src/appStatus').appStatus(APICanData)
-	_appLogger.info('initializing APICan')
+const newAppLogger = function(fileName) {
+    return winston.createLogger({
+        level: 'info',
+        format: winston.format.simple(),
+        transports: [
+            new winston.transports.Console()
+        ]
+    })
 
-	return new Promise((resolve, reject) =>{
-		appDatabase.configure({
-			filePath: database
-		})
-		.then( dbStatus => {
-			_appLogger.info(`database access = ${dbStatus}`)
-			resolve ({
-				data			: APICanData, 
-				appDatabase		: dbStatus,
-				keycloakAccess	: false, 
-				say				: msg => _appLogger.info(msg), 
-				run				: () => {
-				  	_appLogger.info('booting app')
-				}
-			})
-		})
-	})
+}
+
+const APICanConfig = function( appSkeleton ) {
+
+    let _appLogger  = newAppLogger('info.log')
+    let _versionTag = app => `v-${app.version.major}:${app.version.minor}:${app.version.patch}`
+    _appLogger.info('initializing APICan')
+
+    return new Promise((resolve, reject) => {
+
+        appDatabase.configure({
+                filePath: appSkeleton.settingsDB
+            })
+            .then(dbStatus => {
+
+            _appLogger.info(`database access = ${dbStatus}`)
+		    appSkeleton.state 		= 'initializing'
+		    appSkeleton.features.dbStatus	= dbStatus
+		    appSkeleton.say	= msg => {
+			    console.log( msg )
+			    _appLogger.info(msg)
+		    }
+            return resolve( appSkeleton )
+                   /* 
+                    run: (apiCan) => {
+                        apiCan.say(`apiCan ${apiCan.versioning ? apiCan.versionTag : ""} booting`)
+                        tenantsManager.updateTenantInformation()
+                            .then(updateReport => {
+                                return correctFetchErrors(updateReport)
+                            })
+                            .then(_ => {
+                                if (apiCan.clock) apiCan.clock.start()
+                                apiCan.state = "running"
+                            })
+
+
+                    }*/
+            })
+       })
 }
 
 
 module.exports = {
-	APICan
+    APICanConfig
 }

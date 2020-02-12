@@ -42,7 +42,7 @@ const users = (function() {
             _keycloakTest( app.data.apiStoreUserName )
             .then(testResult => {
                 app.say(`keycloak access = ${testResult}`)
-                app.keycloakAccess = testResult 
+                app.features.keycloakAccess = testResult 
                 return resolve(app)
                 })
             })

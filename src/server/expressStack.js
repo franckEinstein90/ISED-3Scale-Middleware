@@ -10,35 +10,37 @@
 "use strict"
 
 /*****************************************************************************/
-const express = require('express')
-const viewSystem = require('@server/views/viewSystem.js').viewSystem
+const express	   = require('express')
 const cookieParser = require('cookie-parser')
-const favicon = require('express-favicon')
+const favicon      = require('express-favicon')
+/*****************************************************************************/
+const viewSystem   = require('@server/views/viewSystem.js').viewSystem
+/*****************************************************************************/
 
-const expressStack = function({
-    root,
-    staticFolder,
-    faviconPath
-
+const expressConfig = function({
+	expressStack, 
+	root, 
+	faviconPath, 
+	staticFolder
 }) {
-    let _app = express()
+
+
     viewSystem.configure({
-        app: _app,
-        root
+        app	: expressStack, 
+        root	: root
     })
 
-    _app.use(cookieParser());
-    _app.use(express.json())
-    _app.use(express.urlencoded({
+    expressStack.use(cookieParser());
+    expressStack.use(express.json())
+    expressStack.use(express.urlencoded({
         extended: false
     }))
-    _app.use(express.static(staticFolder))
-    _app.use(favicon(faviconPath))
+    expressStack.use(express.static(staticFolder))
+    expressStack.use(favicon(faviconPath))
 
 
-    return _app
 }
 
 module.exports = {
-    expressStack
+    expressConfig
 }

@@ -12,6 +12,7 @@
 const fs = require('fs')
 const path = require('path')
 const winston = require('winston')
+/******************************************************************************/
 
 const logs = (function() {
     let _logFile = 'logs/access.log'

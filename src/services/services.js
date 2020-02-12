@@ -153,7 +153,9 @@ services.Service.prototype.addDocumentationSet = function(docObj, tenantUpdateRe
 }
 
 services.Service.prototype.updatePlanAndFeatureInfo = async function(serviceUpdateReport = null) {
-    this.servicePlanIDs.forEach( planID => {
+
+    return serviceUpdateReport
+/*    this.servicePlanIDs.forEach( planID => {
     })
     this.applicationPlanIDs.forEach( planID => {
         this.tenant.getApplicationPlanFeatures( planID )
@@ -169,7 +171,7 @@ services.Service.prototype.updatePlanAndFeatureInfo = async function(serviceUpda
                 })
             }
         })
-    })
+    })*/
 
     /*
     let thisServiceID, that

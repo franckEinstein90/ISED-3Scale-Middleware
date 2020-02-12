@@ -14,30 +14,29 @@ const express = require('express')
 const cors = require('cors')
 /*****************************************************************************/
 const tenantRoutes = require('@server/routes/tenantRoutes').tenantRoutes
-const appRoot = require('@server/routes/appRoot').appRoot
-const apiStoreUserRoutes = require('@routes/apiStoreUsers').apiStoreUserRoutes
-const userGroupRoutes = require('@server/routes/userGroupRoutes').userGroupRoutes
+const appRoot               = require('@server/routes/appRoot').appRoot
+const apiStoreUserRoutes    = require('@server/routes/apiStoreUsers').apiStoreUserRoutes
+const userGroupRoutes       = require('@server/routes/userGroupRoutes').userGroupRoutes/*
 const serviceInspectRoutes = require('@server/routes/serviceInspectRoutes').serviceInspectRoutes
-const newsArticle = require('@apiStore/newsArticle').newsArticle
+const newsArticle = require('@apiStore/newsArticle').newsArticle*/
 /*****************************************************************************/
-const appStatus = require('@server/appStatus').appStatus
-const scheduler = require('@src/cron/timer').scheduler
-const logs = require('@server/logs').logs
+const appStatus = require('@server/routes/appStatus').appStatus
+/*const scheduler = require('@src/cron/timer').scheduler
+const logs = require('@server/logs').logs*/
 /*****************************************************************************/
 
-const routingSystem = function({
-    app
-
-}) {
+const routingSystem = function( apiCan ) {
 
     let router = express.Router()
-
-    let _setTenantRoutes = () => {
-        router.get('/tenants', tenantRoutes.getTenants)
-        router.get('/refreshTenants', tenantRoutes.getRefreshTenants)
-        router.get('/getTenantAccounts', tenantRoutes.getTenantAccounts)
-    }
-
+    let expressStack = apiCan.expressStack
+    expressStack.use('/', router)
+    router.get('/', appRoot.render)
+    //tenant routes
+    router.get('/tenants', tenantRoutes.getTenants)
+    router.get('/refreshTenants', tenantRoutes.getRefreshTenants)
+    router.get('/getTenantAccounts', tenantRoutes.getTenantAccounts)
+    
+/*
     let _setServiceInspectRoutes = () => {
         router.get('/serviceInspect', serviceInspectRoutes.getServiceInfo)
     }
@@ -57,37 +56,34 @@ const routingSystem = function({
             }
         }
     }
+*/
 
-    app.use('/', router)
-    router.get('/', appRoot.render)
+   
     router.get('/appStatus', appStatus.getStatus)
 
-    _setTenantRoutes()
-    _setServiceInspectRoutes()
-    _setNewsArticleRoutes()
-
-    router.get('/schedule', scheduler.getSchedule)
+/*    router.get('/schedule', scheduler.getSchedule)
     router.get('/logs', logs.getLogs)
 	    
     //get sets of users based on various criteria           
-    router.get('/findUsers', userGroupRoutes.findUsers)
+    router.get('/findUsers', userGroupRoutes.findUsers)*/
     router.get('/groupUsers', userGroupRoutes.getGroupUsers)
     router.get('/groups', userGroupRoutes.getGroupList)
     router.delete('/group', userGroupRoutes.deleteUserGroup)
     router.post('/newUserGroup', userGroupRoutes.postNewUserGroup)
 
-
+/*
     router.get('/userinfo.json', apiStoreUserRoutes.getUserInfo)
-    router.get('/api.json', apiStoreUserRoutes.getApi)
+  */router.get('/api.json', apiStoreUserRoutes.getApiInfo)/*
     router.post('/support', cors(corsOptions), apiStoreUserRoutes.postJiraRequest)
     router.post('/enforceOTP', apiStoreUserRoutes.postEnforceOTP)
 
-    app.use(function(req, res, next) {
+	*/
+    expressStack.use(function(req, res, next) {
         next(createError(404));
     })
 
     // error handler
-    app.use(function(err, req, res, next) {
+    expressStack.use(function(err, req, res, next) {
         // set locals, only providing error in development
         res.locals.message = err.message;
         res.locals.error = req.app.get('env') === 'development' ? err : {};

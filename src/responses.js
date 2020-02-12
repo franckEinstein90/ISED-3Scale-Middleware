@@ -1,12 +1,12 @@
 const tenants = require('@src/tenants/apiInfo').tenants
 
-const responses = function(){
+const responses = function() {
 
-	return{
-		
-	}
+    return {
+
+    }
 }
 
 module.exports = {
-  tenants
+    tenants
 }

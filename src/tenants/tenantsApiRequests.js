@@ -12,12 +12,12 @@
 
 /*****************************************************************/
 const validator = require('validator')
-const parseXML      = require('xml2js').parseString
+const parseXML = require('xml2js').parseString
 /*****************************************************************/
-const errors        = require('@errors').errors
-const tenants       = require('@tenants/tenants').tenants
+const errors = require('@errors').errors
+const tenants = require('@tenants/tenants').tenants
 const alwaysResolve = require('@utils/alwaysResolve').alwaysResolve
-const Application   = require('@src/applications/applications').applications.Application
+const Application = require('@src/applications/applications').applications.Application
 
 /***********************API Requests******************************* */
 tenants.Tenant.prototype.getUserAccount = function(clientEmail) {
@@ -147,24 +147,24 @@ tenants.Tenant.prototype.getTenantPlanFeatures = function(planID) {
     })
 }
 
-tenants.Tenant.prototype.getApplicationPlanFeatures = function( planID ){
+tenants.Tenant.prototype.getApplicationPlanFeatures = function(planID) {
     let apiCall = [
-        `https://${this.adminDomain}/admin/api/`, 
-        `application_plans/${planID}/features.json?`, 
+        `https://${this.adminDomain}/admin/api/`,
+        `application_plans/${planID}/features.json?`,
         `access_token=${this.accessToken}`
     ].join('')
 
     let bad = null
-    let processGoodResponse = function(body){
+    let processGoodResponse = function(body) {
         let result = JSON.parse(body)
-        if('features' in result){
+        if ('features' in result) {
             return result.features
-        } else{
+        } else {
             return null
         }
     }
     return alwaysResolve(apiCall, {
-        bad, 
+        bad,
         good: processGoodResponse
     })
 }

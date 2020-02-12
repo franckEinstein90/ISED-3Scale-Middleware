@@ -10,19 +10,19 @@
  **********************************************************************************/
 "use strict"
 
-const moment        = require('moment')
- /**********************************************************************************/
+const moment = require('moment')
+/**********************************************************************************/
 const t = require('@src/responses').tenants
-const UserAccount   = require('@users/accounts').accounts.UserAccount
-const errors        = require('@src/errors').errors
+const UserAccount = require('@users/accounts').accounts.UserAccount
+const errors = require('@src/errors').errors
 const db = require('@server/db').appDatabase
- /**********************************************************************************/
+/**********************************************************************************/
 
 const tenantsManager = function({
     appData
 }) {
     let _tenants = []
-  
+
     let _applicationAPIURI = null
     let tenants = []
     let updateRegister = new Map()
@@ -33,7 +33,7 @@ const tenantsManager = function({
             tenants: []
         }
 
-    let applicationInfo = (application, service) => {
+        let applicationInfo = (application, service) => {
             let serviceDocumentation = service.outputAPIDescription(language)
             let links = application.links
             links.push({
@@ -131,19 +131,19 @@ const tenantsManager = function({
 
         configure: async function(dataJSON) {
             //2
-            let env = APICanData.env() 
+            let env = APICanData.env()
             _applicationAPIURI = (env === "dev" ? ".dev" : "") + ".api.canada.ca/admin/applications/"
 
-        
+
             return Promise.all(tenants.map(tenant => tenant.getBaseInfo()))
-            .then(fetchBaseInfo => {
-                tenants.sort((t1, t2) => t1.name.localeCompare(t2.name))
-                //set up index by name
-                tenants.forEach( tenant => updateRegister.set(tenant.name, null))
-                db.setTenants( tenants.map(t => t.name))
-                //3
-                return "initialized tenant base info"
-            })
+                .then(fetchBaseInfo => {
+                    tenants.sort((t1, t2) => t1.name.localeCompare(t2.name))
+                    //set up index by name
+                    tenants.forEach(tenant => updateRegister.set(tenant.name, null))
+                    db.setTenants(tenants.map(t => t.name))
+                    //3
+                    return "initialized tenant base info"
+                })
         },
 
         lastTenantUpdate: function(tenantName) {
@@ -182,11 +182,11 @@ const tenantsManager = function({
             }
 
             return Promise.all(tenantsToUpdate.map(tenant => {
-                return tenant.updateApiInfo()
-            }))
-            .then(updateReports => {
-                return registerUpdatedTenants(updateReports)
-            })
+                    return tenant.updateApiInfo()
+                }))
+                .then(updateReports => {
+                    return registerUpdatedTenants(updateReports)
+                })
         },
 
         languages: {
@@ -200,18 +200,18 @@ const tenantsManager = function({
 
         getApiInfo: function({
             userEmail,
-            language, 
+            language,
             tenantDomain
         }) {
             if (userEmail === null) {
-                if( tenantDomain.length > 0){
+                if (tenantDomain.length > 0) {
                     let tenantDomainTemp = tenantDomain.map(
                         tName => {
                             return tenants.find(t => t.name === tName)
                         })
                     tenantDomain = tenantDomainTemp
                 } else {
-                    tenantDomain = tenants 
+                    tenantDomain = tenants
                 }
                 return JSON.stringify(tenantDomain.map(t => t.apiJsonAnswer(language)))
             }

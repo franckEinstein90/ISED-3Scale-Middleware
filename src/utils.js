@@ -19,7 +19,7 @@ const utils = (function() {
 
     let langCodes, envCodes
 
-   langCodes = {
+    langCodes = {
         fr: "fr",
         en: "en"
     }
@@ -30,7 +30,7 @@ const utils = (function() {
     }
 
 
-   return {
+    return {
 
         runningEnv: function() {},
 

@@ -10,13 +10,13 @@
 "use strict"
 
 /*****************************************************************************/
-const validator         = require('validator')
-const errors            = require('@errors').errors
-const alwaysResolve     = require('@utils/alwaysResolve').alwaysResolve
-const ServiceRegister   = require('@src/services/serviceRegister').ServiceRegister
+const validator = require('validator')
+const errors = require('@errors').errors
+const alwaysResolve = require('@utils/alwaysResolve').alwaysResolve
+const ServiceRegister = require('@src/services/serviceRegister').ServiceRegister
 /*****************************************************************************/
-let planJsonObjectToserviceID = function( planInfo ){
-    let serviceLink = planInfo.links.find( link => {
+let planJsonObjectToserviceID = function(planInfo) {
+    let serviceLink = planInfo.links.find(link => {
         return link.rel === "service"
     })
     let serviceID = /\d+$/.exec(serviceLink.href)
@@ -36,7 +36,7 @@ class ServiceProvider {
         this.accessToken = accessToken
         this.id = id
         this.name = name
-        this.services = new ServiceRegister(this)    
+        this.services = new ServiceRegister(this)
         this.adminDomain = adminDomain
         this.baseURL = `https://${this.adminDomain}/admin/api/`
         this.accountAdminBaseURL = {
@@ -47,77 +47,77 @@ class ServiceProvider {
     }
 }
 
-ServiceProvider.prototype.getBaseInfo = function(){
+ServiceProvider.prototype.getBaseInfo = function() {
     return Promise.all([
-      this.getServicePlans(), 
-      this.getApplicationPlans()
+        this.getServicePlans(),
+        this.getApplicationPlans()
     ])
 }
 
-ServiceProvider.prototype.getApplicationPlans = function(){
+ServiceProvider.prototype.getApplicationPlans = function() {
     return new Promise((resolve, reject) => {
         this.getApplicationPlanInfo()
-        .then(applicationPlans => {
-            let applicationPlanInfo = applicationPlans.map( planJsonObjectToserviceID )
-            applicationPlanInfo.forEach( planInfo => {
-                if(!this.services.has(planInfo.serviceID)){
-                    this.services.set({
-                        id: planInfo.serviceID, 
-                        tenant: this
-                    })
-                }
-                let s = this.services.get( planInfo.serviceID )
-                s.applicationPlanIDs.push( planInfo.planID )
-                resolve(`${applicationPlanInfo.length} application plans`)
+            .then(applicationPlans => {
+                let applicationPlanInfo = applicationPlans.map(planJsonObjectToserviceID)
+                applicationPlanInfo.forEach(planInfo => {
+                    if (!this.services.has(planInfo.serviceID)) {
+                        this.services.set({
+                            id: planInfo.serviceID,
+                            tenant: this
+                        })
+                    }
+                    let s = this.services.get(planInfo.serviceID)
+                    s.applicationPlanIDs.push(planInfo.planID)
+                    resolve(`${applicationPlanInfo.length} application plans`)
+                })
             })
-        })
     })
 }
-ServiceProvider.prototype.getServicePlans = function(){
+ServiceProvider.prototype.getServicePlans = function() {
     return new Promise((resolve, reject) => {
         this.getServicePlanInfo()
-        .then(servicePlans => {
-            let servicePlanInfo = servicePlans.map( planJsonObjectToserviceID )
-            servicePlanInfo.forEach(planInfo => {
-            if( !this.services.has(planInfo.serviceID) ){
-                this.services.set({
-                    id: planInfo.serviceID,
-                    tenant: this
-                })  
-            }
-            let s = this.services.get(planInfo.serviceID)
-            s.servicePlanIDs.push(planInfo.planID)
-            resolve(`${servicePlanInfo.length} service plans`)
+            .then(servicePlans => {
+                let servicePlanInfo = servicePlans.map(planJsonObjectToserviceID)
+                servicePlanInfo.forEach(planInfo => {
+                    if (!this.services.has(planInfo.serviceID)) {
+                        this.services.set({
+                            id: planInfo.serviceID,
+                            tenant: this
+                        })
+                    }
+                    let s = this.services.get(planInfo.serviceID)
+                    s.servicePlanIDs.push(planInfo.planID)
+                    resolve(`${servicePlanInfo.length} service plans`)
+                })
             })
-        })
     })
 }
-ServiceProvider.prototype.getApplicationPlanInfo = function(){
+ServiceProvider.prototype.getApplicationPlanInfo = function() {
     let apiCall = [
         `https://${this.adminDomain}/admin/api/`,
         `application_plans.json?access_token=${this.accessToken}`
     ].join('')
     let bad = null
     let good = function(body) {
-        if( validator.isJSON(body)){
+        if (validator.isJSON(body)) {
             let applicationPlans = JSON.parse(body).plans.map(p => p.application_plan)
             return applicationPlans
         }
     }
     return alwaysResolve(apiCall, {
-        good, 
+        good,
         bad
     })
 }
-ServiceProvider.prototype.getServicePlanInfo = function(){
+ServiceProvider.prototype.getServicePlanInfo = function() {
     let apiCall = [
         `https://${this.adminDomain}/admin/api/`,
         `service_plans.json?access_token=${this.accessToken}`
     ].join('')
 
     let bad = null
-    let good = function( body ){
-        if( validator.isJSON(body)){
+    let good = function(body) {
+        if (validator.isJSON(body)) {
             let servicePlans = JSON.parse(body).plans.map(x => x.service_plan)
             return servicePlans
         } else {
@@ -125,7 +125,7 @@ ServiceProvider.prototype.getServicePlanInfo = function(){
         }
     }
     return alwaysResolve(apiCall, {
-        good, 
+        good,
         bad
     })
 }

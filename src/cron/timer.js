@@ -10,75 +10,53 @@
 "use strict"
 
 /******************************************************************************/
-const uuidv4 = require('uuid/v4')
+const uuidv4  = require('uuid/v4')
 const cronJob = require('node-cron')
+const moment  = require('moment')
 /******************************************************************************/
 
+const clock = (function(){
 
-const scheduler = (function(){
-
-    let runningTimeMinutes = 0
-    let events = []
-  
-    return {
-  
-      start : function(){ 
-        cronJob.schedule('* * * * *', scheduler.cronUpdate)
-      }, 
- 
-
-      newEvent : function({
-	eventTitle, 
-	description, 
-        frequency, //minutes
-        callback
-      }){
-          let ev ={
-            id: uuidv4(), 
-	    eventTitle, 
-	    description, 
-            frequency, 
-            lastRefresh: 0, 
-            callback
-          }
- 
-          events.push(ev)
-          return ev.id
-      },
-
-      runningTime: function() {
-            return runningTimeMinutes
-      },
-
-      nextRefresh: function(eventID){
-            let ev = events.find( ev => ev.id === eventID)
-            return ev.frequency - ev.lastRefresh
-      }, 
-
-      cronUpdate: function(){
-
-        runningTimeMinutes += 1
-        console.log(`Running time: ${runningTimeMinutes} (min)`)
-        events.forEach(event => {
-            event.lastRefresh += 1
-            if( event.lastRefresh >=  event.frequency ){
-              event.lastRefresh = 0
-              return event.callback()
-            } 
-        })
-
-      },
-
-      getSchedule: function(req, res, next){
-        res.send(events)
+  let _clockRegister = [] 
+  let _appTime    = 0     //mins
+  let _cout       = null
+  let _timeStr    = minTime => `${minTime} minute${minTime === 1 ? '' : 's'}`
+  let _update     = () => {
+      _appTime += 1
+      _clockRegister.forEach(cl => {
+          if (cl.isOn) cl.update( _appTime )
+      })
   }
+  cronJob.schedule('* * * * *', _update)
 
-    }
+  return {
+      Clock : function({
+          cout, 
+          events
+      }){
+          this.clockTime = 0
+          this.id     = uuidv4()
+          this.cout   = cout
+          this.isOn   = false 
+          this.events = events || []
+          _clockRegister.push(this)
+      }
+  }
+})()
 
-  })()
- 
+clock.Clock.prototype.start = function(){
+  this.cout(`Clock ${this.id} starting with ${this.events.length} events`)
+  this.isOn = true
+}
 
+clock.Clock.prototype.update = function( appTime ){
+  this.clockTime += 1
+  this.cout( `app has been running for ${this.clockTime} min(s)`)
+}
+
+clock.Clock.prototype.addEvent = function( event ){
+}
 
 module.exports = {
-   scheduler 
+  clock
 }
