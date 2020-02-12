@@ -3,18 +3,21 @@
   --mainColor: rgb(119, 131, 172);
   --formBackground: rgb(32, 88, 88);
   --comp1: #1982C4;
+  --snap: #F8B32E; 
   --pop: #5acac6;
   --crackle: #363133;
 }
 html {
   scroll-behavior: smooth;
   }
+
 html,body,h1,h2,h3,h4,h5 {
-  font-family: "Raleway", sans-serif
+  font-family: "Raleway", sans-serif;
+  color: var(--pop);
 }
 
 #leftNav {
-  background-color: black;
+  background-color: var(--pop);
   width:250px; 
   color:white;
   text-decoration:bold;
@@ -22,19 +25,27 @@ html,body,h1,h2,h3,h4,h5 {
   height:100%; 
   overflow: auto;
 }
-
+#leftNav h2{
+  color: var(--comp1);
+  border-top: 1px inset var(--snap)
+}
 div.appContent {
-  margin-left: 0px;
+  margin-left: 250px;
   margin-top: 50px;
   padding: 1px 16px;
   height: 1000px;
 }
+.appContent h2 {
+  background-color: var(--crackle); 
+}
 #tenantCards {
   width:50%
 }
+
 #apiInspectSection {
   width:50%
 }
+
 @media screen and (max-width: 1200px) {
   #leftNav{
     display:none;
@@ -68,10 +79,12 @@ div.appContent {
   z-index: 4;
   background-color: var(--crackle);
 }
+
 .flex-container{
   display:flex;
   flex-wrap: wrap;  
 }
+
 #userFormGroupList{
   width:100%
 }
@@ -87,9 +100,9 @@ div.appContent {
 
 .tenant-card {
   border: black 1 px;
-  background-color: var(--formBackground);
+  background-color: var(--snap);
   height:50px; 
-  color:white;
+  color: white;  
   font-family: "Raleway", sans-serif;
   font-size:1.2em; 
 }

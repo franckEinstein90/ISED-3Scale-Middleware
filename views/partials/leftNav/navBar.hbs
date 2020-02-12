@@ -24,7 +24,6 @@
       <p>SETTINGS</p>
   </a>
   {{>appSettingsModal}}
-  <hr  class="w3-bar-item"/>
 
   <h2>Groups</h2>
   <a  ID="manageUsersBtn" onclick="document.getElementById('userGroupsModal').style.display='block'" 
@@ -43,16 +42,7 @@
 
   {{> leftNav/users}}
 
-<!--  <hr  class="w3-bar-item"/>
-  <h2>API Store</h2>
-   <a  href="" 
-    class="w3-bar-item w3-button w3-padding-large w3-hover-black" >
-    <i class="fa fa-code w3-xxlarge leftNavIcon"></i>
-    <p>TEST</p>
-  </a>
--->
-  {{>leftNav/storeAdminSection}}
-  <hr  class="w3-bar-item"/>
+
   <h2>APIs</h2>
   <a  href="" 
     class="w3-bar-item w3-button w3-padding-large w3-hover-black" >
@@ -74,8 +64,19 @@
     <i class="fa fa-pie-chart w3-xxlarge leftNavIcon"></i>
     <p>STATS</p>
   </a>
-    
-  {{>leftNav/userGroupList}}  
+    <a ID="apiJSON" onclick="document.getElementById('apiVisibilityModal').style.display='block'" 
+    class="w3-bar-item w3-button w3-padding-large w3-hover-black" >
+    <i class="fa fa-list-alt w3-xxlarge leftNavIcon"></i>
+    <p>VISIBILITY</p>
+    </a>
+
+    {{>modalAPIVisibility/frame}}
+
+   <a  href="" 
+    class="w3-bar-item w3-button w3-padding-large w3-hover-black" >
+    <i class="fa fa-pie-chart w3-xxlarge leftNavIcon"></i>
+    <p>STATS</p>
+  </a>
   <center>
     <div id="loadingIndicator" style="display:none">
     <p>loading</p>

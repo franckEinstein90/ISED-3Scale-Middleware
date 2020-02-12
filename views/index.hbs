@@ -3,13 +3,6 @@
 <!-- Header -->
 
 	
-
-   <header class="w3-container" style="padding-top:22px">
-     <div class="w3-panel">
-		{{>userGroups/tableDisplay}}
-     </div>
-   </header>
-
 <script>
 	let openTenantPane = function(paneID){
         let x = document.getElementById(paneID);
@@ -65,6 +58,13 @@
 	}
 
 </script>
+
+   <header class="w3-container" style="padding-top:22px">
+     <div class="w3-panel">
+		{{>userGroups/tableDisplay}}
+     </div>
+   </header>
+
 
 	<div class="flex-container">
     	<div ID="tenantCards">

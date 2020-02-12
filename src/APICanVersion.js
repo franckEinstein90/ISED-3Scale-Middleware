@@ -24,7 +24,10 @@ const APICanVersion = function( apiCan ) {
 
             } else {
                 apiCan.version = data.version
-                apiCan.versionTag = `v ${apiCan.version.major}:${apiCan.version.minor}:${apiCan.version.patch}`
+                apiCan.versionTag = [
+                    `(v ${apiCan.version.major}:`, 
+                    `${apiCan.version.minor}:`, 
+                    `${apiCan.version.patch})`].join('')
                 apiCan.features.versioning = true
                 return resolve(apiCan)
             }
