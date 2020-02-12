@@ -49,41 +49,35 @@ const newAppLogger = function(fileName){
 const APICanConfig = function( appSkeleton ) {
 
     let _appLogger  = newAppLogger('info.log')
-    let _versionTag = app => `v-${app.version.major}:${app.version.minor}:${app.version.patch}`
     _appLogger.info('initializing APICan')
 
     return new Promise((resolve, reject) => {
-
-        appDatabase.configure({
+        let configActions = [
+            appDatabase.configure({
                 filePath: appSkeleton.settingsDB
-            })
-            .then(dbStatus => {
-
-                _appLogger.info(`database access = ${dbStatus}`)
-		        appSkeleton.state 		= 'initializing'
-		        appSkeleton.features.dbStatus	= dbStatus
-		        appSkeleton.say	= msg => {
-			        console.log( msg )
-			        _appLogger.info(msg)
-		        }
-                return resolve( appSkeleton )
+            }), 
+            appSkeleton.stats.refresh()
+        ]
+        Promise.all(configActions)
+        .then( status => {
+            _appLogger.info('*****************************')
+            _appLogger.info(`pid: ${appSkeleton.process.id} - ppid: ${appSkeleton.process.ppid}`)
+            let dbStatus = status[0]
+            _appLogger.info(`database access = ${dbStatus}`)
+		    appSkeleton.state 		= 'initializing'
+		    appSkeleton.features.dbStatus	= dbStatus
+		    appSkeleton.say	= msg => {
+			    _appLogger.info(msg)
+		    }
+            return resolve( appSkeleton )
 	    })
     })
 }
                    /* 
-                    run: (apiCan) => {
-                        apiCan.say(`apiCan ${apiCan.versioning ? apiCan.versionTag : ""} booting`)
-                        tenantsManager.updateTenantInformation()
-                            .then(updateReport => {
-                                return correctFetchErrors(updateReport)
-                            })
-                            .then(_ => {
-                                if (apiCan.clock) apiCan.clock.start()
-                                apiCan.state = "running"
-                            })
+                    
 
-
+*/
 
 module.exports = {
     APICanConfig
-}*/
+}

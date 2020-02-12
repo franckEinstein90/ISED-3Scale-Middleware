@@ -15,118 +15,79 @@
  *  Server setup
  ******************************************************************************/
 "use strict"
+
 /*****************************************************************************/
 require('module-alias/register')
 /*****************************************************************************/
 const tenantsManager    = require('@tenants/tenantsManager').tenantsManager
 const users             = require('@users/users').users
 const groups            = require('@users/groups').groups
+const appStatus         = require('@server/routes/appStatus').appStatus
+const path              = require('path')
+const clock             = require('@src/cron/timer').clock
 /*****************************************************************************/
-
-require('@src/APICan').APICan({
-    root    : __dirname, 
-    database: 'settings.db'
-})
-.then( app => {
-    return tenantsManager.configure( app )
-})
-.then( app => {
-    return users.configure( app )
-})
-.then( app =>{
-   return groups.configure( app ) 
-})
-
-/************************** 
-let correctFetchErrors = (tenantsUpdateReport) => {
-    let tenantUpdateErrors = [] //ist of tenants for which there was an error during the update
-    tenantsUpdateReport.forEach(tenantReport => {
-        if (tenantReport.updateOk()) {
-            return errors.codes.Ok
-        } else {
-            console.log(`There was an error updating ${tenantReport.tenantName}, recovering`)
-            tenantUpdateErrors.push(tenantReport.tenantName)
-        }
+let run = (apiCan) => {
+    apiCan.say('*********************************')
+    apiCan.say(`apiCan ${apiCan.features.versioning ? apiCan.versionTag : ""} booting`)
+    tenantsManager.updateTenantInformation()
+        /*.then(updateReport => {
+            return correctFetchErrors(updateReport)
+        })*/
+    .then(_ => {
+        if (apiCan.clock) apiCan.clock.start()
+            apiCan.state = "running"
     })
-    if (tenantUpdateErrors.length > 0) {
-        return tenantsManager.updateTenantInformation(tenantUpdateErrors)
-            .then(correctFetchErrors)
+}
+
+const APICan = {    //this is the app
+    faviconPath     : __dirname + '/public/LOGO139x139.png', 
+    process         : {
+        id : process.pid
+    },  
+    root            : __dirname, 
+    settingsDB      : 'settings.db', 
+    stats           : {}, 
+    staticFolder    : path.join(__dirname, 'public'),
+    data            : require('@src/APICanData').APICanData, 
+    expressStack    : require('express')(), 
+    features        : {
+        userManagement  : false, 
+        messages        : false,
+        processStats    : false,  
+        keycloakAccess  : false, 
+        security        : false, 
+        versioning      : false
     }
 }
-
-
-const scheduler = require('@src/cron/timer.js').scheduler
-const appEvents = require('@server/appEvents').appEvents
-
-let setTimerRefresh = function() {
-    let id = appEvents.configureTenantRefresh(10)    //every 1 minutes
-    appEvents.configureOTPEnforce(100)
-    appStatus.configure({
-        tenantRefreshEventID: id
+require('@server/expressStack').expressConfig( APICan )
+require('@src/process/stats').APICanStats( APICan )
+require('@src/APICan').APICanConfig( APICan )
+.then( APICan => {	//versionning support
+	return require('@src/APICanVersion').APICanVersion( APICan )
+})
+.then( apiCan => {  //process information support
+    return tenantsManager.configure( apiCan )
+})
+.then( apiCan => {
+    return users.configure( apiCan)
+})
+.then( apiCan => {
+    return groups.configure(apiCan)
+})
+.then( apiCan => {
+    apiCan.clock = new clock.Clock( {
+        events: [], 
+        cout: apiCan.say
     })
-    scheduler.start()
-    appStatus.run() //the app is ready to answer requests
-    messages.emitRefreshFront()
-    return 1
-}
-
-
-
-
-const services  = require('@services/services').services
-const groups    = require('@users/groups').groups
-
-db.configure({
-        filePath: './settings.db'
-    }) //access the database
-    .then( APICan.configure) //configure the application engine
-    .then( users.onReady)
-    .then( groups.onReady)
-    .then( services.ready )
-    .then(initMessage => {
-        console.log(initMessage)
-        return appStatus.enableKeyCloak()
-    })
-    .then(initMessage => {
-        console.log(initMessage)
-        return tenantsManager.configure()
-    })
-    .then(initMessage =>{
-        console.log(initMessage)
-        return tenantsManager.updateTenantInformation()
-    })
-    .then(correctFetchErrors)
-    .then(setTimerRefresh)
-
-const memoryStore = new session.MemoryStore()
-//const keycloak = new Keycloak({store: memoryStore })
-
-//express app stack setup
-const app = require('@server/expressStack').expressStack({
-    root: __dirname,
-    staticFolder: path.join(__dirname, 'public'),
-    faviconPath: __dirname + '/public/LOGO139x139.png'
+    return apiCan
+})
+.then( apiCan => { 
+    require('@server/routingSystem').routingSystem( apiCan )
+    appStatus.configure(apiCan)
+    let server = require('@server/httpServer').httpServer( apiCan ) 
+    let io = require('socket.io')(server)
+    let messages = require('@server/messages').messages
+    messages.init(io)
+    run(apiCan)
 })
 
-app.use(session({
-    secret: 'fdafdsajfndas',
-    resave: false,
-    saveUninitialized: true,
-    store: memoryStore
-}))
-//app.use(keycloak.middleware())
-app.use(logger('dev'));
-
-const routingSystem = require('@server/routingSystem').routingSystem({
-    app
-})
-
-const server = require('@server/httpServer').httpServer({
-    app,
-    defaultPort: '3000'
-})
-
-const io = require('socket.io')(server.server())
-const messages = require('@server/messages').messages
-messages.init(io)
-*/

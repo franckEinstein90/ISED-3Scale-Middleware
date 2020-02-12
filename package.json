@@ -1,6 +1,6 @@
 {
   "name": "ised-3scale-middleware",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
   "scripts": {
     "start": "node ./app.js",
@@ -9,7 +9,7 @@
   "_moduleAliases": {
     "@src": "src",
     "@routes": "routes",
-    "@tenants"  : "src/tenants",
+    "@tenants": "src/tenants",
     "@utils": "src/utils",
     "@services": "src/services",
     "@server": "src/server",
@@ -38,6 +38,7 @@
     "moment": "^2.24.0",
     "morgan": "~1.9.1",
     "node-cron": "^2.0.3",
+    "pidusage": "^2.0.17",
     "request": "^2.88.0",
     "request-promise": "^4.2.4",
     "socket.io": "^2.3.0",

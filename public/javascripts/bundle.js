@@ -57,7 +57,22 @@ const selectedUsers = (function() {
 })()
 
 const APICan = (function() {
-    let socket = null
+    let socket      = null
+    let _appStatus  = null
+
+    let _getAppStatus  =  () => {
+        $.get('/appStatus', {}, function(data) {
+            $('#appStatus').text(
+            [`${data.env} - APICan ${data.version} - status ${data.state}`,
+                `online: ${data.runningTime} mins`
+            ].join(' - ')
+            )
+            $('#nextTenantRefresh').text(
+            `(${data.nextTenantRefresh} mins) `
+            )
+        })
+    }
+
 
     let setUI = function() {
         userGroupsDialog({
@@ -114,8 +129,7 @@ const APICan = (function() {
 
             tenants.onReady(setUI)
             storeModulesReady()
-            timer.eachMinute()
-            setInterval(timer.eachMinute, 10000)
+            setInterval(_getAppStatus, 10000)
 
         },
         run: function() {
@@ -786,8 +800,10 @@ const appStatusDialog = require('./dialogs/appStatusDialog').appStatusDialog
 /*****************************************************************************/
 
 const timer = (function() {
+
     return {
         eachMinute: function() {
+            /* update the app status to see if there's been any changes */
             $.get('/appStatus', {}, function(data) {
                 $('#appStatus').text(
                     [`ISED API Store Middleware - status ${data.state}`,

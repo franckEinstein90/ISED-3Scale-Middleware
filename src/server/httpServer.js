@@ -15,12 +15,7 @@
 const http = require('http')
 const debug = require('debug')('ised-3scale-middleware:server');
 
-const normalizePort = function(val) {
-    let port = parseInt(val, 10)
-    if (isNaN(port)) return val
-    if (port >= 0) return port
-    return false
-}
+
 
 const onError = function(port, error) {
     if (error.syscall !== 'listen') {
@@ -55,16 +50,17 @@ const onListening = function(addr) {
 
 const httpServer = function( apiCan ){
 
-    let expressStack = apiCan.expressStack
-    let _port = normalizePort(process.env.PORT || apiCan.data.port)
-    expressStack.set('port', _port)
+    let expressStack 	= apiCan.expressStack
+    let port 		= apiCan.data.port
+
+    expressStack.set( 'port', port ) 
 
     let _server = http.createServer( expressStack )
-    _server.listen(_port)
-    _server.on('error', x     => onError(_port))
+    _server.listen( port )
+    _server.on('error', x     => onError(port))
     _server.on('listening', x => onListening(_server.address()))
 
-    apiCan.say (`App running on port ${_port}`)
+    apiCan.say (`App running on port ${port}`)
     return _server
 }
 

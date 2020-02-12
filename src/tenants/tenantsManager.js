@@ -24,7 +24,7 @@ const tenantsManager = (function() {
     return {
         tenants: _ => _tenants,
 
-        configure: function(apiCan) {
+        configure: function( apiCan ) {
             return new Promise((resolve, reject) => {
                 apiCan.data.tenants.forEach((tenantInfo, tenantName) => {
                     if (tenantInfo.visible) {
