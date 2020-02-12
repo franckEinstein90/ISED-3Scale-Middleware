@@ -14,7 +14,6 @@
 /*****************************************************************************/
 const winston = require('winston')
 /*****************************************************************************/
-const APICanData = require('@src/APICanData').APICanData
 const appDatabase = require('@server/db').appDatabase
 const tenantsManager = require('@tenants/tenantsManager').tenantsManager
 const errors = require('@src/errors').errors
@@ -37,15 +36,14 @@ let correctFetchErrors = (tenantsUpdateReport) => {
 }
 
 
-const newAppLogger = function(fileName) {
-    return winston.createLogger({
-        level: 'info',
-        format: winston.format.simple(),
-        transports: [
-            new winston.transports.Console()
-        ]
-    })
-
+const newAppLogger = function(fileName){
+	return winston.createLogger({
+		level		: 'info', 
+    		format		: winston.format.simple(), 
+    		transports	: [
+        		new winston.transports.Console()
+        	]
+	})
 }
 
 const APICanConfig = function( appSkeleton ) {
@@ -61,14 +59,17 @@ const APICanConfig = function( appSkeleton ) {
             })
             .then(dbStatus => {
 
-            _appLogger.info(`database access = ${dbStatus}`)
-		    appSkeleton.state 		= 'initializing'
-		    appSkeleton.features.dbStatus	= dbStatus
-		    appSkeleton.say	= msg => {
-			    console.log( msg )
-			    _appLogger.info(msg)
-		    }
-            return resolve( appSkeleton )
+                _appLogger.info(`database access = ${dbStatus}`)
+		        appSkeleton.state 		= 'initializing'
+		        appSkeleton.features.dbStatus	= dbStatus
+		        appSkeleton.say	= msg => {
+			        console.log( msg )
+			        _appLogger.info(msg)
+		        }
+                return resolve( appSkeleton )
+	    })
+    })
+}
                    /* 
                     run: (apiCan) => {
                         apiCan.say(`apiCan ${apiCan.versioning ? apiCan.versionTag : ""} booting`)
@@ -82,12 +83,7 @@ const APICanConfig = function( appSkeleton ) {
                             })
 
 
-                    }*/
-            })
-       })
-}
-
 
 module.exports = {
     APICanConfig
-}
+}*/
