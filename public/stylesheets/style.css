@@ -17,9 +17,9 @@ html,body,h1,h2,h3,h4,h5 {
 }
 
 #leftNav {
-  background-color: var(--pop);
-  width:250px; 
-  color:white;
+  background-color  : var(--pop);
+  width             :250px; 
+  color           :white;
   text-decoration:bold;
   font-size: 1em;
   height:100%; 
@@ -91,6 +91,10 @@ div.appContent {
 .apiCanModal{
   background-color: var(--formBackground);
 }
+
+.apiCanModal header {
+  color: var(--crackle);
+}
 .modalContent{
   color:var(--pop);
 }
@@ -121,7 +125,19 @@ div.appContent {
     width:120px; 
     text-align:right 
 }
-
+.eventList {
+  width: 100%; 
+  background-color: var(--comp1);
+}
+.scheduledEvent {
+  cursor        : pointer;
+  font-size     : 1.1em; 
+  padding-left  : 15px;
+  margin-bottom : 10px;  
+  border: 1px inset var(--mainColor); 
+  background-color: var(--crackle); 
+  color: var(--pop); 
+}
 
 #appStatus {
   cursor: pointer;
@@ -143,10 +159,10 @@ div.appContent {
   transition: max-height 0.2s ease-out; 
 }
 
-
 .leftNavItem:hover{
   background-color:yellow !important;
 }
+
 .leftNavIcon {
   color: white
 }

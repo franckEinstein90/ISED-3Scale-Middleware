@@ -51,7 +51,7 @@ const onListening = function(addr) {
 const httpServer = function( apiCan ){
 
     let expressStack 	= apiCan.expressStack
-    let port 		= apiCan.data.port
+    let port 		    = apiCan.data.port
 
     expressStack.set( 'port', port ) 
 

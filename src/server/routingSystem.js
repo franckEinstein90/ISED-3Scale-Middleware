@@ -13,10 +13,12 @@
 const express = require('express')
 const cors = require('cors')
 /*****************************************************************************/
-const tenantRoutes = require('@server/routes/tenantRoutes').tenantRoutes
+const tenantRoutes          = require('@server/routes/tenantRoutes').tenantRoutes
 const appRoot               = require('@server/routes/appRoot').appRoot
 const apiStoreUserRoutes    = require('@server/routes/apiStoreUsers').apiStoreUserRoutes
-const userGroupRoutes       = require('@server/routes/userGroupRoutes').userGroupRoutes/*
+const userGroupRoutes       = require('@server/routes/userGroupRoutes').userGroupRoutes
+const eventsRoutes          = require('@server/routes/eventRoutes').eventsRoutes
+/*
 const serviceInspectRoutes = require('@server/routes/serviceInspectRoutes').serviceInspectRoutes
 const newsArticle = require('@apiStore/newsArticle').newsArticle*/
 /*****************************************************************************/
@@ -26,16 +28,20 @@ const logs = require('@server/logs').logs*/
 /*****************************************************************************/
 
 const routingSystem = function( apiCan ) {
-
+    let _apiCan = apiCan
     let router = express.Router()
     let expressStack = apiCan.expressStack
+
     expressStack.use('/', router)
     router.get('/', appRoot.render)
-    //tenant routes
-    router.get('/tenants', tenantRoutes.getTenants)
-    router.get('/refreshTenants', tenantRoutes.getRefreshTenants)
-    router.get('/getTenantAccounts', tenantRoutes.getTenantAccounts)
     
+    //tenant routes
+    router.get('/tenants',           tenantRoutes.getTenants)
+    router.get('/refreshTenants',    tenantRoutes.getRefreshTenants)
+    router.get('/getTenantAccounts', tenantRoutes.getTenantAccounts)
+ 
+    //events
+    router.get('/events', _apiCan.clock.getEvents) 
 /*
     let _setServiceInspectRoutes = () => {
         router.get('/serviceInspect', serviceInspectRoutes.getServiceInfo)

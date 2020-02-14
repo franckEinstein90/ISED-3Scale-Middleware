@@ -192,29 +192,36 @@ tenants.Tenant.prototype.getAllUsers = function(options) {
     }]
 }
 
-tenants.Tenant.prototype.updateServiceDefinitions =
-    async function(tenantServiceListFetchResult, tenantUpdateReport) {
+tenants.Tenant.prototype.updateServiceDefinitions = async function({
+    fetchedServices, 
+    updateReport}) {
         //if the service list update generated an error, return here
-        if (tenantUpdateReport.fetches.serviceList !== errors.codes.Ok) {
-            return
+        if (updateReport.fetches.serviceList !== errors.codes.Ok) {
+            return      //there was an error fetching the list of services
         }
-        //flag the services that need to be removed from the list of registered services
-        let currentServiceIDs = tenantServiceListFetchResult.map(
+        let currentServiceIDs = fetchedServices.map( //flag services to remove
             service => service.service.id
         )
-        this.services.forEach(
-            (service, serviceID) => {
-                if (!currentServiceIDs.includes(serviceID)) {
-                    updateReport.servicesToRemove.push(serviceID)
-                }
-            })
 
-        log(`updating ${tenantServiceListFetchResult.length} service definitions for ${this.name}`)
-        tenantServiceListFetchResult.forEach(
-            service => this.services.updateServiceDefinition(service.service, tenantUpdateReport)
+        this.services.forEach( (_, serviceID) => {
+            if (!currentServiceIDs.includes(serviceID)) { //found one shouldn't be in here
+                if(! 'servicesToRemove' in updateReport) updateReport.servicesToRemove = []
+                updateReport.servicesToRemove.push(serviceID)
+            }
+        })
+
+        log(`updating ${fetchedServices.length} service definitions for ${this.name}`)
+        fetchedServices.forEach(
+            service => this.services.updateServiceDefinition(service.service, updateReport)
         )
     }
 
+tenants.Tenant.prototype.planInfoUpdatePromises = async function( serviceIDs ){
+    return serviceIDs.map(id => {
+        let service = this.services.get(id)
+        return service.updatePlanAndFeatureInfo
+    })
+}
 tenants.Tenant.prototype.validateAPIs = async function(tenantUpdateReport) {
     //At this stage, we've fetched the list of services from this tenant and
     //its set of documentation
@@ -246,13 +253,10 @@ tenants.Tenant.prototype.validateAPIs = async function(tenantUpdateReport) {
         return tenantUpdateReport
     }
 
-    let promiseArray = billingualServicesReports.map(
-        serviceUpdateReport => {
-            let serviceID = parseInt((serviceUpdateReport.id.split('_'))[1])
-            let service = this.services.register.get(serviceID)
-            return service.updatePlanAndFeatureInfo(serviceUpdateReport)
-        })
-
+    let promiseArray = this.planInfoUpdatePromises( //look to update plan information
+        billingualServicesReports                   //for those services that have bilingual doc
+        .map( serviceUpdateReport => parseInt((serviceUpdateReport.id.split('_'))[1]))
+    )
     let reportUpdateResults = (servicesUpdateReports) => {
         servicesUpdateReports.forEach(
             serviceUpdateReport => {
@@ -284,9 +288,10 @@ tenants.Tenant.prototype.updateApiInfo = async function() {
     let serviceListingPromise = new Promise((resolve, reject) => {
         this.getServiceList(tenantUpdateReport)
             .then(services => resolve(
-                this.updateServiceDefinitions(
-                    services,
-                    tenantUpdateReport)
+                this.updateServiceDefinitions({
+			fetchedServices: services, 
+                    	updateReport: tenantUpdateReport
+		})
             ))
     })
 

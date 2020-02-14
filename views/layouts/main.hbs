@@ -13,12 +13,9 @@
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js"></script>
     <script type="text/javascript" charset="utf8" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.bundle.min.js"></script>
 
-    
-
 
     
   <body class='w3-light-grey'>
-
     <div class="w3-bar w3-top w3-large" id="topNav">
          <button class="w3-bar-item w3-button w3-hide-large w3-hover-none w3-hover-text-light-grey" onclick="w3_open();">
           <i class="fa fa-bars"></i>  Menu
@@ -30,13 +27,12 @@
         
 
         {{>topNav/appStatus}}
-        {{>modalScheduler/frame}}
         {{>topNav/tenantInfoRefresh}}
     </div>
 
     {{>navBottom}}
     {{>leftNav/navBar}}
-
+    {{>modal}}
 
 
 <div class="appContent">

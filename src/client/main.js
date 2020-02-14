@@ -11,7 +11,7 @@
 "use strict"
 
 /******************************************************************************/
-const APICan = require('./APICan').APICan
+/*const APICan = require('./APICan').APICan
 const storeUsers = require('./storeUsers').storeUsers
 const userActions = require('./userActions').userActions
 /******************************************************************************/
@@ -19,26 +19,50 @@ const userActions = require('./userActions').userActions
 
 $(function() {
 
-    let setUp = function() {
-        try {
-            console.group("Init APICan Client")
-            APICan.init()
-            console.groupEnd()
-            return true
+    let apiCanClient = {
 
-        } catch (err) {
-            errors(err)
-            return false
+        adminTools          : null,
+        handleError         : null, 
+        server              : {
+
+        }, 
+        ui                  : null,
+
+        features: {
+
+            ui: false,
+            adminTools: false, 
+            errorHandling: false
+
         }
     }
 
-    if (setUp()) {
-        try {
-            APICan.run()
-        } catch (err) {
-            errors(err)
+    require('./ui').ui(apiCanClient)
+    require('./errors/errors').addErrorHandling(apiCanClient)
+    require('./data/data').addServerComFeature(apiCanClient)
+    require('./adminTools').addAdminTools(apiCanClient)
+
+
+    /*    let setUp = function() {
+            try {
+                console.group("Init APICan Client")
+                APICan.init()
+                console.groupEnd()
+                return true
+
+            } catch (err) {
+                errors(err)
+                return false
+            }
         }
-    }
+
+        if (setUp()) {
+            try {
+                APICan.run()
+            } catch (err) {
+                errors(err)
+            }
+        }*/
 })
 
 /*

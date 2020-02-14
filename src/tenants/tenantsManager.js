@@ -15,6 +15,7 @@ const moment = require('moment')
 const errors = require('@src/errors').errors
 /**********************************************************************************/
 const Tenant = require('@src/responses').tenants.Tenant
+/**********************************************************************************/
 
 const tenantsManager = (function() {
 

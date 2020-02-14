@@ -25,7 +25,7 @@ const timer = (function() {
                     ].join(' - ')
                 )
                 $('#nextTenantRefresh').text(
-                   `(${data.nextTenantRefresh} mins) `
+                    `(${data.nextTenantRefresh} mins) `
                 )
             })
         }

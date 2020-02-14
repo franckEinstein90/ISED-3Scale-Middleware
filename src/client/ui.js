@@ -13,8 +13,22 @@
 /******************************************************************************/
 /******************************************************************************/
 
-const ui = (function() {
-    return {
+const ui = function(app) {
+
+    app.ui = {
+        modal: null
+    }
+
+    app.ui.features = {
+        modal: false
+    }
+
+    require('./ui/modal').addModalFeature(app.ui)
+    app.features.ui = true
+
+
+    /*{
+
         scrollToSection: function(sectionID) {
             let hash = $('#' + sectionID)
             $('html, body').animate({
@@ -27,8 +41,9 @@ const ui = (function() {
             $('#' + apiPaneID).show()
 
         }
-    }
-})()
+    }*/
+
+}
 
 module.exports = {
     ui

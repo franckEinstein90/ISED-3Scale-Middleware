@@ -6,164 +6,153 @@
  * -------------------------------------
  *  Canadian Gov. API Store middleware - client side
  *
- *  APICan.js: client app admin
+ *  adminTools.js: manages admin tools 
  *
  ******************************************************************************/
-
 "use strict"
-
-/******************************************************************************/
-const tenants = require('./tenants').tenants
-const storeUsers = require('./storeUsers').storeUsers
-const storeServices = require('./storeServices').storeServices
-const storeNewsArticles = require('./store/storeNewsArticles').storeNewsArticles
-const appStatusDialog = require('./dialogs/appStatusDialog').appStatusDialog
-/******************************************************************************/
-const timer = require('./timer.js').timer
-const userGroupsDialog = require('./dialogs/userGroupsDialog').userGroupsDialog
-const ui = require('./ui').ui
 /******************************************************************************/
 
-const selectedUsers = (function() {
 
-    let userStore = new Map()
-
-    let toEmailList = function() {
-        let userList = []
-        userStore.forEach((_, userEmail) => userList.push(userEmail))
-        return userList
-    }
-
-    let displayCurrentUserSelection = function() {
-        $('#individuallySelectedUsers').text(toEmailList().join("\n"))
-    }
-
-    return {
-
-        toggleSelectedUser: function(userEmail) {
-            if (userStore.has(userEmail)) {
-                userStore.delete(userEmail)
-            } else {
-                userStore.set(userEmail, 1)
-            }
-            displayCurrentUserSelection()
-        },
-
-        applySelectedActions: function() {
-            userActions.update(toEmailList())
-        }
-
-    }
-})()
-
-const APICan = (function() {
-    let socket      = null
-    let _appStatus  = null
-
-    let _getAppStatus  =  () => {
-        $.get('/appStatus', {}, function(data) {
-            $('#appStatus').text(
-            [`${data.env} - APICan ${data.version} - status ${data.state}`,
-                `online: ${data.runningTime} mins`
-            ].join(' - ')
-            )
-            $('#nextTenantRefresh').text(
-            `(${data.nextTenantRefresh} mins) `
-            )
-        })
-    }
-
-
-    let setUI = function() {
-        userGroupsDialog({
-            jqCreateNewGroupButton: $('#createNewGroup')
-        })
-
-        $('.navGroupLink').click(function(event) {
-            debugger
-        })
-
-        $('.groupCmdRow').each(function(grpCmds) {
-            debugger
-        })
-
-        $('#selectedUsersList tbody').on('click', 'tr', function() {
-            $(this).toggleClass('selected')
-            let selectedUserEmail = storeUsers.selectUserFromSelectedTableRow(this)
-            selectedUsers.toggleSelectedUser(selectedUserEmail)
-        })
-
-        $('#showScheduler').on('click', function(event) {
-            event.preventDefault()
-            document.getElementById('scheduleInspectModal').style.display = 'block'
-            $.get('/schedule', {}, function(events) {
-                $('#scheduleInfo tbody').empty()
-                events.forEach(info => {
-                    $('#scheduleInfo tbody').append(`<tr><td>${info.id}</td><td>${info.eventTitle}</td><td>${info.description}</td><td>${info.frequency}</td><td>${info.lastRefresh}</td></tr>`)
-                })
-            })
-        })
-    }
-
-
-    let storeModulesReady = function() {
-        storeUsers.onReady({
-            userDisplayList: $('#selectedUsersList')
-        })
-
-        storeServices.onReady({
-
-        })
-
-        storeNewsArticles.onReady()
-
-    }
-
-    return {
-        init: function() {
-            appStatusDialog.ready()
-            socket = io()
-            socket.on('updateBottomStatusInfo', function(data) {
-                $('#bottomStatusBar').text(data.message)
-            })
-
-            tenants.onReady(setUI)
-            storeModulesReady()
-            setInterval(_getAppStatus, 10000)
-
-        },
-        run: function() {
-
-        }
-
-    }
-})()
-
-module.exports = {
-    APICan
+const eventPane = ({
+    name,
+    frequency,
+    last,
+    next
+}) => {
+    return [
+        `<tr>`,
+        `<td>${name}</td>`,
+        `<td>${frequency} mins</td>`,
+        `<td>${last}</td>`,
+        `<td>${next}</td>`,
+        `</tr>`
+    ].join(' ')
 }
 
-},{"./dialogs/appStatusDialog":3,"./dialogs/userGroupsDialog":4,"./store/storeNewsArticles":8,"./storeServices":6,"./storeUsers":7,"./tenants":9,"./timer.js":10,"./ui":11}],2:[function(require,module,exports){
-"use strict"
+
+const getEvents = () => {
+    return new Promise((resolve, reject) => {
+        $.get('/events', function(data) {
+            resolve(data)
+        })
+        .fail( err => {
+           reject(err) 
+        })
+    })
+}
+
+const schedulerModalContent = () => {
+    return new Promise((resolve, reject) => {
+        getEvents()
+            .then(events => {
+                return resolve([
+                    `<div class="eventList" id="eventList">`,
+                    `<table class='w3-table scheduledEvent'>`,
+                    `<tr><th>Event Name</th><th>Frequency</th><th>Last</th><th>Next</th></tr>`,
+                    events.map(ev => eventPane(ev)).join(''),
+                    `</table>`,
+                    '</div>'
+                ].join(''))
+            })
+            .catch( err => {
+                reject (err)
+            })
+    })
+}
 
 
-const dataExchangeStatus = (function() {
-    let dataLoading = false
-    return {
-        setLoading: function() {
-            dataLoading = true
-            document.getElementById('loadingIndicator').style.display = 'block'
-        },
-        setInactive: function() {
-            dataLoading = false
-            document.getElementById('loadingIndicator').style.display = 'none'
+const schedulerContent = function() {
+
+    return schedulerModalContent()
+        .then(modalContent => {
+            return ({
+                title: 'Scheduler',
+                content: modalContent
+            })
+        })
+        .catch(err => {
+            throw err
+        })
+}
+
+
+const addAdminTools = async function(clientApp) {
+
+    clientApp.adminTools = {
+        scheduler: null,
+        features: {
+            scheduler: false
         }
     }
-})()
+
+
+    clientApp.showScheduler = _ => {
+        clientApp.server.fetchData('events')
+            .then( modalContent => {
+                    return clientApp.ui.showModal(modalContent)
+            })
+            .catch( err => clientApp.handleError(
+                    [   `<P>Unable to get scheduler data</P>`, 
+                        `<P>Status ${err.status}, `, 
+                        `${err.statusText}</P>`
+                    ].join(''))
+            )
+    }
+
+    $('#showScheduler').click(event => {
+        event.preventDefault()
+        clientApp.showScheduler()
+    })
+
+    clientApp.adminTools.features.scheduler = true
+}
+
 
 module.exports = {
-    dataExchangeStatus
+    addAdminTools
 }
+
+},{}],2:[function(require,module,exports){
+/*******************************************************************************
+ * Franck Binard, ISED (FranckEinstein90)
+ *
+ * APICan application - 2020
+ * -------------------------------------
+ *  Canadian Gov. API Store middleware - client side
+ *
+ *  main.js: entry point 
+ *
+ ******************************************************************************/
+"use strict"
+ /*****************************************************************************/
+
+const getData = serverRoute => {
+    return new Promise((resolve, reject) => {
+        $.get(`/${serverRoute}`, function(data) {
+            resolve(data)
+        })
+        .fail( err => {
+           reject(err) 
+        })
+    })
+}
+
+const fetchServerData = function(clientApp){
+    return serverRoute => getData( serverRoute )
+}
+
+const addServerComFeature =  clientApp =>{
+
+    clientApp.server.fetchData = fetchServerData(clientApp)
+
+}
+
+
+module.exports = {
+    addServerComFeature
+}
+
+
 },{}],3:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
@@ -172,104 +161,32 @@ module.exports = {
  * -------------------------------------
  *  Canadian Gov. API Store middleware - client side
  *
- *  appStatusDialog.js: information and actions on app variables
+ *  errors.js: error handling 
  *
  ******************************************************************************/
 "use strict"
 /******************************************************************************/
-const appStatusDialog = (function(){
 
-	let _initUI = function(){
-		$('#btnRefreshTenants').click(function ( event ){
-			event.preventDefault()
-			$.get('/refreshTenants', {}, function(data) {
-				debugger	
-			})
-		})
-		$('#appStatus').click(function( event ) {
-			this.classList.toggle("active")
-			let statusDetailPaneHeight = $('#appStatusDetail').css('maxHeight')	
-			if( statusDetailPaneHeight === '0px' ){
-				let scrollHeight = $('#appStatusDetail').css('scrollHeight')
-				$('#appStatusDetail').css('maxHeight', '80px')
-			} else {
-				$('#appStatusDetail').css('maxHeight', '0px')
-			}
-		})
-	}
-	return {
-        ready: function(){
-				_initUI()
-		  }, 
-		  update: function(){
 
-		  }
-    }
-})()
+const showError =  clientApp => {
+    return err => clientApp.ui.showModal({
+        title: "ERROR", 
+        content: err
+    })
+}
 
+const addErrorHandling = function( clientApp ){
+
+    clientApp.features.errorHandling = true
+    clientApp.handleError = showError(clientApp)
+    
+    
+}
 module.exports = {
-    appStatusDialog
+    addErrorHandling
 }
 
 },{}],4:[function(require,module,exports){
-/*******************************************************************************
- * Franck Binard, ISED
- * Canadian Gov. API Store middleware - 2020
- * Application APICan
- * -------------------------------------
- *  dialogs/userGroupsDialog.js
- * 
- * Inits userGroupDialog 
- ******************************************************************************/
-
-"use strict"
-
-/*****************************************************************************/
-const storeUsers = require('../storeUsers').storeUsers
-const tenants = require('../tenants').tenants
-/*****************************************************************************/
-
-let userGroupsDialog = function({
-    jqCreateNewGroupButton
-}){
-    let tenantSelectionCell = tName => {
-        return [
-            `<td class='tenantSelection'>`, 
-            `<label class="w3-text-blue">${tName} &nbsp;&nbsp;</label>`,
-            `<input class="w3-check tenantFilterCheckBox" id='${tName}SearchSelect' `, 
-            `type="checkbox"></input>`, 
-            '</td>'
-        ].join('')
-    }
-
-    jqCreateNewGroupButton.click(function(event) {
-        event.preventDefault()
-        if (tenants.ready()) {
-            let newUserGroup = new storeUsers.Group()
-        }
-    })
-
-    let currentRow = ""
-    tenants.names().forEach((tenant, index) => {
-        if( currentRow.length === 0){
-            currentRow = `<TR>${tenantSelectionCell(tenant)}`
-        }
-        else {
-            $('#tenantSelectionTable').append(`${currentRow}${tenantSelectionCell(tenant)}</TR>`)
-            currentRow = ""
-        }
-    })
-    if(currentRow.length > 0){
-        $('#tenantSelectionTable').append(`${currentRow}<td>&nbsp;</td></TR>`)
-    }
-}
-
-
-module.exports = {
-    userGroupsDialog
-}
-
-},{"../storeUsers":7,"../tenants":9}],5:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
@@ -283,7 +200,7 @@ module.exports = {
 "use strict"
 
 /******************************************************************************/
-const APICan = require('./APICan').APICan
+/*const APICan = require('./APICan').APICan
 const storeUsers = require('./storeUsers').storeUsers
 const userActions = require('./userActions').userActions
 /******************************************************************************/
@@ -291,26 +208,50 @@ const userActions = require('./userActions').userActions
 
 $(function() {
 
-    let setUp = function() {
-        try {
-            console.group("Init APICan Client")
-            APICan.init()
-            console.groupEnd()
-            return true
+    let apiCanClient = {
 
-        } catch (err) {
-            errors(err)
-            return false
+        adminTools          : null,
+        handleError         : null, 
+        server              : {
+
+        }, 
+        ui                  : null,
+
+        features: {
+
+            ui: false,
+            adminTools: false, 
+            errorHandling: false
+
         }
     }
 
-    if (setUp()) {
-        try {
-            APICan.run()
-        } catch (err) {
-            errors(err)
+    require('./ui').ui(apiCanClient)
+    require('./errors/errors').addErrorHandling(apiCanClient)
+    require('./data/data').addServerComFeature(apiCanClient)
+    require('./adminTools').addAdminTools(apiCanClient)
+
+
+    /*    let setUp = function() {
+            try {
+                console.group("Init APICan Client")
+                APICan.init()
+                console.groupEnd()
+                return true
+
+            } catch (err) {
+                errors(err)
+                return false
+            }
         }
-    }
+
+        if (setUp()) {
+            try {
+                APICan.run()
+            } catch (err) {
+                errors(err)
+            }
+        }*/
 })
 
 /*
@@ -386,442 +327,8 @@ $(function() {
         $.get('/findUsers', parameters, keyCloakUsers.showUsers)
     })
 */
-},{"./APICan":1,"./storeUsers":7,"./userActions":12}],6:[function(require,module,exports){
-/*******************************************************************************
- * Franck Binard, ISED (FranckEinstein90)
- *
- * APICan application - 2020
- * -------------------------------------
- *  Canadian Gov. API Store middleware - client side
- *
- *  storeService.js: client api services module 
- *
- ******************************************************************************/
 
-"use strict"
-
-/******************************************************************************/
-const ui = require('./ui').ui
-/******************************************************************************/
-
-let drawGraph = function(stats) {
-    let ctx = document.getElementById('statsGraph').getContext('2d')
-    let myChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: [
-                'june', 'july', 'aug', 'sept', 'oct', 'nov', 'dec', 'jan', 'feb'
-            ],
-            datasets: [{
-                label: 'hits per month',
-                data: stats.values
-            }],
-            backgroundColor: stats.values.map(s => 'rgba(255, 0, 0, 0.7)'),
-            borderColor: stats.values.map(s => 'rgba(0, 255, 0, 0.7)')
-
-        },
-        options: {}
-    })
-}
-let openServiceInspectDialog = function({
-    tenant,
-    serviceID
-}) {
-
-    document.getElementById('serviceInspectModal').style.display = 'block'
-    $('#serviceModalTenantName').text(tenant)
-    $('#serviceModalID').text(serviceID)
-    $.get('/serviceInspect', {
-            tenant,
-            service: serviceID
-        }, function(apiInfo) {
-
-            $('#apiInspectFormState').val(apiInfo.state)
-            $('#apiInspectFormTenantName').val(apiInfo.tenantName)
-            $('#apiInspectFormServiceID').val(apiInfo.serviceID)
-            $('#apiInspectFormSystemName').val(apiInfo.systemName)
-            $('#apiInspectFormLastUpdate').val(apiInfo.updatedAt)
-            $('#apiInspectFormCreationDate').val(apiInfo.created_at)
-            $('#apiInspectFormFeatures').html(`${apiInfo.features.map(x => x.name).join('<br/>')}`)
-            $('#englishDoc').val(apiInfo.documentation[0].docSet.body)
-            $('#frenchDoc').val(apiInfo.documentation[1].docSet.body)
-            let tags = []
-            apiInfo.documentation.forEach(d => {
-                if ('tags' in d.docSet) {
-                    d.docSet.tags.forEach(t => tags.push(t))
-                }
-            })
-            $('#apiTags').text(tags.join(','))
-            if ('stats' in apiInfo) drawGraph(apiInfo.stats)
-        })
-        .fail(error => {
-            debugger
-        })
-}
-
-const storeServices = (function() {
-
-    let _setUI = function() {
-        $('#visibleAPISelect').on('change', function() {
-            ui.showVisibleAPITable(this.value)
-        })
-        $('.serviceInspect').click(event => {
-            event.preventDefault()
-            let parentTable = event.currentTarget.offsetParent
-            let tenant = parentTable.id.replace('VisibleAPI', '')
-            let serviceID = Number((event.currentTarget.cells[1]).innerText)
-            openServiceInspectDialog({
-                tenant,
-                serviceID
-            })
-        })
-    }
-
-    return {
-        onReady: function(options) {
-            _setUI()
-        }
-
-    }
-
-})()
-
-module.exports = {
-    storeServices
-}
-},{"./ui":11}],7:[function(require,module,exports){
-/*******************************************************************************
- * Franck Binard, ISED (FranckEinstein90)
- *
- * APICan application - 2020
- * -------------------------------------
- *  Canadian Gov. API Store middleware - client side
- *
- *  main.js: entry point 
- *
- ******************************************************************************/
-"use strict"
-
-/******************************************************************************/
-const APICan = require('./APICan').APICan
-const ui = require('./ui').ui
-const userActions = require('./userActions').userActions
-const dataExchangeStatus = require('./dataExchangeStatus').dataExchangeStatus
-const tenants = require('./tenants').tenants
-/******************************************************************************/
-
-
-const getGroupFormInputs = function() {
-    //gets the parameters from a new group
-    //creation
-
-    let requestTenants = []
-    let userProperties = []
-    let groupDescription = $('#userGroupDescription').val()
-    let newGroupName = $('#userGroupName').val()
-    let groupEmailPattern = $('#groupEmailPattern').val()
-
-    tenants.names().forEach(tName => {
-        if ($(`#${tName}SearchSelect`).is(":checked")) {
-            requestTenants.push(tName)
-        }
-    })
-    if ($('#providerAccountSearchSelect').is(":checked")) {
-        userProperties.push('providerAccount')
-    }
-    if ($('#keyCloakAccountSelect').is(":checked")) {
-        userProperties.push('keyCloakAccount')
-    }
-    if ($('#otpNotEnabledSelect').is(":checked")) {
-        userProperties.push('otpNotEnabled')
-    }
-    return {
-        'tenants[]': requestTenants,
-        'userProperties[]': userProperties,
-        name: newGroupName,
-        groupDescription,
-        groupEmailPattern
-    }
-}
-
-const resetGroupFormInputs = function() {
-    $('#userGroupDescription').val("")
-    $('#userGroupName').val("")
-    $('#groupEmailPattern').val("")
-}
-
-const storeUsers = (function() {
-
-    let _groups = new Map()
-
-    let dataTableHandle = null //table that displays user information
-    let newGroupDefaultName = _ => `group_${groups.size}`
-
-    let displayGroupsListInForm = function(groupName, groupID) {
-        $('#userFormGroupList tbody').append(
-            [`<tr>`,
-                `<td class="w3-text-green">${groupName}</td>`,
-                `<td><i class="fa fa-eye w3-large w3-text-black groupCmd" id="${groupName}View"></i></td>`,
-                `<td><i class="fa fa-gears  w3-large w3-text-black groupCmd"></i></td>`,
-                `<td><i class="fa fa-trash w3-large w3-text-black groupCmd" id="${groupName}Delete"></i></td>`,
-                `</tr>`
-            ].join(''))
-
-        $('#' + groupName + 'Delete').click(function(event) {
-            storeUsers.deleteGroup(groupName)
-        })
-
-        $('#' + groupName + 'View').click(function(event) {
-            event.preventDefault()
-            storeUsers.displayGroupUsers(groupName)
-        })
-
-    }
-    let displayGroupsListInLeftNav = function(groupName) {
-        $('#leftNavUserGroupList tbody').append(
-            [`<tr>`,
-                `<td class="groupLeftNavLink">`,
-                `<a href="#">${groupName}</a></td>`,
-                `</tr>`
-            ].join(''))
-    }
-    let displayGroups = function(groupName) {
-        //Displays groups stored in register
-        $('#userFormGroupList tbody').empty()
-        $('#leftNavUserGroupList tbody').empty()
-        _groups.forEach((_, groupName) => {
-            displayGroupsListInForm(groupName)
-            displayGroupsListInLeftNav(groupName)
-        })
-    }
-
-
-    return {
-        onReady: function({
-            userDisplayList
-        }) {
-            dataTableHandle = userDisplayList.DataTable()
-            $.get('/Groups', {}, function(groups) {
-                    groups.forEach(group => {
-                        let groupProperties = {
-                            ID: group.ID
-                        }
-                        _groups.set(group.name, groupProperties)
-                    })
-                })
-                .done(displayGroups)
-                .fail(error => {
-                    debugger
-                })
-        },
-
-        deleteGroup: function(groupName) {
-            $.ajax({
-                    method: "DELETE",
-                    url: '/group',
-                    data: {
-                        groupName
-                    }
-                })
-                .done(function(msg) {
-                    _groups.delete(groupName)
-                    displayGroups()
-                })
-                .fail(x => {
-                    alert('failed')
-                })
-        },
-
-        displayGroupUsers: function(groupName) {
-            document.getElementById('userGroupsModal').style.display = 'none'
-            dataExchangeStatus.setLoading()
-            //fetches and shows user daya associated with this user group
-            let group = {
-                group: groupName
-            }
-            $.get('/GroupUsers', group, function(data) {
-                dataExchangeStatus.setInactive()
-                dataTableHandle.clear().draw()
-                keyCloakUsers.showUsers(data)
-                ui.scrollToSection("userTableSection")
-            })
-        },
-
-        Group: function() {
-            let formInput = getGroupFormInputs()
-            $.post('/newUserGroup', formInput)
-                .done(x => {
-                    _groups.set(formInput.name, 1)
-                    document.getElementById('userGroupsModal').style.display = 'none'
-                    resetGroupFormInputs()
-                    displayGroups()
-                })
-                .fail(x => {
-                    alert('error')
-                })
-        },
-
-        selectUserFromSelectedTableRow: function(dataRow) {
-            let selectedUser = (dataTableHandle.row(dataRow).data())[0]
-            return selectedUser
-        },
-
-        addUserRow: function({
-            user,
-            email,
-            created,
-            keyCloakAccount,
-            otpEnabled,
-            otpVerified
-        }) {
-
-            dataTableHandle.row.add([
-                user,
-                email,
-                created,
-                keyCloakAccount
-            ]).draw(false)
-        }
-
-    }
-
-})()
-
-const keyCloakUsers = (function() {
-    let userProfiles = []
-
-    return {
-        showUsers: function(userData) {
-            $('#userSelectionTable').empty()
-            userData.forEach(userProfile => {
-                storeUsers.addUserRow({
-                    user: userProfile.username,
-                    email: userProfile.email,
-                    created: userProfile.created_at,
-                    keyCloakAccount: 'keyCloakAccount' in userProfile && 'id' in userProfile.keyCloakAccount ? userProfile.keyCloakAccount.id : 'no'
-                })
-            })
-        }
-    }
-})()
-
-module.exports = {
-    storeUsers,
-    keyCloakUsers
-}
-},{"./APICan":1,"./dataExchangeStatus":2,"./tenants":9,"./ui":11,"./userActions":12}],8:[function(require,module,exports){
-/*******************************************************************************
- * Franck Binard, ISED (FranckEinstein90)
- *
- * APICan application - 2020
- * -------------------------------------
- *  Canadian Gov. API Store middleware - client side
- *
- *  storeNewsArticles.js: entry point 
- *  create and publish articles for the store 
- ******************************************************************************/
-"use strict"
-
-/******************************************************************************/
-/******************************************************************************/
-const storeNewsArticles = (function(){
-
-    return {
-        onReady: function(){
-            $('#testH3').text('dfhwjask')
-        }
-    }
-})()
-
-module.exports = {
-    storeNewsArticles
-}
-
-},{}],9:[function(require,module,exports){
-/*******************************************************************************
- * Franck Binard, ISED (FranckEinstein90)
- *
- * APICan Canada API Store control application - 2020
- * -----------------------------------------------------------------------------
- *  Canadian Gov. API Store middleware - client side
- *
- *  tenants.js: tenant related routines 
- *
- ******************************************************************************/
-"use strict"
-
-/******************************************************************************/
-const tenants = (function() {
-
-    let tenantsInfo = new Map()
-    let tenantsInfoReady = false
-
-    return {
-        ready: function() {
-            return tenantsInfoReady
-        },
-        names: function() {
-            let tenantNames = []
-            tenantsInfo.forEach((_, tName) => tenantNames.push(tName))
-            return tenantNames
-        },
-        onReady: function(cb) {
-            $.get('/tenants', {}, tenants => {
-                    tenants.forEach(tenant => tenantsInfo.set(
-                        tenant.name, {
-                            services: tenant.numServices
-                        }))
-                })
-                .done(x => {
-                    cb()
-                    tenantsInfoReady = true
-                })
-        }
-    }
-})()
-
-module.exports = {
-    tenants
-}
-},{}],10:[function(require,module,exports){
-/*******************************************************************************
- * Franck Binard, ISED (FranckEinstein90)
- *
- * APICan application - 2020
- * -------------------------------------
- *  Canadian Gov. API Store middleware - client side
- *
- *  APICan.js: client app admin
- *
- ******************************************************************************/
-"use strict"
-/*****************************************************************************/
-const appStatusDialog = require('./dialogs/appStatusDialog').appStatusDialog
-/*****************************************************************************/
-
-const timer = (function() {
-
-    return {
-        eachMinute: function() {
-            /* update the app status to see if there's been any changes */
-            $.get('/appStatus', {}, function(data) {
-                $('#appStatus').text(
-                    [`ISED API Store Middleware - status ${data.state}`,
-                        `online: ${data.runningTime} mins`
-                    ].join(' - ')
-                )
-                $('#nextTenantRefresh').text(
-                   `(${data.nextTenantRefresh} mins) `
-                )
-            })
-        }
-    }
-})()
-
-module.exports = {
-    timer
-}
-},{"./dialogs/appStatusDialog":3}],11:[function(require,module,exports){
+},{"./adminTools":1,"./data/data":2,"./errors/errors":3,"./ui":5}],5:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
@@ -837,8 +344,22 @@ module.exports = {
 /******************************************************************************/
 /******************************************************************************/
 
-const ui = (function() {
-    return {
+const ui = function(app) {
+
+    app.ui = {
+        modal: null
+    }
+
+    app.ui.features = {
+        modal: false
+    }
+
+    require('./ui/modal').addModalFeature(app.ui)
+    app.features.ui = true
+
+
+    /*{
+
         scrollToSection: function(sectionID) {
             let hash = $('#' + sectionID)
             $('html, body').animate({
@@ -851,42 +372,37 @@ const ui = (function() {
             $('#' + apiPaneID).show()
 
         }
-    }
-})()
+    }*/
+
+}
 
 module.exports = {
     ui
 }
-},{}],12:[function(require,module,exports){
-/*************************************************************************
- * Client side, trigger user actions
- * 
- *************************************************************************/
-
+},{"./ui/modal":6}],6:[function(require,module,exports){
 "use strict"
 
-const userActions = (function() {
 
-    let actions = [{
-        action: 'enforceOTP',
-        route: 'enforceOTP'
-    }]
-    return {
-        update: function(userEmailList, actionList) {
-            //giving a liste of user addresses
-            //enact actions of those users
-            let actions = ['enforceOTP']
-            let inputData = {
-                users: userEmailList
-            }
-            $.post('/enforceOTP', inputData, function(data) {
+const showModal = ({
 
-            })
-        }
-    }
-})()
+    title, 
+    content
+
+  }) =>{
+
+    $('#modalTitle').text( title )
+    $('#modalContent').html( content )
+    document.getElementById('modalWindow').style.display = 'block'
+}
+
+const addModalFeature = function( ui ){
+
+    ui.features.modal = true
+    ui.showModal = showModal
+}
 
 module.exports = {
-    userActions
+    addModalFeature
 }
-},{}]},{},[5]);
+
+},{}]},{},[4]);

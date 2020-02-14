@@ -8,7 +8,6 @@
  *  APICan.js: client app admin
  *
  ******************************************************************************/
-
 "use strict"
 
 /******************************************************************************/
@@ -56,18 +55,19 @@ const selectedUsers = (function() {
 })()
 
 const APICan = (function() {
-    let socket      = null
-    let _appStatus  = null
 
-    let _getAppStatus  =  () => {
+    let socket = null
+    let _appStatus = null
+
+    let _getAppStatus = () => {
         $.get('/appStatus', {}, function(data) {
             $('#appStatus').text(
-            [`${data.env} - APICan ${data.version} - status ${data.state}`,
-                `online: ${data.runningTime} mins`
-            ].join(' - ')
+                [`${data.env} - APICan ${data.version} - status ${data.state}`,
+                    `online: ${data.runningTime} mins`
+                ].join(' - ')
             )
             $('#nextTenantRefresh').text(
-            `(${data.nextTenantRefresh} mins) `
+                `(${data.nextTenantRefresh} mins) `
             )
         })
     }

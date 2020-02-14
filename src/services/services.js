@@ -153,8 +153,8 @@ services.Service.prototype.addDocumentationSet = function(docObj, tenantUpdateRe
 }
 
 services.Service.prototype.updatePlanAndFeatureInfo = async function(serviceUpdateReport = null) {
-
-    return serviceUpdateReport
+    return new Promise((resolve, reject) => _ => resolve(1))
+    //return serviceUpdateReport
 /*    this.servicePlanIDs.forEach( planID => {
     })
     this.applicationPlanIDs.forEach( planID => {

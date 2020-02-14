@@ -25,6 +25,7 @@ const groups            = require('@users/groups').groups
 const appStatus         = require('@server/routes/appStatus').appStatus
 const path              = require('path')
 const clock             = require('@src/cron/timer').clock
+const Event             = require('@src/cron/timer').Event
 /*****************************************************************************/
 let run = (apiCan) => {
     apiCan.say('*********************************')
@@ -75,8 +76,14 @@ require('@src/APICan').APICanConfig( APICan )
     return groups.configure(apiCan)
 })
 .then( apiCan => {
+
+    let newEvent = new Event ({
+        name : "refresh tenant information", 
+        frequency: 7
+    }) 
+
     apiCan.clock = new clock.Clock( {
-        events: [], 
+        events: [newEvent], 
         cout: apiCan.say
     })
     return apiCan
