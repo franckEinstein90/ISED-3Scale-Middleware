@@ -12,7 +12,6 @@
 "use strict"
 
 /******************************************************************************/
-const ui = require('./ui').ui
 /******************************************************************************/
 
 let drawGraph = function(stats) {
@@ -53,7 +52,6 @@ let openServiceInspectDialog = function({
             $('#apiInspectFormSystemName').val(apiInfo.systemName)
             $('#apiInspectFormLastUpdate').val(apiInfo.updatedAt)
             $('#apiInspectFormCreationDate').val(apiInfo.created_at)
-            $('#apiInspectFormFeatures').html(`${apiInfo.features.map(x => x.name).join('<br/>')}`)
             $('#englishDoc').val(apiInfo.documentation[0].docSet.body)
             $('#frenchDoc').val(apiInfo.documentation[1].docSet.body)
             let tags = []
@@ -71,11 +69,13 @@ let openServiceInspectDialog = function({
 }
 
 const storeServices = (function() {
+    let _app = null
 
     let _setUI = function() {
         $('#visibleAPISelect').on('change', function() {
-            ui.showVisibleAPITable(this.value)
+            _app.showVisibleAPITable( this.value )
         })
+
         $('.serviceInspect').click(event => {
             event.preventDefault()
             let parentTable = event.currentTarget.offsetParent
@@ -89,7 +89,8 @@ const storeServices = (function() {
     }
 
     return {
-        onReady: function(options) {
+        configure   : function( app ){
+            _app = app
             _setUI()
         }
 

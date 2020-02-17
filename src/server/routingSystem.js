@@ -18,9 +18,7 @@ const appRoot               = require('@server/routes/appRoot').appRoot
 const apiStoreUserRoutes    = require('@server/routes/apiStoreUsers').apiStoreUserRoutes
 const userGroupRoutes       = require('@server/routes/userGroupRoutes').userGroupRoutes
 const eventsRoutes          = require('@server/routes/eventRoutes').eventsRoutes
-/*
 const serviceInspectRoutes = require('@server/routes/serviceInspectRoutes').serviceInspectRoutes
-const newsArticle = require('@apiStore/newsArticle').newsArticle*/
 /*****************************************************************************/
 const appStatus = require('@server/routes/appStatus').appStatus
 /*const scheduler = require('@src/cron/timer').scheduler
@@ -42,11 +40,8 @@ const routingSystem = function( apiCan ) {
  
     //events
     router.get('/events', _apiCan.clock.getEvents) 
+    router.get('/serviceInspect', serviceInspectRoutes.getServiceInfo)
 /*
-    let _setServiceInspectRoutes = () => {
-        router.get('/serviceInspect', serviceInspectRoutes.getServiceInfo)
-    }
-
     let _setNewsArticleRoutes = () => {
         router.post('/article', newsArticle.postNewArticle)
         router.get('/article', newsArticle.getStoredArticles)

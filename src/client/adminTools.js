@@ -10,8 +10,6 @@
  ******************************************************************************/
 "use strict"
 /******************************************************************************/
-
-
 const eventPane = ({
     name,
     frequency,
@@ -29,6 +27,37 @@ const eventPane = ({
 }
 
 
+const eventSchedule = (function(){
+	let _events = new Map()
+
+	return {
+
+		update : function(eventArray) {
+			eventArray.forEach(ev => {
+					_events.set(ev.id, ev)
+			})
+		}, 
+
+		showScheduler : function( ){
+			 let eventRows = ""
+			 _events.forEach((ev, _) =>{
+				eventRows = eventRows += eventPane(ev) 
+			 })
+	         return [
+					 `<div class="eventList" id="eventList">`,
+                     `<table class='w3-table scheduledEvent'>`,
+                     `<tr><th>Event Name</th><th>Frequency</th><th>Last</th><th>Next</th></tr>`,
+					  eventRows, 
+                     `</table>`,
+                     '</div>'
+			 		].join('')
+		}
+	}
+
+})()
+
+
+
 const getEvents = () => {
     return new Promise((resolve, reject) => {
         $.get('/events', function(data) {
@@ -40,24 +69,7 @@ const getEvents = () => {
     })
 }
 
-const schedulerModalContent = () => {
-    return new Promise((resolve, reject) => {
-        getEvents()
-            .then(events => {
-                return resolve([
-                    `<div class="eventList" id="eventList">`,
-                    `<table class='w3-table scheduledEvent'>`,
-                    `<tr><th>Event Name</th><th>Frequency</th><th>Last</th><th>Next</th></tr>`,
-                    events.map(ev => eventPane(ev)).join(''),
-                    `</table>`,
-                    '</div>'
-                ].join(''))
-            })
-            .catch( err => {
-                reject (err)
-            })
-    })
-}
+
 
 
 const schedulerContent = function() {
@@ -78,25 +90,17 @@ const schedulerContent = function() {
 const addAdminTools = async function(clientApp) {
 
     clientApp.adminTools = {
-        scheduler: null,
+        scheduler: eventSchedule,
         features: {
             scheduler: false
         }
     }
 
 
-    clientApp.showScheduler = _ => {
-        clientApp.server.fetchData('events')
-            .then( modalContent => {
-                    return clientApp.ui.showModal(modalContent)
-            })
-            .catch( err => clientApp.handleError(
-                    [   `<P>Unable to get scheduler data</P>`, 
-                        `<P>Status ${err.status}, `, 
-                        `${err.statusText}</P>`
-                    ].join(''))
-            )
-    }
+    clientApp.showScheduler = _ => clientApp.ui.showModal({
+			title : 'events', 
+			content: eventSchedule.showScheduler()
+	})
 
     $('#showScheduler').click(event => {
         event.preventDefault()

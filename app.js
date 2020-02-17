@@ -31,9 +31,6 @@ let run = (apiCan) => {
     apiCan.say('*********************************')
     apiCan.say(`apiCan ${apiCan.features.versioning ? apiCan.versionTag : ""} booting`)
     tenantsManager.updateTenantInformation()
-        /*.then(updateReport => {
-            return correctFetchErrors(updateReport)
-        })*/
     .then(_ => {
         if (apiCan.clock) apiCan.clock.start()
             apiCan.state = "running"
@@ -79,7 +76,8 @@ require('@src/APICan').APICanConfig( APICan )
 
     let newEvent = new Event ({
         name : "refresh tenant information", 
-        frequency: 7
+        frequency: 7, 
+        run: tenantsManager.updateTenantInformation
     }) 
 
     apiCan.clock = new clock.Clock( {
@@ -91,6 +89,10 @@ require('@src/APICan').APICanConfig( APICan )
 .then( apiCan => { 
     require('@server/routingSystem').routingSystem( apiCan )
     appStatus.configure(apiCan)
+
+    let appRoot = require('@routes/appRoot').appRoot
+    appRoot.configure(apiCan)
+
     let server = require('@server/httpServer').httpServer( apiCan ) 
     let io = require('socket.io')(server)
     let messages = require('@server/messages').messages

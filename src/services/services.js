@@ -67,8 +67,6 @@ const services = (function() {
                     serviceProvider : tenant
                 })
                 this.documentation      = new Map()
-                this.servicePlanIDs     = []
-                this.applicationPlanIDs = []
             }
 
             get tenant() {
@@ -152,49 +150,12 @@ services.Service.prototype.addDocumentationSet = function(docObj, tenantUpdateRe
 
 }
 
-services.Service.prototype.updatePlanAndFeatureInfo = async function(serviceUpdateReport = null) {
-    return new Promise((resolve, reject) => _ => resolve(1))
-    //return serviceUpdateReport
-/*    this.servicePlanIDs.forEach( planID => {
+services.Service.prototype.updatePlans = async function( ) {
+    return Promise.all([this.tenant.getApplicationPlans(this.id), this.tenant.getServicePlans(this.id)])
+    .then ( plans => {
+        this.plans = plans[0].plans.concat(plans[1].plans)
+        return this
     })
-    this.applicationPlanIDs.forEach( planID => {
-        this.tenant.getApplicationPlanFeatures( planID )
-        .then( planFeatureInfo => {
-            if( Array.isArray(planFeatureInfo) && planFeatureInfo.length > 0 ){
-                let features = planFeatureInfo.map(x => x.feature)
-                features.forEach(f =>{
-                    this.storeUpdateFeature({
-                        featureCategory: f.scope, 
-                        featureID: f.id, 
-                        featureName: f.system_name
-                    })
-                })
-            }
-        })
-    })*/
-
-    /*
-    let thisServiceID, that
-    thisServiceID = this.id
-    that = this
-    let apiCall = [`${this.tenant.baseURL}services/${thisServiceID}/`,
-        `features.json?access_token=${this.tenant.accessToken}`
-    ].join('')
-
-    let processGoodResponse = function(body) {
-        if (validator.isJSON(body)) {
-            if (serviceUpdateReport) {
-                serviceUpdateReport.featuresUpdate = errors.codes.Ok
-            }
-            let features = JSON.parse(body).features
-            that.features = features.map(obj => obj.feature)
-        }
-        return serviceUpdateReport
-    }
-    return alwaysResolve(apiCall, {
-        good: processGoodResponse,
-        bad: serviceUpdateReport
-    })*/
 }
 
 services.Service.prototype.getServiceUsageMetrics = async function() {
@@ -216,6 +177,7 @@ services.Service.prototype.getServiceUsageMetrics = async function() {
         bad
     })
 }
+
 services.Service.prototype.servicePlanAccess = function() {
     let servicePlanAccess = {
         public: true,

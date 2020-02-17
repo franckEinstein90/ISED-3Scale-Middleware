@@ -18,20 +18,18 @@ const groups    = require('@users/groups').groups*/
 
 const appRoot = (function() {
 
-    let router = null
+    let _app = null
 
     return {
+        configure: function ( app ){
+            _app = app
+        }, 
         render: function(req, res, next) {
             let pageData = {
                 title: "APICan",
                 state: 'initializing',
-                tenants: messages.tenantInfo(),
-               // definedUserGroups: groups.definedGroups()
+                tenants: messages.tenantInfo()
             }
-
-//            if (appStatus.isRunning()) {
- //               pageData.state = 'running'
-  //          }
             res.render('index', pageData)
         }
     }

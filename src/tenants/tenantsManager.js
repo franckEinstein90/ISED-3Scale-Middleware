@@ -22,9 +22,17 @@ const tenantsManager = (function() {
     let _tenants = []
     let _updateRegister = new Map()
 
-    return {
+    return {   
+        getTenantByName: tenantName => _tenants.find(t => t.name === tenantName),
         tenants: _ => _tenants,
-
+        lastUpdate  : tenant => {
+            if(_updateRegister.has(tenant)) {
+                return _updateRegister.get(tenant)
+            }
+            else{ 
+                return "Not Updated"
+            }
+        }, 
         configure: function( apiCan ) {
             return new Promise((resolve, reject) => {
                 apiCan.data.tenants.forEach((tenantInfo, tenantName) => {

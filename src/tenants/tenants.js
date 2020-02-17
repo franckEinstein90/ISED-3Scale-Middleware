@@ -13,10 +13,12 @@
 /*****************************************************************************/
 const utils = require('@src/utils').utils
 const errors = require('@errors').errors
-const log = require('@src/utils').utils.log
-const accounts = require('@users/accounts').accounts
-const TenantProto = require('@src/tenants/serviceProvider').ServiceProvider
+const log           = require('@src/utils').utils.log
+const accounts      = require('@users/accounts').accounts
+const TenantProto   = require('@src/tenants/serviceProvider').ServiceProvider
+const alwaysResolve = require('@src/utils/alwaysResolve').alwaysResolve
 /*****************************************************************************/
+const validator     = require('validator')
 const tenants = (function() {
 
     return {
@@ -68,15 +70,66 @@ const tenants = (function() {
     }
 
 })()
+tenants.Tenant.prototype.getAccountPlan = function(planInfo, userEmail) {
+    let accountID, newAccount, planIDs
+    if (planInfo === null) return null
+    accountID = planInfo.account.id[0]
+    newAccount = new accounts.Account(accountID, userEmail)
+    //within the plans included with this user, 
+    this.accounts.set(userEmail, newAccount)
+    //only one has a plan of type "account_plan"
+    //that's the one we need
+    let accountPlan = planInfo.account.plans[0].plan.filter(plan => plan.type[0] === "account_plan")[0]
+    //    planIDs = planInfo.account.plans[0].plan.map(plan => plan.id[0])
+    //   newAccount.associatePlans(planIDs)
+    return accountPlan
+    //at this point, we only care abou tthe plan that has type: account_plan
+    //1. get that account info
+    //2. get the features for that account
+    //so for 161, get feature 31, once that's in: 
+    //extract the system name (in this case gc-internal)
+    //k
+}
 
-/*tenants.Tenant.prototype.apiJsonAnswer = function(language) {
-    return {
-        name: this.name,
-        description: this.tenantDescription(language),
-        maintainers: this.maintainers(language),
-        apis: this.publicAPIList(language)
+tenants.Tenant.prototype.getApplicationPlans = async function(serviceID){
+    let apiCall = [
+            `https://${this.adminDomain}/admin/api/`,
+            `services/${serviceID}/application_plans.json?access_token=${this.accessToken}`
+        ].join('')
+
+    let good = body => {
+        if (validator.isJSON(body)){
+            let parsedAnswer = JSON.parse(body)
+            return parsedAnswer
+        }
     }
-}*/
+    let bad = null
+    return alwaysResolve(apiCall, {
+        good, 
+        bad
+    }) 
+}
+
+tenants.Tenant.prototype.getServicePlans = async function( serviceID ){
+    let apiCall = [
+        `https://${this.adminDomain}/admin/api/`,
+        `services/${serviceID}/service_plans.json?access_token=${this.accessToken}`
+    ].join('')
+
+    let good = body => {
+        if (validator.isJSON(body)){
+            let parsedAnswer = JSON.parse(body)
+            return parsedAnswer
+        }
+    }
+
+    let bad = null
+
+    return alwaysResolve(apiCall, {
+        good, 
+        bad
+    }) 
+}
 
 tenants.Tenant.prototype.publicAPIList = function(language) {
     //returns an array of public services for this tenant
@@ -103,27 +156,6 @@ tenants.Tenant.prototype.publicAPIList = function(language) {
         }
     )
     return listOfApis
-}
-
-tenants.Tenant.prototype.getAccountPlan = function(planInfo, userEmail) {
-    let accountID, newAccount, planIDs
-    if (planInfo === null) return null
-    accountID = planInfo.account.id[0]
-    newAccount = new accounts.Account(accountID, userEmail)
-    //within the plans included with this user, 
-    this.accounts.set(userEmail, newAccount)
-    //only one has a plan of type "account_plan"
-    //that's the one we need
-    let accountPlan = planInfo.account.plans[0].plan.filter(plan => plan.type[0] === "account_plan")[0]
-    //    planIDs = planInfo.account.plans[0].plan.map(plan => plan.id[0])
-    //   newAccount.associatePlans(planIDs)
-    return accountPlan
-    //at this point, we only care abou tthe plan that has type: account_plan
-    //1. get that account info
-    //2. get the features for that account
-    //so for 161, get feature 31, once that's in: 
-    //extract the system name (in this case gc-internal)
-    //k
 }
 
 tenants.Tenant.prototype.getUserApiInfo = async function(userEmail) {
@@ -219,9 +251,10 @@ tenants.Tenant.prototype.updateServiceDefinitions = async function({
 tenants.Tenant.prototype.planInfoUpdatePromises = async function( serviceIDs ){
     return serviceIDs.map(id => {
         let service = this.services.get(id)
-        return service.updatePlanAndFeatureInfo
+        return service.updatePlan()
     })
 }
+
 tenants.Tenant.prototype.validateAPIs = async function(tenantUpdateReport) {
     //At this stage, we've fetched the list of services from this tenant and
     //its set of documentation
@@ -246,36 +279,9 @@ tenants.Tenant.prototype.validateAPIs = async function(tenantUpdateReport) {
             }
         })
 
-    if (billingualServicesReports.length === 0) {
-        //doesn't have billingual documentation
-        //no need to process any further
-        tenantUpdateReport.updateSuccess = errors.codes.Ok
-        return tenantUpdateReport
-    }
-
-    let promiseArray = this.planInfoUpdatePromises( //look to update plan information
-        billingualServicesReports                   //for those services that have bilingual doc
-        .map( serviceUpdateReport => parseInt((serviceUpdateReport.id.split('_'))[1]))
-    )
-    let reportUpdateResults = (servicesUpdateReports) => {
-        servicesUpdateReports.forEach(
-            serviceUpdateReport => {
-                if (serviceUpdateReport.featuresUpdate === errors.codes.Ok) {
-                    serviceUpdateReport.updateSuccess = errors.codes.Ok
-                }
-            })
-        let badServiceUpdateReport = tenantUpdateReport.servicesUpdateReports.find(
-            serviceUpdateReport => serviceUpdateReport.updateSuccess !== errors.codes.Ok
-        )
-        if (!badServiceUpdateReport) {
-            tenantUpdateReport.updateSuccess = errors.codes.Ok
-        }
-        return tenantUpdateReport
-    }
-    return Promise.all(promiseArray)
-        .then(reportUpdateResults)
+    
+    return tenantUpdateReport
 }
-
 
 tenants.Tenant.prototype.updateApiInfo = async function() {
     //called once per cron cycles 
@@ -289,9 +295,9 @@ tenants.Tenant.prototype.updateApiInfo = async function() {
         this.getServiceList(tenantUpdateReport)
             .then(services => resolve(
                 this.updateServiceDefinitions({
-			fetchedServices: services, 
-                    	updateReport: tenantUpdateReport
-		})
+			        fetchedServices: services, 
+                    updateReport: tenantUpdateReport
+		        })
             ))
     })
 
@@ -304,9 +310,27 @@ tenants.Tenant.prototype.updateApiInfo = async function() {
 
     //fulfills both promises in paralell
     return Promise.all([serviceListingPromise, activeDocsPromise])
-        .then(_ => {
-            //7
-            return this.validateAPIs(tenantUpdateReport)
+        .then( _ => {
+            this.validateAPIs( tenantUpdateReport )
+            let bilingualServices = tenantUpdateReport.servicesUpdateReports
+            .filter(
+                report => report.updateSuccess === "Not Ok"
+            )
+            .map( 
+                report => this.services.get(parseInt((report.id.split('_'))[1]))
+            )
+            .filter(services => services.bilingual)
+            if(bilingualServices.length === 0) {
+                tenantUpdateReport.updateSuccess = errors.codes.Ok 
+                return tenantUpdateReport
+            }
+            else{
+                return Promise.all(bilingualServices.map(service => service.updatePlans()))
+                .then(services => {
+                    tenantUpdateReport.updateSuccess = errors.codes.Ok 
+                    return tenantUpdateReport
+                })
+            }
         })
 }
 

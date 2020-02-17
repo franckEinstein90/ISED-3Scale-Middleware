@@ -14,11 +14,16 @@ const appStatusDialog = require('./dialogs/appStatusDialog').appStatusDialog
 /*****************************************************************************/
 
 const timer = (function() {
-
+    let _app = null
     return {
+		configure	: function( app ){
+			_app = app
+		},
+
         eachMinute: function() {
             /* update the app status to see if there's been any changes */
             $.get('/appStatus', {}, function(data) {
+
                 $('#appStatus').text(
                     [`ISED API Store Middleware - status ${data.state}`,
                         `online: ${data.runningTime} mins`
@@ -27,6 +32,8 @@ const timer = (function() {
                 $('#nextTenantRefresh').text(
                     `(${data.nextTenantRefresh} mins) `
                 )
+
+				_app.adminTools.scheduler.update(data.events)
             })
         }
     }

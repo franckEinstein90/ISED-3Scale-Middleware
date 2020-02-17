@@ -32,7 +32,6 @@ const serviceInspectRoutes = (function() {
                 state: service.state,
                 tenantName,
                 serviceID,
-                features: service.features,
                 documentation,
                 registrationRequired: service.end_user_registration_required,
                 systemName: service.system_name,

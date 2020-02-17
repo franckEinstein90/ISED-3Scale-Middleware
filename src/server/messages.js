@@ -25,16 +25,17 @@ const messages = (function() {
                 let bilingualServiceCount = t.services.length({
                     bilingual : true
                 })
-
+                let services = t.services.listServices()
                 return {
                     name: t.name,
                     id: t.id,
+                    lastUpdate  : tenantsManager.lastUpdate(t.name).format('H:m'), 
                     totalServiceCount,  
                     bilingualServiceCount,
                     numVisibleServices: t.services.length({
                         visibleOnly: 1
                     }),
-                    services: t.services.listServices()
+                    services
                 }
             })
         },

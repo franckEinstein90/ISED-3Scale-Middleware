@@ -11,6 +11,7 @@
 "use strict"
 
 /******************************************************************************/
+const timer = require('./timer.js').timer
 /*const APICan = require('./APICan').APICan
 const storeUsers = require('./storeUsers').storeUsers
 const userActions = require('./userActions').userActions
@@ -18,6 +19,8 @@ const userActions = require('./userActions').userActions
 
 
 $(function() {
+    let socket = null
+    socket = io()
 
     let apiCanClient = {
 
@@ -36,13 +39,16 @@ $(function() {
 
         }
     }
-
+    timer.configure( apiCanClient )
     require('./ui').ui(apiCanClient)
     require('./errors/errors').addErrorHandling(apiCanClient)
     require('./data/data').addServerComFeature(apiCanClient)
     require('./adminTools').addAdminTools(apiCanClient)
-
-
+	
+    timer.eachMinute()
+    setInterval(timer.eachMinute, 10000)
+    let storeServices = require('./storeServices').storeServices
+    storeServices.configure( apiCanClient )
     /*    let setUp = function() {
             try {
                 console.group("Init APICan Client")
