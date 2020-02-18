@@ -11,7 +11,7 @@
 "use strict"
 
 /*****************************************************************************/
-const storeUsers = require('../storeUsers').storeUsers
+const storeUsers = require('../storeUsersDELETE').storeUsers
 const tenants = require('../tenants').tenants
 /*****************************************************************************/
 

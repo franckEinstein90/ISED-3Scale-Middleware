@@ -12,7 +12,7 @@
 
 /******************************************************************************/
 const tenants = require('./tenants').tenants
-const storeUsers = require('./storeUsers').storeUsers
+const storeUsers = require('./storeUsersDELETE').storeUsers
 const storeServices = require('./storeServices').storeServices
 const storeNewsArticles = require('./store/storeNewsArticles').storeNewsArticles
 const appStatusDialog = require('./dialogs/appStatusDialog').appStatusDialog

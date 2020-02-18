@@ -29,46 +29,32 @@ $(function() {
         server              : {
 
         }, 
-        ui                  : null,
-
-        features: {
-
-            ui: false,
-            adminTools: false, 
-            errorHandling: false
-
-        }
+        ui                  : null
+      
     }
-    timer.configure( apiCanClient )
+
+    require('../clientServerCommon/features').addFeatureSystem( apiCanClient )
+    apiCanClient.features.include({
+            ui              : false,
+            adminTools      : false, 
+            errorHandling   : false
+    })
+
     require('./ui').ui(apiCanClient)
     require('./errors/errors').addErrorHandling(apiCanClient)
     require('./data/data').addServerComFeature(apiCanClient)
     require('./adminTools').addAdminTools(apiCanClient)
 	
+    timer.configure( apiCanClient )
     timer.eachMinute()
     setInterval(timer.eachMinute, 10000)
     let storeServices = require('./storeServices').storeServices
     storeServices.configure( apiCanClient )
-    /*    let setUp = function() {
-            try {
-                console.group("Init APICan Client")
-                APICan.init()
-                console.groupEnd()
-                return true
-
-            } catch (err) {
-                errors(err)
-                return false
-            }
-        }
-
-        if (setUp()) {
-            try {
-                APICan.run()
-            } catch (err) {
-                errors(err)
-            }
-        }*/
+  
+    require('./groups/userGroups').addUserGroupFeature( apiCanClient )
+    .then( apiCanClient => {
+        debugger
+    })
 })
 
 /*

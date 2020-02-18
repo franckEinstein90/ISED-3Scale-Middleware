@@ -27,7 +27,7 @@ const fetchServerData = function(clientApp){
 }
 
 const addServerComFeature =  clientApp =>{
-
+    
     clientApp.server.fetchData = fetchServerData(clientApp)
 
 }

@@ -1,4 +1,43 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+"use strict"
+
+const featureSystem = (function(){
+
+    let _features = new Map()
+
+    return {
+      
+        includes: featureName => {
+            if(_features.has(featureName)) return _features.get(featureName)
+            return false
+        }, 
+        list : x => _features , 
+        add : function({ featureName, onOff }){
+            if(featureSystem.includes(featureName)){
+                throw "feature already exists"
+            }
+            _features.set(featureName, onOff)
+        }
+    }
+
+})()
+
+const addFeatureSystem = function( app ){
+    app.features = featureSystem
+    app.features.include = (features, status) => {
+        Object.keys(features).forEach( key => {
+            featureSystem.add({
+                featureName: key, 
+                onOff: status 
+            })
+        })
+    }
+}
+
+module.exports = {
+    addFeatureSystem
+}
+},{}],2:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
@@ -11,8 +50,6 @@
  ******************************************************************************/
 "use strict"
 /******************************************************************************/
-
-
 const eventPane = ({
     name,
     frequency,
@@ -30,6 +67,37 @@ const eventPane = ({
 }
 
 
+const eventScheduler = (function(){
+	let _events = new Map()
+
+	return {
+
+		update : function(eventArray) {
+			eventArray.forEach(ev => {
+					_events.set(ev.id, ev)
+			})
+		}, 
+
+		showScheduler : function( ){
+			 let eventRows = ""
+			 _events.forEach((ev, _) =>{
+				eventRows = eventRows += eventPane(ev) 
+			 })
+	         return [
+					 `<div class="eventList" id="eventList">`,
+                     `<table class='w3-table scheduledEvent'>`,
+                     `<tr><th>Event Name</th><th>Frequency</th><th>Last</th><th>Next</th></tr>`,
+					  eventRows, 
+                     `</table>`,
+                     '</div>'
+			 		].join('')
+		}
+	}
+
+})()
+
+
+
 const getEvents = () => {
     return new Promise((resolve, reject) => {
         $.get('/events', function(data) {
@@ -41,24 +109,7 @@ const getEvents = () => {
     })
 }
 
-const schedulerModalContent = () => {
-    return new Promise((resolve, reject) => {
-        getEvents()
-            .then(events => {
-                return resolve([
-                    `<div class="eventList" id="eventList">`,
-                    `<table class='w3-table scheduledEvent'>`,
-                    `<tr><th>Event Name</th><th>Frequency</th><th>Last</th><th>Next</th></tr>`,
-                    events.map(ev => eventPane(ev)).join(''),
-                    `</table>`,
-                    '</div>'
-                ].join(''))
-            })
-            .catch( err => {
-                reject (err)
-            })
-    })
-}
+
 
 
 const schedulerContent = function() {
@@ -77,34 +128,18 @@ const schedulerContent = function() {
 
 
 const addAdminTools = async function(clientApp) {
-
-    clientApp.adminTools = {
-        scheduler: null,
-        features: {
-            scheduler: false
-        }
+    clientApp.eventScheduler = eventScheduler
+    if(clientApp.features.includes('modal')){
+        clientApp.showScheduler = _ => clientApp.ui.showModal({
+			title : 'events', 
+			content: eventScheduler.showScheduler()
+	    })
+        $('#showScheduler').click(event => {
+            event.preventDefault()
+            clientApp.showScheduler()
+        })
+        clientApp.features.add({featureName: eventScheduler, onOff: true})
     }
-
-
-    clientApp.showScheduler = _ => {
-        clientApp.server.fetchData('events')
-            .then( modalContent => {
-                    return clientApp.ui.showModal(modalContent)
-            })
-            .catch( err => clientApp.handleError(
-                    [   `<P>Unable to get scheduler data</P>`, 
-                        `<P>Status ${err.status}, `, 
-                        `${err.statusText}</P>`
-                    ].join(''))
-            )
-    }
-
-    $('#showScheduler').click(event => {
-        event.preventDefault()
-        clientApp.showScheduler()
-    })
-
-    clientApp.adminTools.features.scheduler = true
 }
 
 
@@ -112,7 +147,7 @@ module.exports = {
     addAdminTools
 }
 
-},{}],2:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
@@ -142,7 +177,7 @@ const fetchServerData = function(clientApp){
 }
 
 const addServerComFeature =  clientApp =>{
-
+    
     clientApp.server.fetchData = fetchServerData(clientApp)
 
 }
@@ -153,7 +188,54 @@ module.exports = {
 }
 
 
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
+/*******************************************************************************
+ * Franck Binard, ISED (FranckEinstein90)
+ *
+ * APICan application - 2020
+ * -------------------------------------
+ *  Canadian Gov. API Store middleware - client side
+ *
+ *  appStatusDialog.js: information and actions on app variables
+ *
+ ******************************************************************************/
+"use strict"
+/******************************************************************************/
+const appStatusDialog = (function(){
+
+	let _initUI = function(){
+		$('#btnRefreshTenants').click(function ( event ){
+			event.preventDefault()
+			$.get('/refreshTenants', {}, function(data) {
+				debugger	
+			})
+		})
+		$('#appStatus').click(function( event ) {
+			this.classList.toggle("active")
+			let statusDetailPaneHeight = $('#appStatusDetail').css('maxHeight')	
+			if( statusDetailPaneHeight === '0px' ){
+				let scrollHeight = $('#appStatusDetail').css('scrollHeight')
+				$('#appStatusDetail').css('maxHeight', '80px')
+			} else {
+				$('#appStatusDetail').css('maxHeight', '0px')
+			}
+		})
+	}
+	return {
+        ready: function(){
+				_initUI()
+		  }, 
+		  update: function(){
+
+		  }
+    }
+})()
+
+module.exports = {
+    appStatusDialog
+}
+
+},{}],5:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
@@ -186,7 +268,71 @@ module.exports = {
     addErrorHandling
 }
 
-},{}],4:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
+"use strict"
+
+
+const userGroupFeature = (function(){
+
+    let _dataTableHandle = null
+    let _groups          = new Map() 
+
+    return {
+
+        configure   : function(){
+            _dataTableHandle = $('#userFormGroupList').DataTable()
+        }, 
+
+        addGroup : function({groupName, groupID}){
+            _groups.set(groupID, groupName)
+        },
+
+        displayGroups: _ => {
+            $('#userFormGroupList tbody').empty()
+            _groups.forEach(groupName =>{
+                userGroupFeature.userGroupRow( groupName )
+            })
+        },  
+
+        userGroupRow : function(groupName, groupID) { //displays the group
+            $('#userFormGroupList tbody').append(         //as a line in #userFormGroupList
+                [`<tr>`,
+                    `<td class="w3-text-green">${groupName}</td>`,
+                    `<td><i class="fa fa-eye w3-large w3-text-black groupCmd"></i></td>`, 
+                    `<td><i class="fa fa-gears  w3-large w3-text-black groupCmd"></i></td>`, 
+                    `<td><i class="fa fa-trash w3-large w3-text-black groupCmd"></i></td>`, 
+                    `</tr>`
+                ].join(''))
+        }
+    }
+})()
+
+const addUserGroupFeature = async function( clientApp ){
+    return new Promise((resolve, reject) => {
+        userGroupFeature.configure()  
+        clientApp.server.fetchData('Groups')
+        .then( result => {
+            result.forEach(group => userGroupFeature.addGroup({
+                groupName: group.name, 
+                groupID: group.ID
+            }))
+            return 1
+        })
+        .then( _ => userGroupFeature.displayGroups())
+        .then( _ => {
+                clientApp.features.add({
+                    featureName: 'userGroups', 
+                    onOff   : true
+                })
+                return resolve(clientApp)
+        })
+    })
+}
+
+module.exports = {
+    addUserGroupFeature
+}
+},{}],7:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
@@ -200,6 +346,7 @@ module.exports = {
 "use strict"
 
 /******************************************************************************/
+const timer = require('./timer.js').timer
 /*const APICan = require('./APICan').APICan
 const storeUsers = require('./storeUsers').storeUsers
 const userActions = require('./userActions').userActions
@@ -207,6 +354,8 @@ const userActions = require('./userActions').userActions
 
 
 $(function() {
+    let socket = null
+    socket = io()
 
     let apiCanClient = {
 
@@ -215,43 +364,32 @@ $(function() {
         server              : {
 
         }, 
-        ui                  : null,
-
-        features: {
-
-            ui: false,
-            adminTools: false, 
-            errorHandling: false
-
-        }
+        ui                  : null
+      
     }
+
+    require('../clientServerCommon/features').addFeatureSystem( apiCanClient )
+    apiCanClient.features.include({
+            ui              : false,
+            adminTools      : false, 
+            errorHandling   : false
+    })
 
     require('./ui').ui(apiCanClient)
     require('./errors/errors').addErrorHandling(apiCanClient)
     require('./data/data').addServerComFeature(apiCanClient)
     require('./adminTools').addAdminTools(apiCanClient)
-
-
-    /*    let setUp = function() {
-            try {
-                console.group("Init APICan Client")
-                APICan.init()
-                console.groupEnd()
-                return true
-
-            } catch (err) {
-                errors(err)
-                return false
-            }
-        }
-
-        if (setUp()) {
-            try {
-                APICan.run()
-            } catch (err) {
-                errors(err)
-            }
-        }*/
+	
+    timer.configure( apiCanClient )
+    timer.eachMinute()
+    setInterval(timer.eachMinute, 10000)
+    let storeServices = require('./storeServices').storeServices
+    storeServices.configure( apiCanClient )
+  
+    require('./groups/userGroups').addUserGroupFeature( apiCanClient )
+    .then( apiCanClient => {
+        debugger
+    })
 })
 
 /*
@@ -328,11 +466,164 @@ $(function() {
     })
 */
 
-},{"./adminTools":1,"./data/data":2,"./errors/errors":3,"./ui":5}],5:[function(require,module,exports){
+},{"../clientServerCommon/features":1,"./adminTools":2,"./data/data":3,"./errors/errors":5,"./groups/userGroups":6,"./storeServices":8,"./timer.js":9,"./ui":10}],8:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
  * APICan application - 2020
+ * -------------------------------------
+ *  Canadian Gov. API Store middleware - client side
+ *
+ *  storeService.js: client api services module 
+ *
+ ******************************************************************************/
+
+"use strict"
+
+/******************************************************************************/
+/******************************************************************************/
+
+let drawGraph = function(stats) {
+    let ctx = document.getElementById('statsGraph').getContext('2d')
+    let myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: [
+                'june', 'july', 'aug', 'sept', 'oct', 'nov', 'dec', 'jan', 'feb'
+            ],
+            datasets: [{
+                label: 'hits per month',
+                data: stats.values
+            }],
+            backgroundColor: stats.values.map(s => 'rgba(255, 0, 0, 0.7)'),
+            borderColor: stats.values.map(s => 'rgba(0, 255, 0, 0.7)')
+
+        },
+        options: {}
+    })
+}
+let openServiceInspectDialog = function({
+    tenant,
+    serviceID
+}) {
+
+    document.getElementById('serviceInspectModal').style.display = 'block'
+    $('#serviceModalTenantName').text(tenant)
+    $('#serviceModalID').text(serviceID)
+    $.get('/serviceInspect', {
+            tenant,
+            service: serviceID
+        }, function(apiInfo) {
+
+            $('#apiInspectFormState').val(apiInfo.state)
+            $('#apiInspectFormTenantName').val(apiInfo.tenantName)
+            $('#apiInspectFormServiceID').val(apiInfo.serviceID)
+            $('#apiInspectFormSystemName').val(apiInfo.systemName)
+            $('#apiInspectFormLastUpdate').val(apiInfo.updatedAt)
+            $('#apiInspectFormCreationDate').val(apiInfo.created_at)
+            $('#englishDoc').val(apiInfo.documentation[0].docSet.body)
+            $('#frenchDoc').val(apiInfo.documentation[1].docSet.body)
+            let tags = []
+            apiInfo.documentation.forEach(d => {
+                if ('tags' in d.docSet) {
+                    d.docSet.tags.forEach(t => tags.push(t))
+                }
+            })
+            $('#apiTags').text(tags.join(','))
+            if ('stats' in apiInfo) drawGraph(apiInfo.stats)
+        })
+        .fail(error => {
+            debugger
+        })
+}
+
+const storeServices = (function() {
+    let _app = null
+
+    let _setUI = function() {
+        $('#visibleAPISelect').on('change', function() {
+            _app.showVisibleAPITable( this.value )
+        })
+
+        $('.serviceInspect').click(event => {
+            event.preventDefault()
+            let parentTable = event.currentTarget.offsetParent
+            let tenant = parentTable.id.replace('VisibleAPI', '')
+            let serviceID = Number((event.currentTarget.cells[1]).innerText)
+            openServiceInspectDialog({
+                tenant,
+                serviceID
+            })
+        })
+    }
+
+    return {
+        configure   : function( app ){
+            _app = app
+            _setUI()
+        }
+
+    }
+
+})()
+
+module.exports = {
+    storeServices
+}
+},{}],9:[function(require,module,exports){
+/*******************************************************************************
+ * Franck Binard, ISED (FranckEinstein90)
+ *
+ * APICan application - 2020
+ * -------------------------------------
+ *  Canadian Gov. API Store middleware - client side
+ *
+ *  APICan.js: client app admin
+ *
+ ******************************************************************************/
+"use strict"
+/*****************************************************************************/
+const appStatusDialog = require('./dialogs/appStatusDialog').appStatusDialog
+/*****************************************************************************/
+
+const timer = (function() {
+
+    let _app = null
+
+    return {
+
+		configure	: function( app ){
+			_app = app
+		},
+
+        eachMinute: function() {
+            /* update the app status to see if there's been any changes */
+            $.get('/appStatus', {}, function(data) {
+
+                $('#appStatus').text(
+                    [`ISED API Store Middleware - status ${data.state}`,
+                        `online: ${data.runningTime} mins`
+                    ].join(' - ')
+                )
+                $('#nextTenantRefresh').text(
+                    `(${data.nextTenantRefresh} mins) `
+                )
+
+				_app.eventScheduler.update(data.events)
+            })
+        }
+    }
+})()
+
+module.exports = {
+    timer
+}
+
+},{"./dialogs/appStatusDialog":4}],10:[function(require,module,exports){
+/*******************************************************************************
+ * Franck Binard, ISED (FranckEinstein90)
+ *
+ * APICan application - Feb 2020
  * -------------------------------------
  *  Canadian Gov. API Store middleware - client side
  *
@@ -344,42 +635,64 @@ $(function() {
 /******************************************************************************/
 /******************************************************************************/
 
+
+
+let _initStaticUI = function(){
+
+    $('#btnRefreshTenants').click(function ( event ){
+        event.preventDefault()
+        $.get('/refreshTenants', {}, function(data) {
+            debugger	
+        })
+    })
+
+    $('#appStatus').click(function( event ) {
+        this.classList.toggle("active")
+        let statusDetailPaneHeight = $('#appStatusDetail').css('maxHeight')	
+        if( statusDetailPaneHeight === '0px' ){
+            let scrollHeight = $('#appStatusDetail').css('scrollHeight')
+            $('#appStatusDetail').css('maxHeight', '80px')
+        } else {
+            $('#appStatusDetail').css('maxHeight', '0px')
+        }
+    }) 
+}
+
+
 const ui = function(app) {
-
     app.ui = {
-        modal: null
+
     }
 
-    app.ui.features = {
-        modal: false
+    app.features.add({featureName: 'ui', onOff: true})
+    _initStaticUI()
+    app.showVisibleAPITable = function(tenant, event) {
+       $('.tenantsVisibleAPI').hide()
+       let apiPaneID = tenant + 'VisibleAPI'
+       $('#' + apiPaneID).show()
+
     }
 
-    require('./ui/modal').addModalFeature(app.ui)
-    app.features.ui = true
+    require('./ui/modal').addModalFeature( app )
 
 
-    /*{
+    
 
-        scrollToSection: function(sectionID) {
+    /*scrollToSection: function(sectionID) {
             let hash = $('#' + sectionID)
             $('html, body').animate({
                 scrollTop: hash.offset().top
             }, 800, _ => window.location.hash = hash)
-        },
-        showVisibleAPITable: function(tenant, event) {
-            $('.tenantsVisibleAPI').hide()
-            let apiPaneID = tenant + 'VisibleAPI'
-            $('#' + apiPaneID).show()
+        },*/
 
-        }
-    }*/
 
 }
 
 module.exports = {
     ui
 }
-},{"./ui/modal":6}],6:[function(require,module,exports){
+
+},{"./ui/modal":11}],11:[function(require,module,exports){
 "use strict"
 
 
@@ -395,14 +708,15 @@ const showModal = ({
     document.getElementById('modalWindow').style.display = 'block'
 }
 
-const addModalFeature = function( ui ){
-
-    ui.features.modal = true
-    ui.showModal = showModal
+const addModalFeature = function( app ){
+    if(app.features.includes('ui')){
+        app.ui.showModal = showModal
+        app.features.add({featureName: 'modal', onOff: true})
+    }
 }
 
 module.exports = {
     addModalFeature
 }
 
-},{}]},{},[4]);
+},{}]},{},[7]);

@@ -18,7 +18,10 @@ const tenantRoutes = (function(){
 
     return{
         getRefreshTenants: function(req, res, next){
-           tenantsManager.updateTenantInformation() 
+           let updateReport = tenantsManager.updateTenantInformation()
+           .then ( updateReport => {
+                res.send(updateReport)
+           })
         }, 
 
         getTenants: async function(req, res, next){

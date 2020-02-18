@@ -14,8 +14,11 @@ const appStatusDialog = require('./dialogs/appStatusDialog').appStatusDialog
 /*****************************************************************************/
 
 const timer = (function() {
+
     let _app = null
+
     return {
+
 		configure	: function( app ){
 			_app = app
 		},
@@ -33,7 +36,7 @@ const timer = (function() {
                     `(${data.nextTenantRefresh} mins) `
                 )
 
-				_app.adminTools.scheduler.update(data.events)
+				_app.eventScheduler.update(data.events)
             })
         }
     }

@@ -13,6 +13,7 @@ const db                = require('@server/db').appDatabase
 const tenantsManager    = require('@tenants/tenantsManager').tenantsManager
 const users             = require('@users/users').users
 const messages          = require('@server/messages').messages
+const UserGroup         = require('@clientServerCommon/userGroups').UserGroup
 /*****************************************************************************/
 
 const getGroupMembers = function({
@@ -32,25 +33,6 @@ const getGroupMembers = function({
     })) 
 }
 
-class UserGroup {
-    constructor({
-        id, 
-        name, 
-        description, 
-        emailPattern
-    }){
-        this.id             = id
-        this.name           = name
-        this.description    = description
-        this.emailPattern   = emailPattern
-        this.tenants        = []
-    }
-
-    addTenantAssociation(tenantName){
-        this.tenants.push(tenantName)
-    }
-
-}
 const groups = (function() {
 
     let _groups = new Map()

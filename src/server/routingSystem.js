@@ -42,10 +42,7 @@ const routingSystem = function( apiCan ) {
     router.get('/events', _apiCan.clock.getEvents) 
     router.get('/serviceInspect', serviceInspectRoutes.getServiceInfo)
 /*
-    let _setNewsArticleRoutes = () => {
-        router.post('/article', newsArticle.postNewArticle)
-        router.get('/article', newsArticle.getStoredArticles)
-    }
+    
 
     let whiteList = ['https://dev.api.canada.ca', 'https://api.canada.ca']
     let corsOptions = {

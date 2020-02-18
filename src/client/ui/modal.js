@@ -13,10 +13,11 @@ const showModal = ({
     document.getElementById('modalWindow').style.display = 'block'
 }
 
-const addModalFeature = function( ui ){
-
-    ui.features.modal = true
-    ui.showModal = showModal
+const addModalFeature = function( app ){
+    if(app.features.includes('ui')){
+        app.ui.showModal = showModal
+        app.features.add({featureName: 'modal', onOff: true})
+    }
 }
 
 module.exports = {

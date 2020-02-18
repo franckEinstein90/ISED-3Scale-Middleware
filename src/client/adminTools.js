@@ -27,7 +27,7 @@ const eventPane = ({
 }
 
 
-const eventSchedule = (function(){
+const eventScheduler = (function(){
 	let _events = new Map()
 
 	return {
@@ -88,26 +88,18 @@ const schedulerContent = function() {
 
 
 const addAdminTools = async function(clientApp) {
-
-    clientApp.adminTools = {
-        scheduler: eventSchedule,
-        features: {
-            scheduler: false
-        }
-    }
-
-
-    clientApp.showScheduler = _ => clientApp.ui.showModal({
+    clientApp.eventScheduler = eventScheduler
+    if(clientApp.features.includes('modal')){
+        clientApp.showScheduler = _ => clientApp.ui.showModal({
 			title : 'events', 
-			content: eventSchedule.showScheduler()
-	})
-
-    $('#showScheduler').click(event => {
-        event.preventDefault()
-        clientApp.showScheduler()
-    })
-
-    clientApp.adminTools.features.scheduler = true
+			content: eventScheduler.showScheduler()
+	    })
+        $('#showScheduler').click(event => {
+            event.preventDefault()
+            clientApp.showScheduler()
+        })
+        clientApp.features.add({featureName: eventScheduler, onOff: true})
+    }
 }
 
 

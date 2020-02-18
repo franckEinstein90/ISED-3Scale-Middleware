@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
- * APICan application - 2020
+ * APICan application - Feb 2020
  * -------------------------------------
  *  Canadian Gov. API Store middleware - client side
  *
@@ -12,13 +12,18 @@
 
 /******************************************************************************/
 /******************************************************************************/
-let _initUI = function(){
+
+
+
+let _initStaticUI = function(){
+
     $('#btnRefreshTenants').click(function ( event ){
         event.preventDefault()
         $.get('/refreshTenants', {}, function(data) {
             debugger	
         })
     })
+
     $('#appStatus').click(function( event ) {
         this.classList.toggle("active")
         let statusDetailPaneHeight = $('#appStatusDetail').css('maxHeight')	
@@ -30,8 +35,15 @@ let _initUI = function(){
         }
     }) 
 }
+
+
 const ui = function(app) {
-    _initUI()
+    app.ui = {
+
+    }
+
+    app.features.add({featureName: 'ui', onOff: true})
+    _initStaticUI()
     app.showVisibleAPITable = function(tenant, event) {
        $('.tenantsVisibleAPI').hide()
        let apiPaneID = tenant + 'VisibleAPI'
@@ -39,16 +51,7 @@ const ui = function(app) {
 
     }
 
-    app.ui = {
-        modal: null
-    }
-
-    app.ui.features = {
-        modal: false
-    }
-
-    require('./ui/modal').addModalFeature(app.ui)
-    app.features.ui = true
+    require('./ui/modal').addModalFeature( app )
 
 
     
