@@ -15,6 +15,7 @@
     "@server": "src/server",
     "@errors": "src/errors.js",
     "@apiStore": "src/apiStore",
+    "@clientServerCommon": "src/clientServerCommon", 
     "@users": "src/users"
   },
   "dependencies": {

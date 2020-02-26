@@ -70,6 +70,18 @@ const tenants = (function() {
     }
 
 })()
+
+tenants.Tenant.prototype.updateActiveDocs = async function(apiDocsInfo, updateReport) {
+    //if the document fetch operation resulted in an error, return here
+    if (updateReport.fetches.activeDocs !== errors.codes.Ok) return
+    apiDocsInfo.forEach(
+        apiDocObject => {
+            if(apiDocObject.api_doc.published){
+                this.services.updateServiceDocs( apiDocObject, updateReport)
+            }
+        })
+}
+
 tenants.Tenant.prototype.getAccountPlan = function(planInfo, userEmail) {
     let accountID, newAccount, planIDs
     if (planInfo === null) return null
@@ -303,9 +315,7 @@ tenants.Tenant.prototype.updateApiInfo = async function() {
 
     let activeDocsPromise = new Promise((resolve, reject) => {
         this.getActiveDocsList(tenantUpdateReport)
-            .then(activeDocs => resolve(
-                this.updateActiveDocs(activeDocs, tenantUpdateReport)
-            ))
+            .then(activeDocs => resolve( this.updateActiveDocs(activeDocs, tenantUpdateReport)))
     })
 
     //fulfills both promises in paralell

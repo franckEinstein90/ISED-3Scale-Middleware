@@ -17,6 +17,7 @@ const errors            = require('@errors').errors
 const appDatabase       = require('@server/db').appDatabase
 const ServiceProto      = require('@services/serviceProto').ServiceProto
 const DocumentationSet  = require('@services/documentationSet').DocumentationSet
+const Plan              = require('@clientServerCommon/plans').Plan
 /*****************************************************************************/
 
 const services = (function() {
@@ -67,6 +68,7 @@ const services = (function() {
                     serviceProvider : tenant
                 })
                 this.documentation      = new Map()
+                this.public             = false
             }
 
             get tenant() {
@@ -151,10 +153,68 @@ services.Service.prototype.addDocumentationSet = function(docObj, tenantUpdateRe
 }
 
 services.Service.prototype.updatePlans = async function( ) {
-    return Promise.all([this.tenant.getApplicationPlans(this.id), this.tenant.getServicePlans(this.id)])
+    //get all plans associated with this service
+    return Promise.all([
+        this.tenant.getApplicationPlans(this.id), 
+        this.tenant.getServicePlans(this.id)
+    ])
     .then ( plans => {
-        this.plans = plans[0].plans.concat(plans[1].plans)
+        //store the plans within the service
+        let allPlans = plans[0].plans.concat(plans[1].plans) 
+        this.plans = allPlans.map(plan => {
+            if('application_plan' in plan) return new Plan({
+                id      : plan.application_plan.id,
+                planType: "application",
+                planInfo: plan.application_plan
+            })
+            if('service_plan' in plan) return new Plan({
+                id          : plan.service_plan.id,
+                planType    : "service",
+                planInfo    : plan.service_plan
+            })
+        })
         return this
+    })
+    .then( _ => {   //get the features of the plans associated with this service
+        return Promise.all( this.plans.map( plan => this.getPlanFeatures(plan)))
+    })
+    .then( features => {
+        features.forEach(planFeatures => {
+            if(planFeatures.features === null) return
+            let plan = this.plans.find( plan => plan.id === planFeatures.planID)
+            plan.features = planFeatures.features.map(f => f.feature)
+        })
+
+        //now we have collected the features for all the 
+        //plans, and can decide if the service is "public"
+        //2A2A
+        let servicePlan = this.plans.find(p => p.isServicePlan)
+        if(servicePlan && servicePlan.planInfo.state === "published" && servicePlan.features.length === 0){
+            this.public = true
+        }
+        return this
+    })
+}
+
+services.Service.prototype.getPlanFeatures = function(plan){
+
+    let planFeaturesPromise = null
+    let serviceTenant = this.tenant
+
+    if( plan.isApplicationPlan ){
+        planFeaturesPromise =  serviceTenant.getApplicationPlanFeatures(plan.id)
+    } else if ( plan.isServicePlan ){
+        planFeaturesPromise =  serviceTenant.getServicePlanFeatures(plan.id)
+    } else {
+        debugger
+    }
+
+    return planFeaturesPromise
+    .then( features => {
+        return {
+            planID: plan.id, 
+            features
+        } 
     })
 }
 

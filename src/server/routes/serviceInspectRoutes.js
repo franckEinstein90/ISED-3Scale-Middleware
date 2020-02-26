@@ -15,9 +15,11 @@ const tenantsManager = require('@tenants/tenantsManager').tenantsManager
 const serviceInspectRoutes = (function() {
 
     return {
+        
         getServiceInfo: async function(req, res, next) {
-            let tenantName = req.query.tenant
-            let serviceID = req.query.service
+
+            let tenantName  = req.query.tenant
+            let serviceID   = req.query.service
 
             let tenant = tenantsManager.getTenantByName(tenantName)
             let service = tenant.services.register.get(Number(serviceID))
@@ -36,7 +38,8 @@ const serviceInspectRoutes = (function() {
                 registrationRequired: service.end_user_registration_required,
                 systemName: service.system_name,
                 created_at: service.created_at,
-                updatedAt: service.updated_at
+                updatedAt: service.updated_at, 
+                plans: service.plans
             }
             if (tenantName === 'ised-isde') {
                 service.getServiceUsageMetrics()

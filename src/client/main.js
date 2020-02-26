@@ -23,16 +23,19 @@ $(function() {
     socket = io()
 
     let apiCanClient = {
-
-        adminTools          : null,
-        handleError         : null, 
-        server              : {
+        tenants     : null, 
+        adminTools  : null,
+        handleError : null, 
+        server      : {
 
         }, 
         ui                  : null
       
     }
-
+    require('./tenants/tenants').addTenantCollection({
+        clientApp: apiCanClient, 
+        containerID: 'tenantCards'
+    })
     require('../clientServerCommon/features').addFeatureSystem( apiCanClient )
     apiCanClient.features.include({
             ui              : false,
@@ -40,21 +43,21 @@ $(function() {
             errorHandling   : false
     })
 
-    require('./ui').ui(apiCanClient)
-    require('./errors/errors').addErrorHandling(apiCanClient)
-    require('./data/data').addServerComFeature(apiCanClient)
-    require('./adminTools').addAdminTools(apiCanClient)
+    require('./ui').ui( apiCanClient )
+    require('./errors/errors').addErrorHandling( apiCanClient)
+    require('./data/data').addServerComFeature( apiCanClient)
+    require('./adminTools').addAdminTools( apiCanClient)
 	
     timer.configure( apiCanClient )
     timer.eachMinute()
     setInterval(timer.eachMinute, 10000)
-    let storeServices = require('./storeServices').storeServices
-    storeServices.configure( apiCanClient )
-  
+
+    //service inspect feature
+    require('./storeServices').addServiceInspectFeature( apiCanClient )
     require('./groups/userGroups').addUserGroupFeature( apiCanClient )
-    .then( apiCanClient => {
-        debugger
-    })
+
+  
+
 })
 
 /*

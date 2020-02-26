@@ -13,10 +13,12 @@
 "use strict"
 /*****************************************************************************/
 const tenantsManager = require('@tenants/tenantsManager').tenantsManager
+/*****************************************************************************/
 
 const tenantRoutes = (function(){
 
     return{
+
         getRefreshTenants: function(req, res, next){
            let updateReport = tenantsManager.updateTenantInformation()
            .then ( updateReport => {

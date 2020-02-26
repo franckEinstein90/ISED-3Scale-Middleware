@@ -12,6 +12,7 @@
 "use strict"
 
 /******************************************************************************/
+const Plan = require('../clientServerCommon/plans').Plan
 /******************************************************************************/
 
 let drawGraph = function(stats) {
@@ -33,6 +34,32 @@ let drawGraph = function(stats) {
         options: {}
     })
 }
+
+let showFeatures = features => {
+    return [    "<h3>features</h3><ul>", 
+                features.map(feature => `<li>${feature.name} - visible: ${feature.visible}</li>`).join(''), 
+                '</ul>'
+            ].join('')
+}
+let planHTMLView =  plan => {
+     
+    let planPane = [
+        `<div class="${plan.planType.split(' ').join('_')}">`, 
+        `<P>id: ${plan.id} - ${plan.planInfo.name} - ${plan.planInfo.state}</P>`,
+        `${plan.features.length === 0 ? "no features" : showFeatures(plan.features)}`,  
+        `</div>`
+    ].join('')
+
+    return planPane
+}
+
+let displayAssociatedPlans = function( plans ){
+    $('#servicePlansDisplay').empty()
+	plans.forEach(plan => {
+        $('#servicePlansDisplay').append(planHTMLView(plan))
+    })
+}
+
 let openServiceInspectDialog = function({
     tenant,
     serviceID
@@ -46,6 +73,7 @@ let openServiceInspectDialog = function({
             service: serviceID
         }, function(apiInfo) {
 
+            displayAssociatedPlans( apiInfo.plans )
             $('#apiInspectFormState').val(apiInfo.state)
             $('#apiInspectFormTenantName').val(apiInfo.tenantName)
             $('#apiInspectFormServiceID').val(apiInfo.serviceID)
@@ -89,15 +117,31 @@ const storeServices = (function() {
     }
 
     return {
+
         configure   : function( app ){
             _app = app
             _setUI()
-        }
+        }, 
 
+        showServiceInspectModal : function({
+            tenantName, 
+            serviceID
+        }){
+            openServiceInspectDialog({
+                tenant  : tenantName, 
+                serviceID
+            })
+        }
     }
 
 })()
 
+
+
+const addServiceInspectFeature = function( clientApp ){
+    storeServices.configure(clientApp)
+    clientApp.showServiceInspectModal = storeServices.showServiceInspectModal
+}
 module.exports = {
-    storeServices
+    addServiceInspectFeature
 }

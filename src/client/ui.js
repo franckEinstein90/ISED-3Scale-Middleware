@@ -5,7 +5,7 @@
  * -------------------------------------
  *  Canadian Gov. API Store middleware - client side
  *
- *  main.js: entry point 
+ *  ui.js: entry point 
  *
  ******************************************************************************/
 "use strict"
@@ -14,16 +14,9 @@
 /******************************************************************************/
 
 
-
 let _initStaticUI = function(){
 
-    $('#btnRefreshTenants').click(function ( event ){
-        event.preventDefault()
-        $.get('/refreshTenants', {}, function(data) {
-            debugger	
-        })
-    })
-
+  
     $('#appStatus').click(function( event ) {
         this.classList.toggle("active")
         let statusDetailPaneHeight = $('#appStatusDetail').css('maxHeight')	

@@ -67,12 +67,9 @@
 
 
 	<div class="flex-container">
-    	<div ID="tenantCards">
-			<center><h2>Tenants</h2></center>
-			{{#each tenants}}
-				{{>tenantCard}}
-			{{/each}}
-     	</div>
+		
+		{{>tenantSection/container}}
+
 		<div id="apiInspectSection">
 		{{>apiPageSection/apiList}}	
 		</div>
