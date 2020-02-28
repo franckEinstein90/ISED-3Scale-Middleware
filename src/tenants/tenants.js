@@ -271,7 +271,6 @@ tenants.Tenant.prototype.validateAPIs = async function(tenantUpdateReport) {
     //At this stage, we've fetched the list of services from this tenant and
     //its set of documentation
     //if either the service list fetch or the active doc fetch returned errors 
-    //8
     if (tenantUpdateReport.fetches.serviceList !== errors.codes.Ok ||
         tenantUpdateReport.fetches.activeDocs !== errors.codes.Ok) {
         //report a failed update

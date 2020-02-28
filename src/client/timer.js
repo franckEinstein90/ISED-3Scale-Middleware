@@ -25,18 +25,18 @@ const timer = (function() {
 
         eachMinute: function() {
             /* update the app status to see if there's been any changes */
-            $.get('/appStatus', {}, function(data) {
+            $.get('/appStatus', {}, function( appStatus ) {
 
                 $('#appStatus').text(
-                    [`ISED API Store Middleware - status ${data.state}`,
-                        `online: ${data.runningTime} mins`
+                    [`APICan ${appStatus.version} status ${appStatus.state}`,
+                        `online: ${appStatus.runningTime} mins`
                     ].join(' - ')
                 )
                 $('#nextTenantRefresh').text(
-                    `(${data.nextTenantRefresh} mins) `
+                    `(${appStatus.nextTenantRefresh} mins) `
                 )
 
-				_app.eventScheduler.update(data.events)
+				_app.eventScheduler.update(appStatus.events)
             })
         }
     }

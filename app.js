@@ -24,8 +24,6 @@ const users             = require('@users/users').users
 const groups            = require('@users/groups').groups
 const appStatus         = require('@server/routes/appStatus').appStatus
 const path              = require('path')
-const clock             = require('@src/cron/timer').clock
-const Event             = require('@src/cron/timer').Event
 /*****************************************************************************/
 let run = (apiCan) => {
     apiCan.say('*********************************')
@@ -48,45 +46,47 @@ const APICan = {    //this is the app
     staticFolder    : path.join(__dirname, 'public'),
     data            : require('@src/APICanData').APICanData, 
     expressStack    : require('express')(), 
-    features        : {
-        userManagement  : false, 
-        messages        : false,
-        processStats    : false,  
-        keycloakAccess  : false, 
-        security        : false, 
-        versioning      : false
-    }
 }
+
+
+require('@clientServerCommon/features').addFeatureSystem( APICan )
+APICan.features.addRequirement(
+    {
+        req: {   
+            label : "userInfo.json", 
+            shortDescription : "Answers userInfo.json requests"
+        }
+    })
+
 require('@server/expressStack').expressConfig( APICan )
-require('@src/process/stats').APICanStats( APICan )
+require('@src/process/stats').addProcessStatsFeature( APICan )
+require('@cron/timer').addRecurringEventsFeature( APICan )
+require('@cron/timer').addTimerFeature( APICan )
 require('@src/APICan').APICanConfig( APICan )
-.then( APICan => {	//versionning support
-	return require('@src/APICanVersion').APICanVersion( APICan )
+.then( require('@src/APICanVersion').addVersioningFeature ) //versioning support
+.then( apiCan => {                                          //tenant manager configuration
+    tenantsManager.configure( apiCan ) 
+    if(apiCan.implements('recurring-events')){
+        apiCan.addNewEvent( "refresh tenant information", 7, tenantsManager.updateTenantInformation)
+    }
+    return apiCan
 })
-.then( apiCan => {  //process information support
-    return tenantsManager.configure( apiCan )
-})
+
 .then( apiCan => {
     return users.configure( apiCan)
 })
+
 .then( apiCan => {
     return groups.configure(apiCan)
 })
+
 .then( apiCan => {
-
-    let newEvent = new Event ({
-        name : "refresh tenant information", 
-        frequency: 7, 
-        run: tenantsManager.updateTenantInformation
-    }) 
-
-    apiCan.clock = new clock.Clock( {
-        events: [newEvent], 
-        cout: apiCan.say
-    })
+    apiCan.newClock()
     return apiCan
 })
-.then( apiCan => { 
+
+.then( apiCan => {
+     
     require('@server/routingSystem').routingSystem( apiCan )
     appStatus.configure(apiCan)
 

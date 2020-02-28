@@ -43,6 +43,14 @@ const tenantRoutes = (function(){
             .then(x => {
                 res.send(x)
             })
+        }, 
+
+        getServiceSummary: async function(req, res, next){
+            //returns a summary of the services provided or 
+            //hosted by this tenant
+            let tenantName = req.query.tenantName
+            let tenant = tenantsManager.getTenantByName( tenantName )
+            res.send(tenant.services.listServices())
         }
 
     }

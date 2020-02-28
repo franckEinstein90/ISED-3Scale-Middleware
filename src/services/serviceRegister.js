@@ -41,7 +41,7 @@ class ServiceRegister extends ServiceRegisterProto {
             if('bilingual' in options) {
                 let numBilingual = 0
                 this.forEach( service => {
-                    numBilingual += service.bilingual ? 1 : 0
+                    numBilingual += service.publishable ? 1 : 0
                 })
                 return numBilingual
             }
@@ -76,13 +76,14 @@ ServiceRegister.prototype.listServices = function() {
            })
         })
         result.push({
+            name: service.name,
             id: serviceID,
-            bilingualDoc: service.bilingual,
+            tenant: service.tenant.name, 
+            publishable: service.publishable,
+            public: service.public, 
             created: moment(service.created_at).format('YY/M/D'),
             updated: moment(service.updated_at).format('YY/M/D'),
-            name: service.name,
             state: service.state, 
-            serviceFeatures
         })
     })
 

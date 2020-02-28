@@ -37,10 +37,12 @@ const routingSystem = function( apiCan ) {
     router.get('/tenants',           tenantRoutes.getTenants)
     router.get('/refreshTenants',    tenantRoutes.getRefreshTenants)
     router.get('/getTenantAccounts', tenantRoutes.getTenantAccounts)
+    router.get('/servicesSummary',   tenantRoutes.getServiceSummary)
  
     //events
     router.get('/events', _apiCan.clock.getEvents) 
     router.get('/serviceInspect', serviceInspectRoutes.getServiceInfo)
+    
 /*
     
 

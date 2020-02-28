@@ -19,6 +19,7 @@ const statusCodes = {
 
 
 const appStatus = (function( ) {
+
     let _apiCan = null
    
     return {
@@ -36,12 +37,13 @@ const appStatus = (function( ) {
                     frequency: ev.frequency, 
                     name: ev.name
                 }
-            })            
+            })           
+
             let reqResponse = {
                 runningTime: _apiCan.clock.clockTime, 
                 env: _apiCan.data.env.env, 
                 state: _apiCan.state,
-                version: _apiCan.versioning ? _apiCan.versionTag : null, 
+                version: _apiCan.versionTag, 
                 nextTenantRefresh : 5 , 
                 events
                 //managedTenants: _managedTenants

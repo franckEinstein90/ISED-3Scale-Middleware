@@ -34,10 +34,18 @@ const APICanStats = function( APICan ){
 
 	}
 
-	APICan.features.processStats = true
 	APICan.stats.refresh = getStats
 }
 
+const addProcessStatsFeature = function( app ){
+	APICanStats( app )
+	app.addFeature({
+		label: 'process-stats', 
+		description: 'returns information on the process carrying this app', 
+		state: 'implemented'
+	})
+}
+
 module.exports = {
-	APICanStats
+	addProcessStatsFeature
 }

@@ -12,7 +12,6 @@ const apv = require('appversion')
 /*****************************************************************************/
 
 /*****************************************************************************/
-
 const APICanVersion = function( apiCan ) {
 
     return new Promise((resolve, reject) => {
@@ -36,6 +35,17 @@ const APICanVersion = function( apiCan ) {
     return apiCan
 }
 
+const addVersioningFeature = function( app ){
+    return APICanVersion(app)
+    .then( app => {
+        app.addFeature({
+            label: "versioning", 
+            state: "implemented"
+        })
+        return app
+    })
+}
+
 module.exports = {
-    APICanVersion
+    addVersioningFeature
 }

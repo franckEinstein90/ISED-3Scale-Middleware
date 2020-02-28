@@ -52,6 +52,7 @@ const APICanConfig = function( appSkeleton ) {
     _appLogger.info('initializing APICan')
 
     return new Promise((resolve, reject) => {
+        
         let configActions = [
             appDatabase.configure({
                 filePath: appSkeleton.settingsDB
@@ -64,19 +65,23 @@ const APICanConfig = function( appSkeleton ) {
             _appLogger.info(`pid: ${appSkeleton.process.id} - ppid: ${appSkeleton.process.ppid}`)
             let dbStatus = status[0]
             _appLogger.info(`database access = ${dbStatus}`)
-		    appSkeleton.state 		= 'initializing'
-		    appSkeleton.features.dbStatus	= dbStatus
+		    appSkeleton.state 	= 'initializing'
+		    appSkeleton.addFeature({
+                label: 'sqliteDB', 
+                state: 'implemented'
+            })
 		    appSkeleton.say	= msg => {
 			    _appLogger.info(msg)
-		    }
+            }
+            appSkeleton.addFeature({
+                label: 'say', 
+                state: 'implemented'
+            })
             return resolve( appSkeleton )
 	    })
     })
 }
-                   /* 
-                    
 
-*/
 
 module.exports = {
     APICanConfig

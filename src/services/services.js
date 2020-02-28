@@ -11,6 +11,7 @@
 "use strict"
 
 const validator = require('validator')
+const flatten   = require('array-flatten').flatten
 /*****************************************************************************/
 const alwaysResolve     = require('@src/utils/alwaysResolve').alwaysResolve
 const errors            = require('@errors').errors
@@ -68,6 +69,7 @@ const services = (function() {
                     serviceProvider : tenant
                 })
                 this.documentation      = new Map()
+                this.publishable        = false
                 this.public             = false
             }
 
@@ -138,6 +140,7 @@ services.Service.prototype.updateDefinition = function(defObj) {
 services.Service.prototype.addDocumentationSet = function(docObj, tenantUpdateReport) {
 
     let serviceReport = tenantUpdateReport.serviceReport(this.id)
+
     if (/\-fr$/i.test(docObj.system_name)) {
         //French documentation		
         serviceReport.languageUpdate.french = errors.codes.Ok
@@ -148,7 +151,11 @@ services.Service.prototype.addDocumentationSet = function(docObj, tenantUpdateRe
         //neither English nor French documentation
         return
     }
-    this.documentation.set(docObj.system_name.toLowerCase(), new DocumentationSet(docObj))
+
+    if( docObj.published){
+        this.documentation.set(docObj.system_name.toLowerCase(), new DocumentationSet(docObj))
+        if(this.documentation.size === 2) this.publishable = true
+    }
 
 }
 
@@ -179,18 +186,36 @@ services.Service.prototype.updatePlans = async function( ) {
         return Promise.all( this.plans.map( plan => this.getPlanFeatures(plan)))
     })
     .then( features => {
+
+        if(features.map(f => f.features).filter(f => f !== null).length === 0){
+            this.public = true
+            return this
+        }
+
         features.forEach(planFeatures => {
             if(planFeatures.features === null) return
             let plan = this.plans.find( plan => plan.id === planFeatures.planID)
             plan.features = planFeatures.features.map(f => f.feature)
         })
 
+        let publishedPlansFeatures = flatten( 
+            this.plans.filter( p => p.planInfo.state === "published")
+            .filter(p => p.features.length > 0)
+            .map(p => p.features.map(f => f.system_name)))
+        if(publishedPlansFeatures.some(f => /intern/.test(f))){
+            this.public = false
+            return this
+        }
         //now we have collected the features for all the 
         //plans, and can decide if the service is "public"
         //2A2A
         let servicePlan = this.plans.find(p => p.isServicePlan)
-        if(servicePlan && servicePlan.planInfo.state === "published" && servicePlan.features.length === 0){
-            this.public = true
+        if(servicePlan){
+            if(servicePlan.planInfo.state === "published" && servicePlan.features.length === 0){
+                this.public = true 
+            }else if(servicePlan.planInfo.state === 'hidden'){
+
+            } 
         }
         return this
     })

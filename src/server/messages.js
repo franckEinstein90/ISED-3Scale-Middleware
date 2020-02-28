@@ -29,7 +29,7 @@ const messages = (function() {
                 return {
                     name: t.name,
                     id: t.id,
-                    lastUpdate  : tenantsManager.lastUpdate(t.name).format('H:m'), 
+                  //  lastUpdate  : tenantsManager.lastUpdate(t.name).format('H:m'), 
                     totalServiceCount,  
                     bilingualServiceCount,
                     numVisibleServices: t.services.length({

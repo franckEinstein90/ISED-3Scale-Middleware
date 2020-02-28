@@ -94,7 +94,35 @@ clock.Clock.prototype.getEvents = function(req, res, next){
   res.send( events )
 }
 
+
+const addRecurringEventsFeature = function( app ){
+  app.recurringEvents = []
+  app.addNewEvent = (name, frequency, run) => {
+    app.recurringEvents.push(new Event({name, frequency, run}))
+  }
+  app.addFeature({
+      label: 'recurring-events', 
+      state: 'implemented'
+    })
+}
+
+const addTimerFeature = function( app ){
+
+  app.newClock = _ => {
+    app.clock = new clock.Clock({
+      cout: app.say, 
+      events: app.recurringEvents
+    })
+  }
+  app.addFeature({
+    label: 'createClock', 
+    description: `creates a new app timer that handles the app's recurring events`, 
+    state: 'implemented'
+  })
+  return app
+}
+
 module.exports = {
-  clock, 
-  Event
+  addTimerFeature, 
+  addRecurringEventsFeature, 
 }

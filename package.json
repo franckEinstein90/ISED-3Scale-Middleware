@@ -7,6 +7,8 @@
     "dev": "nodemon ./app.js"
   },
   "_moduleAliases": {
+    "@clientServerCommon": "src/clientServerCommon",
+    "@cron": "src/cron", 
     "@src": "src",
     "@routes": "src/server/routes",
     "@tenants": "src/tenants",
@@ -15,11 +17,11 @@
     "@server": "src/server",
     "@errors": "src/errors.js",
     "@apiStore": "src/apiStore",
-    "@clientServerCommon": "src/clientServerCommon", 
     "@users": "src/users"
   },
   "dependencies": {
     "appversion": "^1.7.1",
+    "array-flatten": "^3.0.0",
     "async": "^3.1.0",
     "chai": "^4.2.0",
     "config": "^3.2.2",

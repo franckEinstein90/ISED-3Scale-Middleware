@@ -17,26 +17,20 @@ const favicon      = require('express-favicon')
 const viewSystem   = require('@server/views/viewSystem.js').viewSystem
 /*****************************************************************************/
 
-const expressConfig = function({
-	expressStack, 
-	root, 
-	faviconPath, 
-	staticFolder
-}) {
-
+const expressConfig = function( serverApp ){
 
     viewSystem.configure({
-        app	: expressStack, 
-        root	: root
+        app	    : serverApp.expressStack, 
+        root	: serverApp.root
     })
 
-    expressStack.use(cookieParser());
-    expressStack.use(express.json())
-    expressStack.use(express.urlencoded({
+    serverApp.expressStack.use(cookieParser());
+    serverApp.expressStack.use(express.json())
+    serverApp.expressStack.use(express.urlencoded({
         extended: false
     }))
-    expressStack.use(express.static(staticFolder))
-    expressStack.use(favicon(faviconPath))
+    serverApp.expressStack.use(express.static( serverApp.staticFolder))
+    serverApp.expressStack.use(favicon( serverApp.faviconPath ))
 
 
 }

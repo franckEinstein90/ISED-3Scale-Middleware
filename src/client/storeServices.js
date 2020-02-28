@@ -80,7 +80,11 @@ let openServiceInspectDialog = function({
             $('#apiInspectFormSystemName').val(apiInfo.systemName)
             $('#apiInspectFormLastUpdate').val(apiInfo.updatedAt)
             $('#apiInspectFormCreationDate').val(apiInfo.created_at)
+
+            $('#EnglishDocTitle').text(apiInfo.documentation[0].docName)
             $('#englishDoc').val(apiInfo.documentation[0].docSet.body)
+
+            $('#FrenchDocTitle').text(apiInfo.documentation[1].docName)
             $('#frenchDoc').val(apiInfo.documentation[1].docSet.body)
             let tags = []
             apiInfo.documentation.forEach(d => {
@@ -100,14 +104,16 @@ const storeServices = (function() {
     let _app = null
 
     let _setUI = function() {
-        $('#visibleAPISelect').on('change', function() {
-            _app.showVisibleAPITable( this.value )
+
+        $('#publishableAPIs').DataTable({
+            "pageLength" :50  
+            
         })
 
         $('.serviceInspect').click(event => {
             event.preventDefault()
             let parentTable = event.currentTarget.offsetParent
-            let tenant = parentTable.id.replace('VisibleAPI', '')
+            let tenant = (event.currentTarget.cells[2]).innerText
             let serviceID = Number((event.currentTarget.cells[1]).innerText)
             openServiceInspectDialog({
                 tenant,
