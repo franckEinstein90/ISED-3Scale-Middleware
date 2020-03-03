@@ -98,7 +98,10 @@ const addAdminTools = async function(clientApp) {
             event.preventDefault()
             clientApp.showScheduler()
         })
-        clientApp.features.add({featureName: eventScheduler, onOff: true})
+        clientApp.addFeature({
+            label: 'eventScheduler', 
+            state: 'implemented'
+         })
     }
 }
 

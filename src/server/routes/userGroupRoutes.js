@@ -16,15 +16,17 @@ const users         = require('@users/users').users*/
 const userGroups    = require('@users/groups').groups
 /*****************************************************************************/
 
-const userGroupRoutes = (function() {
-
+const userGroupRoutes = function( app ) {
+    let _app = app
     return {
 
         getGroupList: async function(req, res, next) {
+            console.log(_app)
             //returns list of defined user groups
-            let groupList = userGroups.getGroupList()
-            res.send(groupList)
+            let groupList = _app.userGroups.getGroupList()
+            res.send( groupList )
         },
+
         getGroupUsers: async function(req, res, next) {
             //returns an array of user accounts
             //meeting the property of the 
@@ -106,11 +108,17 @@ const userGroupRoutes = (function() {
                 })
         }
     }
-})()
+}
 
 
 
-
+const addUserGroupRoutes = function( app ){
+    if( 'routes' in app === false ){
+        app.routes = {}
+    }
+    app.routes.groups = userGroupRoutes( app )
+    return app
+}
 module.exports = {
-    userGroupRoutes
+    addUserGroupRoutes
 }

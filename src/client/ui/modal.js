@@ -16,7 +16,7 @@ const showModal = ({
 const addModalFeature = function( app ){
     if(app.features.includes('ui')){
         app.ui.showModal = showModal
-        app.features.add({featureName: 'modal', onOff: true})
+        app.addFeature({label : 'modal', state: 'implemented'})
     }
 }
 
