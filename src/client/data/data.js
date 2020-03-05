@@ -11,25 +11,19 @@
 "use strict"
  /*****************************************************************************/
 
-const getData = serverRoute => {
+const fetchServerData = serverRoute => {
     return new Promise((resolve, reject) => {
         $.get(`/${serverRoute}`, function(data) {
-            resolve(data)
+            return resolve(data)
         })
         .fail( err => {
-           reject(err) 
+           return reject(err) 
         })
     })
 }
 
-const fetchServerData = function(clientApp){
-    return serverRoute => getData( serverRoute )
-}
-
 const addServerComFeature =  clientApp =>{
-    
-    clientApp.server.fetchData = fetchServerData(clientApp)
-
+    clientApp.addFeature({label:'fetchServerData', method: fetchServerData})
 }
 
 

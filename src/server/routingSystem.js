@@ -66,10 +66,10 @@ const routingSystem = function( apiCan ) {
 	    
     //get sets of users based on various criteria           
     router.get('/findUsers', userGroupRoutes.findUsers)*/
-    router.get('/groupUsers', userGroupRoutes.getGroupUsers)
-    router.get('/groups', userGroupRoutes.getGroupList)
-    router.delete('/group', userGroupRoutes.deleteUserGroup)
-    router.post('/newUserGroup', userGroupRoutes.postNewUserGroup)
+    router.get(     '/groupUsers',   apiCan.routes.groups.getGroupUsers   )
+    router.get(     '/groups',       apiCan.routes.groups.getGroupList    )
+    router.delete(  '/group',        apiCan.routes.groups.deleteUserGroup )
+    router.post(    '/newUserGroup', apiCan.routes.groups.postNewUserGroup)
 
 /*
     router.get('/userinfo.json', apiStoreUserRoutes.getUserInfo)

@@ -89,8 +89,8 @@ const schedulerContent = function() {
 
 const addAdminTools = async function(clientApp) {
     clientApp.eventScheduler = eventScheduler
-    if(clientApp.features.includes('modal')){
-        clientApp.showScheduler = _ => clientApp.ui.showModal({
+    if(clientApp.implements('showModal')){
+        clientApp.showScheduler = _ => clientApp.showModal({
 			title : 'events', 
 			content: eventScheduler.showScheduler()
 	    })

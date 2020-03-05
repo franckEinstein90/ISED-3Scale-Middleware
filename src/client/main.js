@@ -32,104 +32,30 @@ $(function() {
         ui                  : null
       
     }
+
+    require('../clientServerCommon/features').addFeatureSystem( apiCanClient )
+
     require('./tenants/tenants').addTenantCollection({
         clientApp: apiCanClient, 
         containerID: 'tenantCards'
     })
-    require('../clientServerCommon/features').addFeatureSystem( apiCanClient )
-    apiCanClient.features.include({
-            ui              : false,
-            adminTools      : false, 
-            errorHandling   : false
-    })
 
-    require('./ui').ui( apiCanClient )
-    require('./errors/errors').addErrorHandling( apiCanClient)
-    require('./data/data').addServerComFeature( apiCanClient)
-    require('./adminTools').addAdminTools( apiCanClient)
+    .then( app => {
+        require('./ui').ui( app )
+        require('./errors/errors').addErrorHandling( apiCanClient)
+        require('./data/data').addServerComFeature( apiCanClient)
+        require('./adminTools').addAdminTools( apiCanClient)
 	
-    timer.configure( apiCanClient )
-    timer.eachMinute()
-    setInterval(timer.eachMinute, 10000)
+        timer.configure( apiCanClient )
+        timer.eachMinute()
+        setInterval(timer.eachMinute, 10000)
 
-    //service inspect feature
-    require('./storeServices').addServiceInspectFeature( apiCanClient )
-    require('./groups/userGroups').addUserGroupFeature( apiCanClient )
+        //service inspect feature
+        require('./storeServices').addServiceInspectFeature( apiCanClient )
+        require('./groups/userGroups').addUserGroupFeature( apiCanClient )
 
+
+    })    
   
 
 })
-
-/*
-   
-
-    let userGroupNames = $('#userGroupNames').text().split(',').map(name => name.trim())
-    userGroupNames.splice(userGroupNames.length - 1, 1)
-	    
-    timer.eachMinute()
-    setInterval(timer.eachMinute, 10000)
-
-    
-    let appStatus = $('#appStatus').text()
-	
-    if (appStatus === 'running'){
-	
-    }
-
-
-  
-    socket.on('refresh page', function(tenants){
-
-    })
-    
-  
-    $('#manageUsersBtn').click(function(event){
-        $('#searchResults').empty()
-        document.getElementById('id01').style.display='block'
-    }) 
-
-  
-    $('#userActions').click(function(event){
-        event.preventDefault()
-        let emails = []
-        let otpEnforceEmail = $('.enforceOTPCheck')
-        otpEnforceEmail.each( function() {
-            if ($(this).is(':checked')){
-                emails.push($(this).val())
-            }
-        })
-
-        $.get('/enforceOTP', {emails})
-        console.log('e')
-    })
-
-
-	$('#userActionGo').on('click', function(){
-		selectedUsers.applySelectedActions()
-    })
-    
-    $("#searchUser").click(function(event){
-        event.preventDefault()
-        $('#searchResults').empty()
-        let filter = {
-            tenants: [], 
-            provideraccounts: $('#providerAccountSearchSelect').is(":checked")
-        }
-        
-        tenantsFilter.forEach((state, tName)=>{
-            if($(`#${tName}SearchSelect`).is(":checked")){
-                tenantsFilter.set(tName, 'on')
-                filter.tenants.push(tName)
-            }
-            else{
-                tenantsFilter.set(tName, 'off')
-            }
-        })
-    
-        let parameters = {
-            search: $('#userEmail').val(), 
-            filter
-        }
-        $.get('/findUsers', parameters, keyCloakUsers.showUsers)
-    })
-*/

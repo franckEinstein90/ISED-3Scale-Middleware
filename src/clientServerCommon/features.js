@@ -1,6 +1,18 @@
+/*****************************************************************************/
 "use strict"
+/*****************************************************************************/
 
-const featureSystem = (function(){
+class Feature {
+
+    constructor( options ){
+        this.label          = options.label
+        this.implemented    = options.implemented || false
+        this.method         = options.method || false
+    }
+
+}
+
+const featureSystem = function( app ){
 
     let _features       = new Map()
     let _reqMajor       = 0
@@ -8,18 +20,15 @@ const featureSystem = (function(){
 
     return {
 
-        get featureList()  {
-            let list = {} 
+        get list()  {
+            let features = {}
             _features.forEach((value, key)=>{
-                list[key] = value
+                features[key] = value
             })
-            return list
+            return features
         },
 
-        implements  : function(featureLabel){
-            if(!_features.has(featureLabel)) return false
-            return(_features.get(featureLabel).state === 'implemented')
-        }, 
+        implements  : featureLabel => _features.has(featureLabel), 
 
         addRequirement  : function({
             req, 
@@ -36,36 +45,24 @@ const featureSystem = (function(){
             return false
         },
 
-        addFeature : function({
-            label, 
-            description, 
-            state
-        }){
-            if(featureSystem.includes(label)){
-                throw "feature already exists"
-            }
-            if(description === undefined || description === null){
-                description = "no description"
-            }
-            _features.set(label, {state, description})
+        add : function( feature ){
+            if(!('label' in feature)) throw 'error in feature definition'
+            if(_features.has(feature.label)) throw "feature already exists"
+            _features.set( feature.label, feature)
+            if('method' in feature) app[ feature.label ] = feature.method
         }
     }
-
-})()
+}
 
 const addFeatureSystem = function( app ){
-    app.features = featureSystem
-    app.addFeature = feature => app.features.addFeature(feature)
-    app.implements = featureLabel => featureSystem.implements(featureLabel)
 
-    app.features.include = (features, status) => {
-        Object.keys(features).forEach( key => {
-            featureSystem.add({
-                featureName: key, 
-                onOff: status 
-            })
-        })
-    }
+    let features = featureSystem( app )
+    Object.defineProperty( app, 'features', {get: () => features.list})
+    app.addRequirement = features.addRequirement        
+    app.Feature = Feature
+    app.addFeature = features.add
+    app.implements = features.implements
+    return app
 }
 
 module.exports = {

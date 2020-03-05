@@ -17,7 +17,9 @@ const userGroups    = require('@users/groups').groups
 /*****************************************************************************/
 
 const userGroupRoutes = function( app ) {
+
     let _app = app
+
     return {
 
         getGroupList: async function(req, res, next) {
@@ -31,8 +33,8 @@ const userGroupRoutes = function( app ) {
             //returns an array of user accounts
             //meeting the property of the 
             //group passed in as argument
-            let groupName = req.query.group
-            userGroups.getGroupUserAccounts(groupName)
+            let groupID = req.query.group
+            _app.userGroups.getGroupUserAccountInfo(groupID)
                 .then(userAccounts => {
                     res.send(userAccounts)
                 })
@@ -88,7 +90,7 @@ const userGroupRoutes = function( app ) {
             let groupUserProperties = req.body['userProperties[]']
             let groupTenants = req.body['tenants[]']
             let groupEmailPattern = req.body.groupEmailPattern
-            userGroups.newGroup({
+            _app.userGroups.postNewUserGroup({
                     groupName,
                     groupDescription,
                     groupUserProperties,

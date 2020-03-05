@@ -21,7 +21,6 @@ require('module-alias/register')
 /*****************************************************************************/
 const tenantsManager    = require('@tenants/tenantsManager').tenantsManager
 const users             = require('@users/users').users
-const groups            = require('@users/groups').groups
 const appStatus         = require('@server/routes/appStatus').appStatus
 const path              = require('path')
 /*****************************************************************************/
@@ -50,7 +49,7 @@ const APICan = {    //this is the app
 
 
 require('@clientServerCommon/features').addFeatureSystem( APICan )
-APICan.features.addRequirement(
+APICan.addRequirement(
     {
         req: {   
             label : "userInfo.json", 
@@ -76,9 +75,7 @@ require('@src/APICan').APICanConfig( APICan )
     return users.configure( apiCan)
 })
 
-.then( apiCan => {
-    return groups.configure(apiCan)
-})
+.then( require('@users/groups').addUserGroupFeature )
 
 .then( apiCan => {
     apiCan.newClock()
@@ -86,7 +83,7 @@ require('@src/APICan').APICanConfig( APICan )
 })
 
 .then( apiCan => {
-     
+    require('@server/routes/userGroupRoutes').addUserGroupRoutes( apiCan )
     require('@server/routingSystem').routingSystem( apiCan )
     appStatus.configure(apiCan)
 

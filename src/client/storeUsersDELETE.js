@@ -79,10 +79,7 @@ const storeUsers = (function() {
             storeUsers.deleteGroup(groupName)
         })
 
-        $('#' + groupName + 'View').click(function(event) {
-            event.preventDefault()
-            storeUsers.displayGroupUsers(groupName)
-        })
+      
 
     }
     let displayGroupsListInLeftNav = function(groupName) {
@@ -140,21 +137,7 @@ const storeUsers = (function() {
                 })
         },
 
-        displayGroupUsers: function(groupName) {
-            document.getElementById('userGroupsModal').style.display = 'none'
-            dataExchangeStatus.setLoading()
-            //fetches and shows user daya associated with this user group
-            let group = {
-                group: groupName
-            }
-            $.get('/GroupUsers', group, function(data) {
-                dataExchangeStatus.setInactive()
-                dataTableHandle.clear().draw()
-                keyCloakUsers.showUsers(data)
-                ui.scrollToSection("userTableSection")
-            })
-        },
-
+        
         Group: function() {
             let formInput = getGroupFormInputs()
             $.post('/newUserGroup', formInput)

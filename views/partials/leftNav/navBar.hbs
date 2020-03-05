@@ -2,15 +2,7 @@
   <!-- Sidebar/menu -->
 <nav    class="w3-sidebar w3-small w3-hide-small w3-hide-medium w3-animate-left w3-center" 
         id="leftNav">
-<a href="#" class="w3-bar-item w3-button w3-padding-large w3-hover-opacity w3-hover-black leftNavItem">
-    <i class="fa fa-home w3-xxlarge leftNavIcon"></i>
-    <p>TENANTS</p>
-  </a>
-  <a  onclick=""
-	    class="w3-bar-item w3-button w3-padding-large w3-hover-black">
-      <i class="fa fa-check w3-xxlarge leftNavIcon"></i>
-      <p>TEST</p>
-  </a>
+
 
  <a href="/logs" 
 	    class="w3-bar-item w3-button w3-padding-large w3-hover-black">
@@ -18,15 +10,8 @@
       <p>LOGS</p>
   </a>
 
-<a  onclick="document.getElementById('appSettingsModal').style.display='block'"
-	    class="w3-bar-item w3-button w3-padding-large w3-hover-black">
-      <i class="fa fa-cog w3-xxlarge leftNavIcon"></i>
-      <p>SETTINGS</p>
-  </a>
-  {{>appSettingsModal}}
-
-  <h2>Groups</h2>
-  <a  ID="manageUsersBtn" onclick="document.getElementById('userGroupsModal').style.display='block'" 
+<h2>Groups</h2>
+  <a  ID="manageUsersBtn" 
     class="w3-bar-item w3-button w3-padding-large w3-hover-black ">
     <i class="fa fa-users w3-xxlarge leftNavIcon"></i>
     <p>CREATE</p>

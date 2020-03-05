@@ -13,6 +13,44 @@
 const moment = require('moment')
 /******************************************************************************/
 
+const tenantModule = async function( app ){
+
+    let _tenants = new Map()
+    $('.tenant-card').each( function(){
+        let tenantName = ($( this ).attr('id')).replace('TenantCard', '')
+        _tenants.set(tenantName, null)
+    })
+
+    $('#btnRefreshTenants').click(function ( event ){           //sends cmd
+        event.preventDefault()                                  //to server to
+        $.get('/refreshTenants', {}, function( tenantData ) {   //refresh tenant
+            tenantData.forEach( tenantInfo => {                 //info
+                _tenants.set(tenantInfo.tenantName, tenantInfo)
+            })
+            tenantModule.updateTenantContainer()
+        })
+    })
+
+    return {
+        get tenants(){
+            let tList = []
+            _tenants.forEach((value, key)=>{
+                tList.push(key)
+            })
+            return tList 
+        }, 
+
+        updateTenantContainer : function(){
+            _tenants.forEach((tInfo, tName) => {
+                let beginUpdateTime = moment(tInfo.beginUpdateTime)
+                let endUpdateTime = moment(tInfo.endUpdateTime)
+                $(`#${tName}TenantCard`).text(`${tName}: LastUpdate: ${endUpdateTime.format('H:mm')}`)
+            })
+        }
+
+    }
+}
+
 const tenants = (function() {
 
     let $tenantSectionContainer = null
@@ -20,19 +58,10 @@ const tenants = (function() {
 
     let _configUI = function(){
 
-        $('#btnRefreshTenants').click(function ( event ){           //sends cmd
-            event.preventDefault()                                  //to server to
-            $.get('/refreshTenants', {}, function( tenantData ) {   //refresh tenant
-                tenantData.forEach( tenantInfo => {                 //info
-                    _tenants.set(tenantInfo.tenantName, tenantInfo)
-                })
-                tenants.updateTenantContainer()
-            })
-        })
+      
     }
 
     return {
-
         configure : function( containerID ){
             $tenantSectionContainer = $(`#${containerID}`)
             $('.tenant-card').each( function(){
@@ -42,24 +71,20 @@ const tenants = (function() {
             _configUI()
         },
 
-        updateTenantContainer : function(){
-            _tenants.forEach((tInfo, tName) => {
-                let beginUpdateTime = moment(tInfo.beginUpdateTime)
-                let endUpdateTime = moment(tInfo.endUpdateTime)
-                $(`#${tName}TenantCard`).text(`${tName}: LastUpdate: ${endUpdateTime.format('H:mm')}`)
-            })
-        }
+       
    }
 })()
 
 
-const addTenantCollection = function({
+const addTenantCollection = async function({
     clientApp, 
     containerID
   }){
-    tenants.configure(containerID)
-    clientApp.tenants = tenants
-    return clientApp
+        return tenantModule( clientApp )
+        .then( tenantModule =>{
+            Object.defineProperty(clientApp, 'tenants', {get: function(){return tenantModule.tenants}})
+            return clientApp
+        })
 }
 
 module.exports = {

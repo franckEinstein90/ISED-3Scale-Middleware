@@ -35,7 +35,7 @@ const ui = function(app) {
 
     }
 
-    app.features.add({featureName: 'ui', onOff: true})
+    app.addFeature({label: 'ui', state:'implemented'})
     _initStaticUI()
     app.showVisibleAPITable = function(tenant, event) {
        $('.tenantsVisibleAPI').hide()
@@ -45,6 +45,7 @@ const ui = function(app) {
     }
 
     require('./ui/modal').addModalFeature( app )
+    require('./ui/dataTables').addDataTableFeature( app )
 
 
     

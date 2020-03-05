@@ -14,10 +14,8 @@ const showModal = ({
 }
 
 const addModalFeature = function( app ){
-    if(app.features.includes('ui')){
-        app.ui.showModal = showModal
-        app.addFeature({label : 'modal', state: 'implemented'})
-    }
+    app.addFeature({label : 'showModal', method: showModal})
+    return app
 }
 
 module.exports = {

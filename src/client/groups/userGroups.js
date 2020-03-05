@@ -1,61 +1,81 @@
+/*******************************************************************************
+ * Franck Binard, ISED
+ * Canadian Gov. API Store middleware
+ * -------------------------------------
+ *
+ * User Group Structure 
+ ******************************************************************************/
 "use strict"
+/*****************************************************************************/
 
 
-const userGroupFeature = (function(){
-
-    let _dataTableHandle = null
-    let _groups          = new Map() 
-
-    return {
-
-        configure   : function(){
-            _dataTableHandle = $('#userFormGroupList').DataTable()
-        }, 
-
-        addGroup : function({groupName, groupID}){
-            _groups.set(groupID, groupName)
-        },
-
-        displayGroups: _ => {
-            $('#userFormGroupList tbody').empty()
-            _groups.forEach(groupName =>{
-                userGroupFeature.userGroupRow( groupName )
-            })
-        },  
-
-        userGroupRow : function(groupName, groupID) { //displays the group
-            $('#userFormGroupList tbody').append(         //as a line in #userFormGroupList
-                [`<tr>`,
-                    `<td class="w3-text-green">${groupName}</td>`,
-                    `<td><i class="fa fa-eye w3-large w3-text-black groupCmd"></i></td>`, 
-                    `<td><i class="fa fa-gears  w3-large w3-text-black groupCmd"></i></td>`, 
-                    `<td><i class="fa fa-trash w3-large w3-text-black groupCmd"></i></td>`, 
-                    `</tr>`
-                ].join(''))
-        }
+const displayGroupUsers  = function(groupID) {
+//    document.getElementById('userGroupsModal').style.display = 'none'
+    //dataExchangeStatus.setLoading()
+    //fetches and shows user daya associated with this user group
+    let group = {
+        group: groupID
     }
-})()
-
-const addUserGroupFeature = async function( clientApp ){
-    return new Promise((resolve, reject) => {
-        userGroupFeature.configure()  
-        clientApp.server.fetchData('Groups')
-        .then( result => {
-            result.forEach(group => userGroupFeature.addGroup({
-                groupName: group.name, 
-                groupID: group.ID
-            }))
-            return 1
-        })
-        .then( _ => userGroupFeature.displayGroups())
-        .then( _ => {
-                clientApp.features.add({
-                    featureName: 'userGroups', 
-                    onOff   : true
-                })
-                return resolve(clientApp)
-        })
+    $.get('/GroupUsers', group, function(data) {
+        debugger
+     //   dataExchangeStatus.setInactive()
+      //  dataTableHandle.clear().draw()
+       // keyCloakUsers.showUsers(data)
+//        ui.scrollToSection("userTableSection")
     })
+}
+
+const userGroupFeatureConfigure = async function( app ){
+
+      let _groups = new Map()
+
+    /*    let formCreateGroup      = ('./newUserGroupForm.js').userGroupUIConfigure( app )*/
+
+
+      let _fetchGroupData = function(){
+         return new Promise((resolve, reject) => {
+            app.fetchServerData('Groups')
+            .then( result => {
+
+                    _groups.clear()
+                    result.forEach(group => {
+                        _groups.set(group.ID, group.name)
+                    })
+                    return resolve(result)
+            })
+         })
+       }
+
+       return _fetchGroupData( )
+       .then (_ =>{
+         return {
+
+            get groups() {
+            let groupList = []
+            _groups.forEach((name, id) => groupList.push({id, name}))
+            return groupList
+            }
+       
+         }
+      })
+}
+
+const addUserGroupFeature = function( clientApp ){
+
+   userGroupFeatureConfigure( clientApp )
+   .then( userGroupFeature => {
+      clientApp.addFeature({label: 'userGroups', implemented: true})
+      Object.defineProperty( clientApp, 'groups',  {get: function(){return userGroupFeature.groups}})
+      return clientApp
+   })
+   .then( clientApp => {
+      require('./mainPageUserGroupDisplay.js').addFeature( clientApp ) 
+      return clientApp
+   })
+   .then( clientApp =>{
+      return require('./newUserGroupForm').addFeature( clientApp )
+   })
+
 }
 
 module.exports = {

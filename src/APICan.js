@@ -14,7 +14,7 @@
 /*****************************************************************************/
 const winston = require('winston')
 /*****************************************************************************/
-const appDatabase = require('@server/db').appDatabase
+
 const tenantsManager = require('@tenants/tenantsManager').tenantsManager
 const errors = require('@src/errors').errors
 /*****************************************************************************/
@@ -54,9 +54,7 @@ const APICanConfig = function( appSkeleton ) {
     return new Promise((resolve, reject) => {
         
         let configActions = [
-            appDatabase.configure({
-                filePath: appSkeleton.settingsDB
-            }), 
+            require('@server/db').addLocalDatabaseFeature( appSkeleton ),
             appSkeleton.stats.refresh()
         ]
         Promise.all(configActions)
