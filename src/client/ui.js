@@ -9,7 +9,6 @@
  *
  ******************************************************************************/
 "use strict"
-
 /******************************************************************************/
 /******************************************************************************/
 
@@ -29,13 +28,20 @@ let _initStaticUI = function(){
     }) 
 }
 
+const uiFeature = function( app ){
+    app.ui = {}
+    return {
 
-const ui = function(app) {
-    app.ui = {
+        addUiTrigger: function({ triggerID, action}){
+		    $(`#${triggerID}`).click( action )
+        }
 
     }
-
-    app.addFeature({label: 'ui', state:'implemented'})
+}
+const ui = function(app) {
+    let ui = uiFeature(app)
+    app.addComponent({label: 'ui', component: {}})
+    app.ui.addFeature({label: 'addUiTrigger', method: ui.addUiTrigger})
     _initStaticUI()
     app.showVisibleAPITable = function(tenant, event) {
        $('.tenantsVisibleAPI').hide()
@@ -47,7 +53,7 @@ const ui = function(app) {
     require('./ui/modal').addModalFeature( app )
     require('./ui/dataTables').addDataTableFeature( app )
 
-
+    return app
     
 
     /*scrollToSection: function(sectionID) {

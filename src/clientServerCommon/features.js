@@ -12,9 +12,22 @@ class Feature {
 
 }
 
+function AppComponent( component ){
+
+    let _features = new Map()
+
+    this.addFeature =  function(feature){
+        if(!('label' in feature)) throw 'error in feature definition'
+        if(_features.has(feature.label)) throw "feature already exists"
+        _features.set( feature.label, feature)
+        if('method' in feature) this[ feature.label ] = feature.method
+    }
+}
+
 const featureSystem = function( app ){
 
     let _features       = new Map()
+    let _components     = new Map()
     let _reqMajor       = 0
     let _requirements   = new Map()
 
@@ -45,6 +58,12 @@ const featureSystem = function( app ){
             return false
         },
 
+        addComponent : function({label, component}){
+            let newComponent = new AppComponent( component )
+            _components.set(label, newComponent)
+            app[label] = newComponent 
+        }, 
+
         add : function( feature ){
             if(!('label' in feature)) throw 'error in feature definition'
             if(_features.has(feature.label)) throw "feature already exists"
@@ -59,6 +78,7 @@ const addFeatureSystem = function( app ){
     let features = featureSystem( app )
     Object.defineProperty( app, 'features', {get: () => features.list})
     app.addRequirement = features.addRequirement        
+    app.addComponent   = features.addComponent
     app.Feature = Feature
     app.addFeature = features.add
     app.implements = features.implements

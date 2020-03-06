@@ -4603,44 +4603,97 @@
 })));
 
 },{}],2:[function(require,module,exports){
+/*****************************************************************************/
 "use strict"
+/*****************************************************************************/
 
-const featureSystem = (function(){
+class Feature {
+
+    constructor( options ){
+        this.label          = options.label
+        this.implemented    = options.implemented || false
+        this.method         = options.method || false
+    }
+
+}
+
+function AppComponent( component ){
 
     let _features = new Map()
 
+    this.addFeature =  function(feature){
+        if(!('label' in feature)) throw 'error in feature definition'
+        if(_features.has(feature.label)) throw "feature already exists"
+        _features.set( feature.label, feature)
+        if('method' in feature) this[ feature.label ] = feature.method
+    }
+}
+
+const featureSystem = function( app ){
+
+    let _features       = new Map()
+    let _components     = new Map()
+    let _reqMajor       = 0
+    let _requirements   = new Map()
+
     return {
-      
+
+        get list()  {
+            let features = {}
+            _features.forEach((value, key)=>{
+                features[key] = value
+            })
+            return features
+        },
+
+        implements  : featureLabel => _features.has(featureLabel), 
+
+        addRequirement  : function({
+            req, 
+            parentReq
+        }) {
+            if( parentReq === undefined || parentReq === null){
+                _reqMajor += 1
+                _requirements.set(  _reqMajor, req)
+            }
+        },
+
         includes: featureName => {
             if(_features.has(featureName)) return _features.get(featureName)
             return false
+        },
+
+        addComponent : function({label, component}){
+            let newComponent = new AppComponent( component )
+            _components.set(label, newComponent)
+            app[label] = newComponent 
         }, 
-        list : x => _features , 
-        add : function({ featureName, onOff }){
-            if(featureSystem.includes(featureName)){
-                throw "feature already exists"
-            }
-            _features.set(featureName, onOff)
+
+        add : function( feature ){
+            if(!('label' in feature)) throw 'error in feature definition'
+            if(_features.has(feature.label)) throw "feature already exists"
+            _features.set( feature.label, feature)
+            if('method' in feature) app[ feature.label ] = feature.method
         }
     }
-
-})()
+}
 
 const addFeatureSystem = function( app ){
-    app.features = featureSystem
-    app.features.include = (features, status) => {
-        Object.keys(features).forEach( key => {
-            featureSystem.add({
-                featureName: key, 
-                onOff: status 
-            })
-        })
-    }
+
+    let features = featureSystem( app )
+    Object.defineProperty( app, 'features', {get: () => features.list})
+    app.addRequirement = features.addRequirement        
+    app.addComponent   = features.addComponent
+    app.Feature = Feature
+    app.addFeature = features.add
+    app.implements = features.implements
+    return app
 }
 
 module.exports = {
     addFeatureSystem
 }
+
 },{}],3:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
@@ -4781,8 +4834,8 @@ const schedulerContent = function() {
 
 const addAdminTools = async function(clientApp) {
     clientApp.eventScheduler = eventScheduler
-    if(clientApp.features.includes('modal')){
-        clientApp.showScheduler = _ => clientApp.ui.showModal({
+    if(clientApp.implements('showModal')){
+        clientApp.showScheduler = _ => clientApp.showModal({
 			title : 'events', 
 			content: eventScheduler.showScheduler()
 	    })
@@ -4790,7 +4843,10 @@ const addAdminTools = async function(clientApp) {
             event.preventDefault()
             clientApp.showScheduler()
         })
-        clientApp.features.add({featureName: eventScheduler, onOff: true})
+        clientApp.addFeature({
+            label: 'eventScheduler', 
+            state: 'implemented'
+         })
     }
 }
 
@@ -4813,25 +4869,19 @@ module.exports = {
 "use strict"
  /*****************************************************************************/
 
-const getData = serverRoute => {
+const fetchServerData = serverRoute => {
     return new Promise((resolve, reject) => {
         $.get(`/${serverRoute}`, function(data) {
-            resolve(data)
+            return resolve(data)
         })
         .fail( err => {
-           reject(err) 
+           return reject(err) 
         })
     })
 }
 
-const fetchServerData = function(clientApp){
-    return serverRoute => getData( serverRoute )
-}
-
 const addServerComFeature =  clientApp =>{
-    
-    clientApp.server.fetchData = fetchServerData(clientApp)
-
+    clientApp.addFeature({label:'fetchServerData', method: fetchServerData})
 }
 
 
@@ -4921,70 +4971,298 @@ module.exports = {
 }
 
 },{}],8:[function(require,module,exports){
+/*******************************************************************************
+ * Franck Binard, ISED
+ * Canadian Gov. API Store middleware
+ * ------------------------------------- 
+ *  configures the ui element at the top of the 
+ *  content section that displays user groups
+ ******************************************************************************/
 "use strict"
+/*****************************************************************************/
+const mainPageGroupDisplay = function( app ){
 
+    let _tableHandle = $('#userFormGroupList').DataTable()
+    $('#userFormGroupList tbody').empty()
 
-const userGroupFeature = (function(){
-
-    let _dataTableHandle = null
-    let _groups          = new Map() 
-
-    return {
-
-        configure   : function(){
-            _dataTableHandle = $('#userFormGroupList').DataTable()
-        }, 
-
-        addGroup : function({groupName, groupID}){
-            _groups.set(groupID, groupName)
-        },
-
-        displayGroups: _ => {
-            $('#userFormGroupList tbody').empty()
-            _groups.forEach(groupName =>{
-                userGroupFeature.userGroupRow( groupName )
-            })
-        },  
-
-        userGroupRow : function(groupName, groupID) { //displays the group
-            $('#userFormGroupList tbody').append(         //as a line in #userFormGroupList
-                [`<tr>`,
-                    `<td class="w3-text-green">${groupName}</td>`,
-                    `<td><i class="fa fa-eye w3-large w3-text-black groupCmd"></i></td>`, 
-                    `<td><i class="fa fa-gears  w3-large w3-text-black groupCmd"></i></td>`, 
-                    `<td><i class="fa fa-trash w3-large w3-text-black groupCmd"></i></td>`, 
-                    `</tr>`
-                ].join(''))
-        }
+    let _userGroupRow = function(groupName, groupID) { //displays the group
+        let groupRow = [
+            groupName,
+            `<i id="${groupName}UserListDisplay" class="fa fa-eye w3-large w3-text-black groupCmd"></i>`, 
+            `<i id="${groupName}GroupEdit" class="fa fa-gears  w3-large w3-text-black groupCmd"></i>`, 
+            `<i class="fa fa-trash w3-large w3-text-black groupCmd"></i>`]
+  
+        return groupRow
     }
-})()
 
-const addUserGroupFeature = async function( clientApp ){
-    return new Promise((resolve, reject) => {
-        userGroupFeature.configure()  
-        clientApp.server.fetchData('Groups')
-        .then( result => {
-            result.forEach(group => userGroupFeature.addGroup({
-                groupName: group.name, 
-                groupID: group.ID
-            }))
-            return 1
+
+    app.groups.forEach( group => {
+        _tableHandle.row.add( _userGroupRow(group.name, group.id) ).draw( false )
+        
+        $('#' + group.name + 'UserListDisplay').click(function(event) {
+            event.preventDefault()
+            displayGroupUsers(group.name, group.id)
         })
-        .then( _ => userGroupFeature.displayGroups())
-        .then( _ => {
-                clientApp.features.add({
-                    featureName: 'userGroups', 
-                    onOff   : true
-                })
-                return resolve(clientApp)
+
+        app.ui.addUiTrigger({
+            triggerID: group.name + "GroupEdit", 
+            action: x => app.ui.userGroupModal({
+                editGroup: group.name
+            })
         })
     })
+
+    return app
+}
+
+const addFeature = function(app){
+    return mainPageGroupDisplay( app )
+}
+
+module.exports = {
+    addFeature
+}
+
+},{}],9:[function(require,module,exports){
+/***********************************************************
+ * manages form to create or edit user groups
+ * ***************************************************************************/
+"use strict"
+/*****************************************************************************/
+const tenantSelectionTable = function(options){
+    return [
+        `<label class="groupCreationLabel"><b>Included tenants</b></label>`,
+        options.tenantSelection 
+        `<table>`,
+        `</table>`
+    ].join('')
+}
+/*
+  <br/>
+      <button id="selectAllTenants">select all</button>
+      <button id="unselectAllTenants">unselect all</button>
+  <br/>
+
+ <table id="groupsTenantsSelectionTable" class="display" style="color:black">
+    <thead>
+      <tr>
+        <th>Name</th>
+      </tr>
+    </thead>  
+    <tbody>
+      <tr><td>da</td></tr>
+    </tbody> 
+</table>*/
+
+
+const formTemplate = function(options){
+    return [
+        `<form class="w3-container w3-left-align">`, 
+            `<div class="w3-row">`, 
+                `<div class='w3-col m5 l5 w3-left-align' style="margin-right:20px">`, 
+                    `left`, 
+                `</div>`, 
+                `<div class='w3-col m5 l5 w3-right-align"'>`, 
+                  'right', //  `${tenantSelectionTable(options)}`, 
+                `</div>`, 
+            `</div>`, 
+            `<div class="w3-row" style='margin:15,15,15,15'>`, 
+                `<br/>`, 
+                `<button class="w3-btn w3-blue w3-block" id="createNewGroup" >`, 
+                    `${options.editGroup ? 'Save Changes':'Create New Group'}`, 
+                `</button>`, 
+                ` <br/>`, 
+            ` </div>`, 
+        `</form>`].join('')
+}
+
+const userGroupCreateEditWindowFeature = function( app ){
+    return {
+        showUserGroupModal  : function(options){
+            app.showModal({
+                title: (options.editGroup ? `Edit group: ${options.editGroup}` : "New User Group"), 
+                content: formTemplate( options )
+            })
+        }
+    }
+}
+
+const getGroupFormInputs = function() {
+    //gets the parameters from a new group creation
+
+    let userProperties = []
+    let groupDescription = $('#userGroupDescription').val()
+    let newGroupName = $('#userGroupName').val()
+    let groupEmailPattern = $('#groupEmailPattern').val()
+
+    
+    if ($('#providerAccountSearchSelect').is(":checked")) {
+        userProperties.push('providerAccount')
+    }
+    if ($('#keyCloakAccountSelect').is(":checked")) {
+        userProperties.push('keyCloakAccount')
+    }
+    if ($('#otpNotEnabledSelect').is(":checked")) {
+        userProperties.push('otpNotEnabled')
+    }
+    return {
+        'userProperties[]': userProperties,
+        name: newGroupName,
+        groupDescription,
+        groupEmailPattern
+    }
+}
+
+const tenantDomainTable = function( app ){
+   let selectedTenants = new Map()
+
+   let _groupTenantDomainsUI = $('#groupsTenantsSelectionTable').DataTable({
+        'info': true, 
+        'searching': false, 
+        'lengthChange':false
+    })
+
+    app.tenants.forEach(tenant => {
+        _groupTenantDomainsUI.row.add([tenant]).draw(false)
+    })
+
+    let selectedTenantTableRow = dataRow =>  (_groupTenantDomainsUI.row(dataRow).data())[0]
+       
+    $('#groupsTenantsSelectionTable tbody').on( 'click', 'tr', function () {
+        let selectedTenant = selectedTenantTableRow(this)
+        if ($(this).hasClass('selected')){
+            selectedTenants.delete( selectedTenant )
+            $(this).removeClass('selected')
+        } else {
+            selectedTenants.set(selectedTenant, 1)
+            $(this).addClass('selected')
+        }
+    })
+
+    $('#createNewGroup').click(function(){
+        debugger
+        let formInput = getGroupFormInputs()
+        let groupTenants = []
+        selectedTenants.forEach((_, name) => groupTenants.push(name))
+        formInput['tenants[]'] = groupTenants 
+        $.post('/newUserGroup', formInput)
+            .done(x => {
+                debugger
+            })
+            .fail(x => {
+                alert('error')
+            })
+    })
+}
+
+const addFeature = async function( app ){
+    let userEditCreateModal = userGroupCreateEditWindowFeature( app )
+    app.ui.addFeature({label: 'userGroupModal', method: userEditCreateModal.showUserGroupModal})
+    app.ui.addUiTrigger({
+        triggerID: 'newGroupFromMain', 
+        action: app.ui.userGroupModal
+    })
+    app.ui.addUiTrigger({
+        triggerID: 'manageUsersBtn', 
+        action: app.ui.userGroupModal
+    })
+    return app
+//    let _dataTableHandle = $('#userFormGroupList').DataTable()
+//    return configureNewGroupModalWindow( app )
+}
+module.exports = {
+    addFeature
+}
+},{}],10:[function(require,module,exports){
+/*******************************************************************************
+ * Franck Binard, ISED
+ * Canadian Gov. API Store middleware
+ * -------------------------------------
+ *
+ * User Group Structure 
+ ******************************************************************************/
+"use strict"
+/*****************************************************************************/
+
+
+const displayGroupUsers  = function(groupID) {
+//    document.getElementById('userGroupsModal').style.display = 'none'
+    //dataExchangeStatus.setLoading()
+    //fetches and shows user daya associated with this user group
+    let group = {
+        group: groupID
+    }
+    $.get('/GroupUsers', group, function(data) {
+        debugger
+     //   dataExchangeStatus.setInactive()
+      //  dataTableHandle.clear().draw()
+       // keyCloakUsers.showUsers(data)
+//        ui.scrollToSection("userTableSection")
+    })
+}
+
+const userGroupFeatureConfigure = async function( app ){
+
+      let _groups = new Map()
+
+      let _fetchGroupData = function(){
+         return new Promise((resolve, reject) => {
+            app.fetchServerData('Groups')
+            .then( result => {
+
+                    _groups.clear()
+                    result.forEach(group => {
+                        _groups.set(group.ID, group.name)
+                    })
+                    return resolve(result)
+            })
+         })
+      }
+
+      return _fetchGroupData( )
+       .then (_ =>{
+         return {
+
+            get groups() {
+               let groupList = []
+               _groups.forEach((name, id) => groupList.push({id, name}))
+               return groupList
+            }
+       
+         }
+      })
+}
+
+const addUserGroupFeature = function( clientApp ){
+
+   userGroupFeatureConfigure( clientApp )
+   .then( userGroupFeature => {
+      clientApp.addFeature({label: 'userGroups', implemented: true})
+      Object.defineProperty( clientApp, 'groups',  {get: function(){return userGroupFeature.groups}})
+      clientApp.ui.groupTenantSelectionTable = group => {
+         return [
+            '<table>', 
+            '<tr><td>hello</td></tr>', 
+            '</table>'].join('')
+      }
+      return clientApp
+   })
+   .then( clientApp => {
+      return require('./newUserGroupForm').addFeature( clientApp )
+      return clientApp
+   })
+   .then( clientApp =>{
+      require('./mainPageUserGroupDisplay.js').addFeature( clientApp )
+      return clientApp 
+   })
+
 }
 
 module.exports = {
     addUserGroupFeature
 }
-},{}],9:[function(require,module,exports){
+
+},{"./mainPageUserGroupDisplay.js":8,"./newUserGroupForm":9}],11:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
@@ -5019,109 +5297,35 @@ $(function() {
         ui                  : null
       
     }
+
+    require('../clientServerCommon/features').addFeatureSystem( apiCanClient )
+
     require('./tenants/tenants').addTenantCollection({
         clientApp: apiCanClient, 
         containerID: 'tenantCards'
     })
-    require('../clientServerCommon/features').addFeatureSystem( apiCanClient )
-    apiCanClient.features.include({
-            ui              : false,
-            adminTools      : false, 
-            errorHandling   : false
-    })
 
-    require('./ui').ui( apiCanClient )
-    require('./errors/errors').addErrorHandling( apiCanClient)
-    require('./data/data').addServerComFeature( apiCanClient)
-    require('./adminTools').addAdminTools( apiCanClient)
+    .then( app => {
+        require('./ui').ui( app )
+        require('./errors/errors').addErrorHandling( apiCanClient)
+        require('./data/data').addServerComFeature( apiCanClient)
+        require('./adminTools').addAdminTools( apiCanClient)
 	
-    timer.configure( apiCanClient )
-    timer.eachMinute()
-    setInterval(timer.eachMinute, 10000)
+        timer.configure( apiCanClient )
+        timer.eachMinute()
+        setInterval(timer.eachMinute, 10000)
 
-    //service inspect feature
-    require('./storeServices').addServiceInspectFeature( apiCanClient )
-    require('./groups/userGroups').addUserGroupFeature( apiCanClient )
+        //service inspect feature
+        require('./storeServices').addServiceInspectFeature( apiCanClient )
+        require('./groups/userGroups').addUserGroupFeature( apiCanClient )
 
+
+    })    
   
 
 })
 
-/*
-   
-
-    let userGroupNames = $('#userGroupNames').text().split(',').map(name => name.trim())
-    userGroupNames.splice(userGroupNames.length - 1, 1)
-	    
-    timer.eachMinute()
-    setInterval(timer.eachMinute, 10000)
-
-    
-    let appStatus = $('#appStatus').text()
-	
-    if (appStatus === 'running'){
-	
-    }
-
-
-  
-    socket.on('refresh page', function(tenants){
-
-    })
-    
-  
-    $('#manageUsersBtn').click(function(event){
-        $('#searchResults').empty()
-        document.getElementById('id01').style.display='block'
-    }) 
-
-  
-    $('#userActions').click(function(event){
-        event.preventDefault()
-        let emails = []
-        let otpEnforceEmail = $('.enforceOTPCheck')
-        otpEnforceEmail.each( function() {
-            if ($(this).is(':checked')){
-                emails.push($(this).val())
-            }
-        })
-
-        $.get('/enforceOTP', {emails})
-        console.log('e')
-    })
-
-
-	$('#userActionGo').on('click', function(){
-		selectedUsers.applySelectedActions()
-    })
-    
-    $("#searchUser").click(function(event){
-        event.preventDefault()
-        $('#searchResults').empty()
-        let filter = {
-            tenants: [], 
-            provideraccounts: $('#providerAccountSearchSelect').is(":checked")
-        }
-        
-        tenantsFilter.forEach((state, tName)=>{
-            if($(`#${tName}SearchSelect`).is(":checked")){
-                tenantsFilter.set(tName, 'on')
-                filter.tenants.push(tName)
-            }
-            else{
-                tenantsFilter.set(tName, 'off')
-            }
-        })
-    
-        let parameters = {
-            search: $('#userEmail').val(), 
-            filter
-        }
-        $.get('/findUsers', parameters, keyCloakUsers.showUsers)
-    })
-*/
-
-},{"../clientServerCommon/features":2,"./adminTools":4,"./data/data":5,"./errors/errors":7,"./groups/userGroups":8,"./storeServices":10,"./tenants/tenants":11,"./timer.js":12,"./ui":13}],10:[function(require,module,exports){
+},{"../clientServerCommon/features":2,"./adminTools":4,"./data/data":5,"./errors/errors":7,"./groups/userGroups":10,"./storeServices":12,"./tenants/tenants":13,"./timer.js":14,"./ui":15}],12:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
@@ -5204,7 +5408,11 @@ let openServiceInspectDialog = function({
             $('#apiInspectFormSystemName').val(apiInfo.systemName)
             $('#apiInspectFormLastUpdate').val(apiInfo.updatedAt)
             $('#apiInspectFormCreationDate').val(apiInfo.created_at)
+
+            $('#EnglishDocTitle').text(apiInfo.documentation[0].docName)
             $('#englishDoc').val(apiInfo.documentation[0].docSet.body)
+
+            $('#FrenchDocTitle').text(apiInfo.documentation[1].docName)
             $('#frenchDoc').val(apiInfo.documentation[1].docSet.body)
             let tags = []
             apiInfo.documentation.forEach(d => {
@@ -5224,14 +5432,16 @@ const storeServices = (function() {
     let _app = null
 
     let _setUI = function() {
-        $('#visibleAPISelect').on('change', function() {
-            _app.showVisibleAPITable( this.value )
+
+        $('#publishableAPIs').DataTable({
+            "pageLength" :50  
+            
         })
 
         $('.serviceInspect').click(event => {
             event.preventDefault()
             let parentTable = event.currentTarget.offsetParent
-            let tenant = parentTable.id.replace('VisibleAPI', '')
+            let tenant = (event.currentTarget.cells[2]).innerText
             let serviceID = Number((event.currentTarget.cells[1]).innerText)
             openServiceInspectDialog({
                 tenant,
@@ -5270,7 +5480,7 @@ module.exports = {
     addServiceInspectFeature
 }
 
-},{"../clientServerCommon/plans":3}],11:[function(require,module,exports){
+},{"../clientServerCommon/plans":3}],13:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
@@ -5286,6 +5496,44 @@ module.exports = {
 const moment = require('moment')
 /******************************************************************************/
 
+const tenantModule = async function( app ){
+
+    let _tenants = new Map()
+    $('.tenant-card').each( function(){
+        let tenantName = ($( this ).attr('id')).replace('TenantCard', '')
+        _tenants.set(tenantName, null)
+    })
+
+    $('#btnRefreshTenants').click(function ( event ){           //sends cmd
+        event.preventDefault()                                  //to server to
+        $.get('/refreshTenants', {}, function( tenantData ) {   //refresh tenant
+            tenantData.forEach( tenantInfo => {                 //info
+                _tenants.set(tenantInfo.tenantName, tenantInfo)
+            })
+            tenantModule.updateTenantContainer()
+        })
+    })
+
+    return {
+        get tenants(){
+            let tList = []
+            _tenants.forEach((value, key)=>{
+                tList.push(key)
+            })
+            return tList 
+        }, 
+
+        updateTenantContainer : function(){
+            _tenants.forEach((tInfo, tName) => {
+                let beginUpdateTime = moment(tInfo.beginUpdateTime)
+                let endUpdateTime = moment(tInfo.endUpdateTime)
+                $(`#${tName}TenantCard`).text(`${tName}: LastUpdate: ${endUpdateTime.format('H:mm')}`)
+            })
+        }
+
+    }
+}
+
 const tenants = (function() {
 
     let $tenantSectionContainer = null
@@ -5293,19 +5541,10 @@ const tenants = (function() {
 
     let _configUI = function(){
 
-        $('#btnRefreshTenants').click(function ( event ){           //sends cmd
-            event.preventDefault()                                  //to server to
-            $.get('/refreshTenants', {}, function( tenantData ) {   //refresh tenant
-                tenantData.forEach( tenantInfo => {                 //info
-                    _tenants.set(tenantInfo.tenantName, tenantInfo)
-                })
-                tenants.updateTenantContainer()
-            })
-        })
+      
     }
 
     return {
-
         configure : function( containerID ){
             $tenantSectionContainer = $(`#${containerID}`)
             $('.tenant-card').each( function(){
@@ -5315,30 +5554,26 @@ const tenants = (function() {
             _configUI()
         },
 
-        updateTenantContainer : function(){
-            _tenants.forEach((tInfo, tName) => {
-                let beginUpdateTime = moment(tInfo.beginUpdateTime)
-                let endUpdateTime = moment(tInfo.endUpdateTime)
-                $(`#${tName}TenantCard`).text(`${tName}: LastUpdate: ${endUpdateTime.format('H:mm')}`)
-            })
-        }
+       
    }
 })()
 
 
-const addTenantCollection = function({
+const addTenantCollection = async function({
     clientApp, 
     containerID
   }){
-    tenants.configure(containerID)
-    clientApp.tenants = tenants
-    return clientApp
+        return tenantModule( clientApp )
+        .then( tenantModule =>{
+            Object.defineProperty(clientApp, 'tenants', {get: function(){return tenantModule.tenants}})
+            return clientApp
+        })
 }
 
 module.exports = {
    addTenantCollection 
 }
-},{"moment":1}],12:[function(require,module,exports){
+},{"moment":1}],14:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
@@ -5366,18 +5601,18 @@ const timer = (function() {
 
         eachMinute: function() {
             /* update the app status to see if there's been any changes */
-            $.get('/appStatus', {}, function(data) {
+            $.get('/appStatus', {}, function( appStatus ) {
 
                 $('#appStatus').text(
-                    [`ISED API Store Middleware - status ${data.state}`,
-                        `online: ${data.runningTime} mins`
+                    [`APICan ${appStatus.version} status ${appStatus.state}`,
+                        `online: ${appStatus.runningTime} mins`
                     ].join(' - ')
                 )
                 $('#nextTenantRefresh').text(
-                    `(${data.nextTenantRefresh} mins) `
+                    `(${appStatus.nextTenantRefresh} mins) `
                 )
 
-				_app.eventScheduler.update(data.events)
+				_app.eventScheduler.update(appStatus.events)
             })
         }
     }
@@ -5387,7 +5622,7 @@ module.exports = {
     timer
 }
 
-},{"./dialogs/appStatusDialog":6}],13:[function(require,module,exports){
+},{"./dialogs/appStatusDialog":6}],15:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
@@ -5399,7 +5634,6 @@ module.exports = {
  *
  ******************************************************************************/
 "use strict"
-
 /******************************************************************************/
 /******************************************************************************/
 
@@ -5419,13 +5653,20 @@ let _initStaticUI = function(){
     }) 
 }
 
+const uiFeature = function( app ){
+    app.ui = {}
+    return {
 
-const ui = function(app) {
-    app.ui = {
+        addUiTrigger: function({ triggerID, action}){
+		    $(`#${triggerID}`).click( action )
+        }
 
     }
-
-    app.features.add({featureName: 'ui', onOff: true})
+}
+const ui = function(app) {
+    let ui = uiFeature(app)
+    app.addComponent({label: 'ui', component: {}})
+    app.ui.addFeature({label: 'addUiTrigger', method: ui.addUiTrigger})
     _initStaticUI()
     app.showVisibleAPITable = function(tenant, event) {
        $('.tenantsVisibleAPI').hide()
@@ -5435,8 +5676,9 @@ const ui = function(app) {
     }
 
     require('./ui/modal').addModalFeature( app )
+    require('./ui/dataTables').addDataTableFeature( app )
 
-
+    return app
     
 
     /*scrollToSection: function(sectionID) {
@@ -5453,7 +5695,28 @@ module.exports = {
     ui
 }
 
-},{"./ui/modal":14}],14:[function(require,module,exports){
+},{"./ui/dataTables":16,"./ui/modal":17}],16:[function(require,module,exports){
+"use strict"
+
+const dataTables = function( app ){
+
+    return {
+
+        newTable : function(htmlID){
+            
+        }
+
+    }
+}
+
+
+const addDataTableFeature = function( app ){
+    app.dataTables = dataTables(app)
+}
+module.exports = {
+    addDataTableFeature
+}
+},{}],17:[function(require,module,exports){
 "use strict"
 
 
@@ -5470,14 +5733,12 @@ const showModal = ({
 }
 
 const addModalFeature = function( app ){
-    if(app.features.includes('ui')){
-        app.ui.showModal = showModal
-        app.features.add({featureName: 'modal', onOff: true})
-    }
+    app.addFeature({label : 'showModal', method: showModal})
+    return app
 }
 
 module.exports = {
     addModalFeature
 }
 
-},{}]},{},[9]);
+},{}]},{},[11]);

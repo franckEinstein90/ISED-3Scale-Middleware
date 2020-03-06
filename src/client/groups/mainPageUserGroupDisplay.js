@@ -16,7 +16,7 @@ const mainPageGroupDisplay = function( app ){
         let groupRow = [
             groupName,
             `<i id="${groupName}UserListDisplay" class="fa fa-eye w3-large w3-text-black groupCmd"></i>`, 
-            `<i class="fa fa-gears  w3-large w3-text-black groupCmd"></i>`, 
+            `<i id="${groupName}GroupEdit" class="fa fa-gears  w3-large w3-text-black groupCmd"></i>`, 
             `<i class="fa fa-trash w3-large w3-text-black groupCmd"></i>`]
   
         return groupRow
@@ -25,10 +25,17 @@ const mainPageGroupDisplay = function( app ){
 
     app.groups.forEach( group => {
         _tableHandle.row.add( _userGroupRow(group.name, group.id) ).draw( false )
-
+        
         $('#' + group.name + 'UserListDisplay').click(function(event) {
             event.preventDefault()
             displayGroupUsers(group.name, group.id)
+        })
+
+        app.ui.addUiTrigger({
+            triggerID: group.name + "GroupEdit", 
+            action: x => app.ui.userGroupModal({
+                editGroup: group.name
+            })
         })
     })
 
