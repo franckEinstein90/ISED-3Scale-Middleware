@@ -37,7 +37,7 @@ const formTemplate = function(options){
                     `left`, 
                 `</div>`, 
                 `<div class='w3-col m5 l5 w3-right-align"'>`, 
-                  'right', //  `${tenantSelectionTable(options)}`, 
+                  `${tenantSelectionTable(options)}`, 
                 `</div>`, 
             `</div>`, 
             `<div class="w3-row" style='margin:15,15,15,15'>`, 
@@ -53,6 +53,7 @@ const formTemplate = function(options){
 const userGroupCreateEditWindowFeature = function( app ){
     return {
         showUserGroupModal  : function(options){
+            debugger
             app.showModal({
                 title: (options.editGroup ? `Edit group: ${options.editGroup}` : "New User Group"), 
                 content: formTemplate( options )
@@ -129,8 +130,26 @@ const tenantDomainTable = function( app ){
     })
 }
 
+
+const createNewUserGroup = function({
+    groupName
+}){
+    debugger
+}
+
+
 const addFeature = async function( app ){
-    let userEditCreateModal = userGroupCreateEditWindowFeature( app )
+    app.userGroupManagement.addFeature({
+        label: 'createNew', 
+        description: 'creates a new user group', 
+        method: createNewUserGroup
+    })
+
+    app.userGroupManagement.createNew({
+        groupName: 'testGroup'
+    })
+    return app
+  /*  let userEditCreateModal = userGroupCreateEditWindowFeature( app )
     app.ui.addFeature({label: 'userGroupModal', method: userEditCreateModal.showUserGroupModal})
     app.ui.addUiTrigger({
         triggerID: 'newGroupFromMain', 
@@ -142,7 +161,7 @@ const addFeature = async function( app ){
     })
     return app
 //    let _dataTableHandle = $('#userFormGroupList').DataTable()
-//    return configureNewGroupModalWindow( app )
+//    return configureNewGroupModalWindow( app )*/
 }
 module.exports = {
     addFeature

@@ -27,59 +27,38 @@ const displayGroupUsers  = function(groupID) {
 
 const userGroupFeatureConfigure = async function( app ){
 
-      let _groups = new Map()
+      app.userGroupManagement.groupRegister = new Map()
 
-      let _fetchGroupData = function(){
+      app.userGroupManagement.fetchGroupData = function(){
          return new Promise((resolve, reject) => {
-            app.fetchServerData('Groups')
+            app.fetchServerData('userGroups')
             .then( result => {
-
-                    _groups.clear()
+                    app.userGroupManagement.groupRegister.clear()
                     result.forEach(group => {
-                        _groups.set(group.ID, group.name)
+                        app.userGroupManagement.groupRegister.set(group.ID, group.name)
                     })
                     return resolve(result)
             })
          })
       }
 
-      return _fetchGroupData( )
-       .then (_ =>{
-         return {
-
-            get groups() {
-               let groupList = []
-               _groups.forEach((name, id) => groupList.push({id, name}))
-               return groupList
-            }
-       
-         }
-      })
+      return app.userGroupManagement.fetchGroupData()
 }
 
 const addUserGroupFeature = function( clientApp ){
-
    userGroupFeatureConfigure( clientApp )
-   .then( userGroupFeature => {
-      clientApp.addFeature({label: 'userGroups', implemented: true})
-      Object.defineProperty( clientApp, 'groups',  {get: function(){return userGroupFeature.groups}})
-      clientApp.ui.groupTenantSelectionTable = group => {
-         return [
-            '<table>', 
-            '<tr><td>hello</td></tr>', 
-            '</table>'].join('')
-      }
+   .then( userGroupInfo => {
       return clientApp
    })
    .then( clientApp => {
-      return require('./newUserGroupForm').addFeature( clientApp )
+      require('./newUserGroupForm').addFeature( clientApp )
       return clientApp
    })
-   .then( clientApp =>{
+   /*.then( clientApp =>{
       require('./mainPageUserGroupDisplay.js').addFeature( clientApp )
       return clientApp 
    })
-
+ */
 }
 
 module.exports = {

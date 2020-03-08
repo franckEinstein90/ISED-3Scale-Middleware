@@ -52,16 +52,17 @@ const httpServer = function( apiCan ){
 
     let expressStack 	= apiCan.expressStack
     let port 		    = apiCan.data.port
-
     expressStack.set( 'port', port ) 
-
     let _server = http.createServer( expressStack )
-    _server.listen( port )
-    _server.on('error', x     => onError(port))
-    _server.on('listening', x => onListening(_server.address()))
-
-    apiCan.say (`App running on port ${port}`)
-    return _server
+    
+    apiCan.server = {}
+    apiCan.server.start = function(){
+        _server.listen( port )
+        _server.on('error', x     => onError(port))
+        _server.on('listening', x => onListening(_server.address()))
+        apiCan.say (`App running on port ${port}`)
+    }
+    return apiCan 
 }
 
 

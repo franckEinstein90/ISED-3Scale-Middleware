@@ -16,7 +16,6 @@ const cors = require('cors')
 const tenantRoutes          = require('@server/routes/tenantRoutes').tenantRoutes
 const appRoot               = require('@server/routes/appRoot').appRoot
 const apiStoreUserRoutes    = require('@server/routes/apiStoreUsers').apiStoreUserRoutes
-const userGroupRoutes       = require('@server/routes/userGroupRoutes').userGroupRoutes
 const eventsRoutes          = require('@server/routes/eventRoutes').eventsRoutes
 const serviceInspectRoutes = require('@server/routes/serviceInspectRoutes').serviceInspectRoutes
 /*****************************************************************************/
@@ -30,6 +29,9 @@ const routingSystem = function( apiCan ) {
     let router = express.Router()
     let expressStack = apiCan.expressStack
 
+
+    
+    expressStack.use('/userGroups', apiCan.userGroups.router)
     expressStack.use('/', router)
     router.get('/', appRoot.render)
     
@@ -64,13 +66,7 @@ const routingSystem = function( apiCan ) {
 /*    router.get('/schedule', scheduler.getSchedule)
     router.get('/logs', logs.getLogs)
 	    
-    //get sets of users based on various criteria           
-    router.get('/findUsers', userGroupRoutes.findUsers)*/
-    router.get(     '/groupUsers',   apiCan.routes.groups.getGroupUsers   )
-    router.get(     '/groups',       apiCan.routes.groups.getGroupList    )
-    router.delete(  '/group',        apiCan.routes.groups.deleteUserGroup )
-    router.post(    '/newUserGroup', apiCan.routes.groups.postNewUserGroup)
-
+   
 /*
     router.get('/userinfo.json', apiStoreUserRoutes.getUserInfo)
   */router.get('/api.json', apiStoreUserRoutes.getApiInfo)/*

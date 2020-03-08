@@ -19,8 +19,8 @@ const userActions = require('./userActions').userActions
 
 
 $(function() {
-    let socket = null
-    socket = io()
+/*    let socket = null
+    socket = io()*/
 
     let apiCanClient = {
         tenants     : null, 
@@ -41,18 +41,20 @@ $(function() {
     })
 
     .then( app => {
+
+        app.addComponent({label: 'userGroupManagement'})
         require('./ui').ui( app )
-        require('./errors/errors').addErrorHandling( apiCanClient)
-        require('./data/data').addServerComFeature( apiCanClient)
-        require('./adminTools').addAdminTools( apiCanClient)
+        require('./errors/errors').addErrorHandling(  app )
+        require('./data/data').addServerComFeature(  app )
+        require('./adminTools').addAdminTools( app )
 	
-        timer.configure( apiCanClient )
+      /*  timer.configure( app )
         timer.eachMinute()
-        setInterval(timer.eachMinute, 10000)
+        setInterval(timer.eachMinute, 10000)*/
 
         //service inspect feature
-        require('./storeServices').addServiceInspectFeature( apiCanClient )
-        require('./groups/userGroups').addUserGroupFeature( apiCanClient )
+        require('./storeServices').addServiceInspectFeature( app )
+        require('./groups/userGroups').addUserGroupFeature( app )
 
 
     })    

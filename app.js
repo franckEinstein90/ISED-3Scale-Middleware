@@ -30,7 +30,11 @@ let run = (apiCan) => {
     tenantsManager.updateTenantInformation()
     .then(_ => {
         if (apiCan.clock) apiCan.clock.start()
-            apiCan.state = "running"
+        apiCan.server.start()  
+        let io = require('socket.io')(server)
+        let messages = require('@server/messages').messages
+        messages.init(io)
+        apiCan.state = "running"
     })
 }
 
@@ -72,7 +76,7 @@ require('@src/APICan').APICanConfig( APICan )
 })
 
 .then( apiCan => {
-    return users.configure( apiCan)
+    return users.configure( apiCan )
 })
 
 .then( require('@users/groups').addUserGroupFeature )
@@ -83,17 +87,15 @@ require('@src/APICan').APICanConfig( APICan )
 })
 
 .then( apiCan => {
-    require('@server/routes/userGroupRoutes').addUserGroupRoutes( apiCan )
+ //   require('@server/routes/userGroupRoutes').addUserGroupRoutes( apiCan )
     require('@server/routingSystem').routingSystem( apiCan )
     appStatus.configure(apiCan)
 
     let appRoot = require('@routes/appRoot').appRoot
     appRoot.configure(apiCan)
 
-    let server = require('@server/httpServer').httpServer( apiCan ) 
-    let io = require('socket.io')(server)
-    let messages = require('@server/messages').messages
-    messages.init(io)
+    require('@server/httpServer').httpServer( apiCan ) 
+ 
     run(apiCan)
 })
 
