@@ -14,8 +14,6 @@
 
 
 let _initStaticUI = function(){
-
-  
     $('#appStatus').click(function( event ) {
         this.classList.toggle("active")
         let statusDetailPaneHeight = $('#appStatusDetail').css('maxHeight')	
@@ -29,25 +27,54 @@ let _initStaticUI = function(){
 }
 
 const uiFeature = function( app ){
-    app.ui = {}
+
+    let formInputField = function({
+            label, 
+            inputField
+        }){
+             return [   
+                    `<label class="groupCreationLabel"><b>${label}</b></label>`, 
+                    inputField
+                ].join('')
+    }
+
     return {
 
         addUiTrigger: function({ triggerID, action}){
 		    $(`#${triggerID}`).click( action )
-        }
+        }, 
 
+        createForm: function( formContent ){
+             return [
+                `<form class="w3-container w3-left-align">`, 
+                  formContent, 
+                `</form>`].join('')
+        }, 
+
+        textField : function({
+            label, 
+            htmlID, 
+            value
+        }){
+            let textField = formInputField({ 
+                label, 
+                inputField: `<input class="w3-input w3-border" id="${htmlID}" value="${value || ''}" type="text">`
+            })
+            return textField
+        }
     }
 }
+
 const ui = function(app) {
-    let ui = uiFeature(app)
-    app.addComponent({label: 'ui', component: {}})
-    app.ui.addFeature({label: 'addUiTrigger', method: ui.addUiTrigger})
+
+    app.addComponent({label: 'ui', methods: uiFeature(app)})
+
     _initStaticUI()
+
     app.showVisibleAPITable = function(tenant, event) {
        $('.tenantsVisibleAPI').hide()
        let apiPaneID = tenant + 'VisibleAPI'
        $('#' + apiPaneID).show()
-
     }
 
     require('./ui/modal').addModalFeature( app )

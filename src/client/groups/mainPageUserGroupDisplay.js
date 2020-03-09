@@ -23,21 +23,25 @@ const mainPageGroupDisplay = function( app ){
     }
 
 
-    app.groups.forEach( group => {
-        _tableHandle.row.add( _userGroupRow(group.name, group.id) ).draw( false )
+    app.userGroupManagement.groupRegister.forEach( 
+       (name, id) => {
+            _tableHandle.row.add( _userGroupRow(name, id) ).draw( false )
         
-        $('#' + group.name + 'UserListDisplay').click(function(event) {
-            event.preventDefault()
-            displayGroupUsers(group.name, group.id)
-        })
-
-        app.ui.addUiTrigger({
-            triggerID: group.name + "GroupEdit", 
-            action: x => app.ui.userGroupModal({
-                editGroup: group.name
+            $('#' + name + 'UserListDisplay').click(function(event) {
+                event.preventDefault()
+                displayGroupUsers(name, id)
             })
-        })
-    })
+
+            app.ui.addUiTrigger({
+                triggerID: name + "GroupEdit", 
+                action: event  => {
+                    debugger
+                    app.ui.userGroupModal(event, {
+                        groupName: name
+                    })
+                }
+            })
+       })
 
     return app
 }

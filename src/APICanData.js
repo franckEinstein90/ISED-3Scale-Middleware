@@ -43,14 +43,31 @@ const getKeycloakCredentials = function(env) {
     }
 }
 
-const APICanData = (function() {
+const APICanData = function( app ) {
 
     let _appConfigurationData = getMasterConfigInfo()
     let _tenantsConfigurationData = new Map()
     let _configurationEnv = _appConfigurationData.env
-    let _jiraAuthCredentials = getJiraAuthCredentials()
-    let _keycloakCredentials = getKeycloakCredentials(_configurationEnv)
-    let _APIStoreUserName = config.get('APIStoreUserName')
+
+    let _jiraAuthCredentials = null 
+    try{
+        _jiraAuthCredentials = getJiraAuthCredentials()
+    } catch {
+
+        _jiraAuthCredentials = null 
+    }
+    let _keycloakCredentials = null
+    try { 
+        _keycloakCredentials = getKeycloakCredentials(_configurationEnv)
+    } catch {
+        _keycloakCredentials = null
+    }
+    let _APIStoreUserName = null
+    try { 
+        _APIStoreUserName = config.get('APIStoreUserName')
+    } catch{
+        _APIStoreUserName = null
+    }
 
     _appConfigurationData.tenants.forEach(t => {
         _tenantsConfigurationData.set(t.name, t)
@@ -75,9 +92,18 @@ const APICanData = (function() {
         }
     }
 
-})()
+}
 
+const getAppData = function( app ){
+    return new Promise((resolve)=> {
+        app.addComponent({
+            label: 'data', 
+            methods: APICanData(app)
+        })
+        return resolve(app)
+    })
+}
 
 module.exports = {
-    APICanData
+    getAppData
 }

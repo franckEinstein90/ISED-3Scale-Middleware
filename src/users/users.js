@@ -32,20 +32,25 @@ const users = (function() {
     return {
 
         configure: function( app ) {
+            if(app.data.jiraAuthCredentials){
+                jiraInterface.configure( app.data.jiraAuthCredentials )
+            }
+            if(app.data.keycloakCredentials){
+                _keycloakCredentials = app.data.keycloakCredentials
 
-            jiraInterface.configure( app.data.jiraAuthCredentials )
-            _keycloakCredentials = app.data.keycloakCredentials
-
-            return new Promise((resolve, reject) =>{
-            //test to see if we can access keycloak user data
-            //by searching for the api store email 
-            _keycloakTest( app.data.apiStoreUserName )
-            .then(testResult => {
-                app.say(`keycloak access = ${testResult}`)
-                app.features.keycloakAccess = testResult 
-                return resolve(app)
+                return new Promise((resolve, reject) =>{
+                    //test to see if we can access keycloak user data
+                    //by searching for the api store email 
+                    _keycloakTest( app.data.apiStoreUserName )
+                    .then(testResult => {
+                    app.say(`keycloak access = ${testResult}`)
+                    app.features.keycloakAccess = testResult 
+                    return resolve(app)
+                    })
                 })
-            })
+            }
+
+            return app
         },
 
         getKeyCloakCredentials: function() {
@@ -172,6 +177,13 @@ const users = (function() {
     }
 })()
 
+
+const addUserModule = function( app ){
+    return new Promise((resolve) => {
+        return resolve(users.configure(app))
+    })
+}
+
 module.exports = {
-    users
+   addUserModule 
 }

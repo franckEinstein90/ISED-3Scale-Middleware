@@ -19,8 +19,8 @@ const userActions = require('./userActions').userActions
 
 
 $(function() {
-/*    let socket = null
-    socket = io()*/
+    let socket = null
+    socket = io()
 
     let apiCanClient = {
         tenants     : null, 
@@ -48,9 +48,9 @@ $(function() {
         require('./data/data').addServerComFeature(  app )
         require('./adminTools').addAdminTools( app )
 	
-      /*  timer.configure( app )
+        timer.configure( app )
         timer.eachMinute()
-        setInterval(timer.eachMinute, 10000)*/
+        setInterval(timer.eachMinute, 10000)
 
         //service inspect feature
         require('./storeServices').addServiceInspectFeature( app )

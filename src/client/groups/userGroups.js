@@ -8,8 +8,19 @@
 "use strict"
 /*****************************************************************************/
 
+const createNewUserGroup = function( groupDefinition ){
 
-const displayGroupUsers  = function(groupID) {
+}
+
+const editUserGroup = function( groupDefinition ){
+
+}
+
+const deleteUserGroup = function( groupID ){
+
+}
+
+const loadUserGroupMembers = function( groupID ){
 //    document.getElementById('userGroupsModal').style.display = 'none'
     //dataExchangeStatus.setLoading()
     //fetches and shows user daya associated with this user group
@@ -23,6 +34,11 @@ const displayGroupUsers  = function(groupID) {
        // keyCloakUsers.showUsers(data)
 //        ui.scrollToSection("userTableSection")
     })
+}
+
+
+
+const displayGroupUsers  = function(groupID) {
 }
 
 const userGroupFeatureConfigure = async function( app ){
@@ -46,19 +62,44 @@ const userGroupFeatureConfigure = async function( app ){
 }
 
 const addUserGroupFeature = function( clientApp ){
-   userGroupFeatureConfigure( clientApp )
-   .then( userGroupInfo => {
+
+    userGroupFeatureConfigure( clientApp )
+
+    .then( userGroupInfo => {
+
+        clientApp.userGroupManagement.addFeature({
+            label: 'createNewUserGroup', 
+            description: 'creates a new user group', 
+            method: createNewUserGroup
+        })
+
+        clientApp.userGroupManagement.addFeature({
+            label: 'editUserGroup', 
+            method:  editUserGroup
+        })
+
+        clientApp.userGroupManagement.addFeature({
+            label: 'deleteUserGroup', 
+            method: deleteUserGroup 
+        })
+
+        clientApp.userGroupManagement.addFeature({
+            label: 'loadUserGroupMembers', 
+            method: loadUserGroupMembers
+        })
+
       return clientApp
-   })
-   .then( clientApp => {
+    })
+
+    .then( clientApp => {
       require('./newUserGroupForm').addFeature( clientApp )
       return clientApp
-   })
-   /*.then( clientApp =>{
+    })
+
+    .then( clientApp =>{
       require('./mainPageUserGroupDisplay.js').addFeature( clientApp )
       return clientApp 
    })
- */
 }
 
 module.exports = {

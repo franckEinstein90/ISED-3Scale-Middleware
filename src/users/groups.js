@@ -253,7 +253,10 @@ const addComponentMethods = function( app ){
     })
 
     app.userGroups.getGroupsInfo = (req, res, next)=>{
-        debugger
+        app.userGroups.getGroupDefinitions()
+        .then( groupData => {
+            res.send(groupData)
+        })
     }
     app.userGroups.createNewGroup = (req, res, next)=>{
         

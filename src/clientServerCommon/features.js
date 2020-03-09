@@ -12,9 +12,19 @@ class Feature {
 
 }
 
-function AppComponent( component ){
+function AppComponent( componentDefinition ){
 
+    this.label = componentDefinition.label
     let _features = new Map()
+
+    if('methods' in componentDefinition) {
+        Object.keys(componentDefinition.methods).forEach(
+            (key, index)=>{
+                if(key === 'configure') return
+                _features[key] = true
+                this[key] = componentDefinition.methods[key]
+            })
+    }
 
     this.addFeature =  function(feature){
         if(!('label' in feature)) throw 'error in feature definition'
@@ -58,10 +68,10 @@ const featureSystem = function( app ){
             return false
         },
 
-        addComponent : function({label, component}){
-            let newComponent = new AppComponent( component )
-            _components.set(label, newComponent)
-            app[label] = newComponent 
+        addComponent : function( componentInfo ){
+            let newComponent = new AppComponent( componentInfo )
+            _components.set(newComponent.label, newComponent)
+            app[newComponent.label] = newComponent 
         }, 
 
         add : function( feature ){

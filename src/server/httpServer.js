@@ -57,7 +57,8 @@ const httpServer = function( apiCan ){
     
     apiCan.server = {}
     apiCan.server.start = function(){
-        _server.listen( port )
+        _server.listen( port ) 
+        apiCan.io = require('socket.io')(_server)
         _server.on('error', x     => onError(port))
         _server.on('listening', x => onListening(_server.address()))
         apiCan.say (`App running on port ${port}`)

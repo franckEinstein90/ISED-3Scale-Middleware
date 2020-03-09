@@ -29,34 +29,62 @@ const tenantSelectionTable = function(options){
 </table>*/
 
 
-const formTemplate = function(options){
+const formTemplate = function( formContent, submitID ){
     return [
-        `<form class="w3-container w3-left-align">`, 
             `<div class="w3-row">`, 
                 `<div class='w3-col m5 l5 w3-left-align' style="margin-right:20px">`, 
-                    `left`, 
+                    formContent, 
                 `</div>`, 
                 `<div class='w3-col m5 l5 w3-right-align"'>`, 
-                  `${tenantSelectionTable(options)}`, 
+                    'left',  
                 `</div>`, 
             `</div>`, 
             `<div class="w3-row" style='margin:15,15,15,15'>`, 
                 `<br/>`, 
                 `<button class="w3-btn w3-blue w3-block" id="createNewGroup" >`, 
-                    `${options.editGroup ? 'Save Changes':'Create New Group'}`, 
+                    'submit', 
                 `</button>`, 
                 ` <br/>`, 
-            ` </div>`, 
-        `</form>`].join('')
+            ` </div>`].join('')
 }
 
 const userGroupCreateEditWindowFeature = function( app ){
+
+    let groupNameInput = value => app.ui.textField({
+            label: 'Group Name',
+            value: value || null,  
+            htmlID: 'userGroupName'
+        })
+
+    let groupEmailPattern  = value => app.ui.textField({
+            label: 'Email Pattern',
+            value: value || null,  
+            htmlID: 'groupEmailPattern'
+    })
+ 
+
+    let groupPropertySubform = function({
+        groupName, 
+        emailPattern
+    }){
+        return [
+            `${groupNameInput(groupName)}`, 
+            `${groupEmailPattern(emailPattern)}`, 
+        ].join('')
+    }
+
     return {
-        showUserGroupModal  : function(options){
-            debugger
+
+        showUserGroupModal  : function( event, options){
+            event.preventDefault()
             app.showModal({
-                title: (options.editGroup ? `Edit group: ${options.editGroup}` : "New User Group"), 
-                content: formTemplate( options )
+                title: "group form", //(options.editGroup ? `Edit group: ${options.editGroup}` : "New User Group"), 
+                content: app.ui.createForm(formTemplate(
+                    groupPropertySubform({
+                        groupName: options.groupName || null, 
+                        emailPattern: options.emailPattern || null, 
+                        submit: x => alert('fdsa')
+                    })))
             })
         }
     }
@@ -89,6 +117,7 @@ const getGroupFormInputs = function() {
 }
 
 const tenantDomainTable = function( app ){
+
    let selectedTenants = new Map()
 
    let _groupTenantDomainsUI = $('#groupsTenantsSelectionTable').DataTable({
@@ -131,38 +160,28 @@ const tenantDomainTable = function( app ){
 }
 
 
-const createNewUserGroup = function({
-    groupName
-}){
-    debugger
-}
-
 
 const addFeature = async function( app ){
-    app.userGroupManagement.addFeature({
-        label: 'createNew', 
-        description: 'creates a new user group', 
-        method: createNewUserGroup
+
+    let userEditCreateModal = userGroupCreateEditWindowFeature( app )
+
+    app.ui.addFeature({
+        label: 'userGroupModal', 
+        method: (event, formType) => userEditCreateModal.showUserGroupModal(event, formType)
     })
 
-    app.userGroupManagement.createNew({
-        groupName: 'testGroup'
-    })
-    return app
-  /*  let userEditCreateModal = userGroupCreateEditWindowFeature( app )
-    app.ui.addFeature({label: 'userGroupModal', method: userEditCreateModal.showUserGroupModal})
     app.ui.addUiTrigger({
-        triggerID: 'newGroupFromMain', 
-        action: app.ui.userGroupModal
+        triggerID   : 'newGroupFromMain', 
+        action      : event => app.ui.userGroupModal(event, "new")
     })
+
     app.ui.addUiTrigger({
         triggerID: 'manageUsersBtn', 
         action: app.ui.userGroupModal
     })
     return app
-//    let _dataTableHandle = $('#userFormGroupList').DataTable()
-//    return configureNewGroupModalWindow( app )*/
 }
+
 module.exports = {
     addFeature
 }

@@ -20,7 +20,7 @@
 require('module-alias/register')
 /*****************************************************************************/
 const tenantsManager    = require('@tenants/tenantsManager').tenantsManager
-const users             = require('@users/users').users
+
 const appStatus         = require('@server/routes/appStatus').appStatus
 const path              = require('path')
 /*****************************************************************************/
@@ -31,9 +31,8 @@ let run = (apiCan) => {
     .then(_ => {
         if (apiCan.clock) apiCan.clock.start()
         apiCan.server.start()  
-        let io = require('socket.io')(server)
         let messages = require('@server/messages').messages
-        messages.init(io)
+        messages.init(apiCan.io)
         apiCan.state = "running"
     })
 }
@@ -47,25 +46,19 @@ const APICan = {    //this is the app
     settingsDB      : 'settings.db', 
     stats           : {}, 
     staticFolder    : path.join(__dirname, 'public'),
-    data            : require('@src/APICanData').APICanData, 
     expressStack    : require('express')(), 
 }
 
 
 require('@clientServerCommon/features').addFeatureSystem( APICan )
-APICan.addRequirement(
-    {
-        req: {   
-            label : "userInfo.json", 
-            shortDescription : "Answers userInfo.json requests"
-        }
-    })
-
-require('@server/expressStack').expressConfig( APICan )
-require('@src/process/stats').addProcessStatsFeature( APICan )
-require('@cron/timer').addRecurringEventsFeature( APICan )
-require('@cron/timer').addTimerFeature( APICan )
-require('@src/APICan').APICanConfig( APICan )
+require('@src/APICanData').getAppData( APICan )
+.then(APICan => {
+    require('@server/expressStack').expressConfig( APICan )
+    require('@src/process/stats').addProcessStatsFeature( APICan )
+    require('@cron/timer').addRecurringEventsFeature( APICan )
+    require('@cron/timer').addTimerFeature( APICan )
+    return require('@src/APICan').APICanConfig( APICan )
+})
 .then( require('@src/APICanVersion').addVersioningFeature ) //versioning support
 .then( apiCan => {                                          //tenant manager configuration
     tenantsManager.configure( apiCan ) 
@@ -75,11 +68,11 @@ require('@src/APICan').APICanConfig( APICan )
     return apiCan
 })
 
-.then( apiCan => {
-    return users.configure( apiCan )
-})
+.then( require('@users/users').addUserModule )
 
 .then( require('@users/groups').addUserGroupFeature )
+
+.then(require('@users/groupActions').addGroupActionsFeatures)
 
 .then( apiCan => {
     apiCan.newClock()
