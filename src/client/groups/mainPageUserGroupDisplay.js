@@ -17,29 +17,30 @@ const mainPageGroupDisplay = function( app ){
             groupName,
             `<i id="${groupName}UserListDisplay" class="fa fa-eye w3-large w3-text-black groupCmd"></i>`, 
             `<i id="${groupName}GroupEdit" class="fa fa-gears  w3-large w3-text-black groupCmd"></i>`, 
-            `<i class="fa fa-trash w3-large w3-text-black groupCmd"></i>`]
+            `<i id="groupDelete_${groupID}" class="fa fa-trash w3-large w3-text-black groupCmd"></i>`]
   
         return groupRow
     }
-
-
     app.userGroupManagement.groupRegister.forEach( 
        (name, id) => {
             _tableHandle.row.add( _userGroupRow(name, id) ).draw( false )
-        
+       
+            $(`#groupDelete_${id}`).click(function(event){
+                event.preventDefault()
+                app.userGroupManagement.deleteUserGroup(id)
+            })
+
             $('#' + name + 'UserListDisplay').click(function(event) {
                 event.preventDefault()
-                displayGroupUsers(name, id)
+                app.userGroupManagement.loadUserGroupMembers(id)
             })
 
             app.ui.addUiTrigger({
                 triggerID: name + "GroupEdit", 
                 action: event  => {
-                    debugger
-                    app.ui.userGroupModal(event, {
-                        groupName: name
-                    })
-                }
+                    app.userGroupManagement.getGroupDefinition(id)
+                    .then(groupInfo =>  app.ui.userGroupModal(event, groupInfo))
+               }
             })
        })
 

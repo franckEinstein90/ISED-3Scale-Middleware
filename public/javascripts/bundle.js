@@ -4603,6 +4603,7 @@
 })));
 
 },{}],2:[function(require,module,exports){
+<<<<<<< HEAD
 /*****************************************************************************/
 "use strict"
 /*****************************************************************************/
@@ -4703,6 +4704,108 @@ const addFeatureSystem = function( app ){
 module.exports = {
     addFeatureSystem
 }
+=======
+/*****************************************************************************/
+"use strict"
+/*****************************************************************************/
+
+class Feature {
+
+    constructor( options ){
+        this.label          = options.label
+        this.implemented    = options.implemented || false
+        this.method         = options.method || false
+    }
+
+}
+
+function AppComponent( componentDefinition ){
+
+    this.label = componentDefinition.label
+    let _features = new Map()
+
+    if('methods' in componentDefinition) {
+        Object.keys(componentDefinition.methods).forEach(
+            (key, index)=>{
+                if(key === 'configure') return
+                _features[key] = true
+                this[key] = componentDefinition.methods[key]
+            })
+    }
+
+    this.addFeature =  function(feature){
+        if(!('label' in feature)) throw 'error in feature definition'
+        if(_features.has(feature.label)) throw "feature already exists"
+        _features.set( feature.label, feature)
+        if('method' in feature) this[ feature.label ] = feature.method
+    }
+}
+
+const featureSystem = function( app ){
+
+    let _features       = new Map()
+    let _components     = new Map()
+    let _reqMajor       = 0
+    let _requirements   = new Map()
+
+    return {
+
+        get list()  {
+            let features = {}
+            _features.forEach((value, key)=>{
+                features[key] = value
+            })
+            return features
+        },
+
+        implements  : featureLabel => _features.has(featureLabel), 
+
+        addRequirement  : function({
+            req, 
+            parentReq
+        }) {
+            if( parentReq === undefined || parentReq === null){
+                _reqMajor += 1
+                _requirements.set(  _reqMajor, req)
+            }
+        },
+
+        includes: featureName => {
+            if(_features.has(featureName)) return _features.get(featureName)
+            return false
+        },
+
+        addComponent : function( componentInfo ){
+            let newComponent = new AppComponent( componentInfo )
+            _components.set(newComponent.label, newComponent)
+            app[newComponent.label] = newComponent 
+        }, 
+
+        add : function( feature ){
+            if(!('label' in feature)) throw 'error in feature definition'
+            if(_features.has(feature.label)) throw "feature already exists"
+            _features.set( feature.label, feature)
+            if('method' in feature) app[ feature.label ] = feature.method
+        }
+    }
+}
+
+const addFeatureSystem = function( app ){
+
+    let features = featureSystem( app )
+    Object.defineProperty( app, 'features', {get: () => features.list})
+    app.addRequirement = features.addRequirement        
+    app.addComponent   = features.addComponent
+    app.Feature = Feature
+    app.addFeature = features.add
+    app.implements = features.implements
+    return app
+}
+
+module.exports = {
+    addFeatureSystem
+}
+>>>>>>> 4bbb737f4a17ce543051925074dbfcfbfe65404c
 
 },{}],3:[function(require,module,exports){
 /*******************************************************************************
@@ -4981,6 +5084,7 @@ module.exports = {
 }
 
 },{}],8:[function(require,module,exports){
+<<<<<<< HEAD
 /*******************************************************************************
  * Franck Binard, ISED
  * Canadian Gov. API Store middleware
@@ -5399,6 +5503,476 @@ $(function() {
   
 
 })
+=======
+/*******************************************************************************
+ * Franck Binard, ISED
+ * Canadian Gov. API Store middleware
+ * ------------------------------------- 
+ *  configures the ui element at the top of the 
+ *  content section that displays user groups
+ ******************************************************************************/
+"use strict"
+/*****************************************************************************/
+const mainPageGroupDisplay = function( app ){
+
+    let _tableHandle = $('#userFormGroupList').DataTable()
+    $('#userFormGroupList tbody').empty()
+
+    let _userGroupRow = function(groupName, groupID) { //displays the group
+        let groupRow = [
+            groupName,
+            `<i id="${groupName}UserListDisplay" class="fa fa-eye w3-large w3-text-black groupCmd"></i>`, 
+            `<i id="${groupName}GroupEdit" class="fa fa-gears  w3-large w3-text-black groupCmd"></i>`, 
+            `<i id="groupDelete_${groupID}" class="fa fa-trash w3-large w3-text-black groupCmd"></i>`]
+  
+        return groupRow
+    }
+    app.userGroupManagement.groupRegister.forEach( 
+       (name, id) => {
+            _tableHandle.row.add( _userGroupRow(name, id) ).draw( false )
+       
+            $(`#groupDelete_${id}`).click(function(event){
+                event.preventDefault()
+                app.userGroupManagement.deleteUserGroup(id)
+            })
+
+            $('#' + name + 'UserListDisplay').click(function(event) {
+                event.preventDefault()
+                app.userGroupManagement.loadUserGroupMembers(id)
+            })
+
+            app.ui.addUiTrigger({
+                triggerID: name + "GroupEdit", 
+                action: event  => {
+                    app.userGroupManagement.getGroupDefinition(id)
+                    .then(groupInfo =>  app.ui.userGroupModal(event, groupInfo))
+               }
+            })
+       })
+
+    return app
+}
+
+const addFeature = function(app){
+    return mainPageGroupDisplay( app )
+}
+
+module.exports = {
+    addFeature
+}
+
+},{}],9:[function(require,module,exports){
+/***********************************************************
+ * manages form to create or edit user groups
+ * ***************************************************************************/
+"use strict"
+/*****************************************************************************/
+
+const selectedTenants = new Map() 
+
+const tenantSelectionTable = function( ){
+    return [
+            `<label class="groupCreationLabel"><b>Included tenants</b></label>`,
+            `<br/> <button id="selectAllTenants">select all</button>`, 
+            `<button id="unselectAllTenants">unselect all</button><br/>`, 
+            `<table id="groupsTenantsSelectionTable" class="display" style="color:black">`,
+            `<thead> <tr> <th>Tenant</th> </tr> </thead>`, 
+            `<tbody> <tr><td>da</td></tr> </tbody>`, 
+            `</table>`
+    ].join('')
+}
+
+
+const formTemplate = function( formContent, submitID ){
+    return [
+            `<div class="w3-row">`, 
+                `<div class='w3-col m5 l5 w3-left-align' style="margin-right:20px">`, 
+                    formContent, 
+                `</div>`, 
+                `<div class='w3-col m5 l5 w3-right-align"'>`, 
+                    tenantSelectionTable(),  
+                `</div>`, 
+            `</div>`, 
+            `<div class="w3-row" style='margin:15,15,15,15'>`, 
+                `<br/>`, 
+                `<button class="w3-btn w3-blue w3-block" id="createNewGroup" >`, 
+                    'submit', 
+                `</button>`, 
+                ` <br/>`, 
+            ` </div>`].join('')
+}
+
+const userGroupCreateEditWindowFeature = function( app ){
+
+    let groupNameInput = value => app.ui.textField({
+            label: 'Group Name',
+            value: value || null,  
+            htmlID: 'userGroupName'
+    })
+
+    let groupEmailPattern  = value => app.ui.textField({
+            label: 'Email Pattern',
+            value: value || null,  
+            htmlID: 'groupEmailPattern'
+    })
+    
+    let groupDescription = value => app.ui.textArea({
+            label: "Description", 
+            value: value || null, 
+            htmlID: 'userGroupDescription'
+    })
+
+    let hiddenIDInput = value => app.ui.hidden({
+            htmlID: 'groupID', 
+            value
+    })
+	
+    let groupPropertySubform = function({
+        id, 
+        groupName, 
+        emailPattern, 
+        description
+    }){
+        return [
+            `${id ? hiddenIDInput(id) : ""}`, 
+            `${groupNameInput(groupName)}`, 
+            `${groupEmailPattern(emailPattern)}`, 
+            `${groupDescription(description)}`
+        ].join('')
+    }
+
+    return {
+
+        showUserGroupModal  : function( event, options){
+            event.preventDefault()
+            let htmlID = null
+            selectedTenants.clear()
+            if(options.ID){
+            }
+            else {
+                  htmlID = 'createNewGroup'
+            }
+            let formContent = app.ui.createForm(formTemplate(
+                    groupPropertySubform({
+                        id          : options.ID|| null,
+                        groupName   : options.name|| null, 
+                        emailPattern: options.emailPattern || null, 
+                        description : options.Description || null
+                    })))
+            app.showModal({
+                title: options.ID? `Editing group: ${options.ID}` : "New User Group", 
+                content: formContent
+            })
+            tenantDomainTable( app )
+            app.ui.addUiTrigger({
+                triggerID: htmlID,  
+                action: x => {
+                    let groupFormValues = getGroupFormInputs()
+                    app.userGroupManagement.createNewUserGroup( groupFormValues )
+                } 
+            })
+        }
+    }
+}
+
+const getGroupFormInputs = function() {
+   let tenants = []
+   selectedTenants.forEach((_, tenant)=>tenants.push(tenant))
+   return {
+                name: $('#userGroupName').val(), 
+                emailPattern : $('#groupEmailPattern').val(),
+                Description : $('#userGroupDescription').val(), 
+                selectedTenants : tenants
+   }
+        //
+    //gets the parameters from a new group creation
+
+   /* let userProperties = []*/
+//    let groupDescription = $('#userGroupDescription').val()
+
+   /* if ($('#providerAccountSearchSelect').is(":checked")) {
+        userProperties.push('providerAccount')
+    }
+    if ($('#keyCloakAccountSelect').is(":checked")) {
+        userProperties.push('keyCloakAccount')
+    }
+    if ($('#otpNotEnabledSelect').is(":checked")) {
+        userProperties.push('otpNotEnabled')
+    }
+    return {
+        'userProperties[]': userProperties,
+        name: newGroupName,
+        groupDescription,
+        groupEmailPattern
+    }*/
+}
+
+const tenantDomainTable = function( app ){
+
+
+   let _groupTenantDomainsUI = $('#groupsTenantsSelectionTable').DataTable({
+        'info': true, 
+        'searching': false, 
+        'lengthChange':false
+    })
+
+    app.tenants.forEach(tenant => {
+        _groupTenantDomainsUI.row.add([tenant]).draw(false)
+    })
+
+    let selectedTenantTableRow = dataRow =>  (_groupTenantDomainsUI.row(dataRow).data())[0]
+       
+    $('#groupsTenantsSelectionTable tbody').on( 'click', 'tr', function () {
+        let selectedTenant = selectedTenantTableRow(this)
+        if ($(this).hasClass('selected')){
+            selectedTenants.delete( selectedTenant )
+            $(this).removeClass('selected')
+        } else {
+            selectedTenants.set(selectedTenant, 1)
+            $(this).addClass('selected')
+        }
+    })
+}
+
+
+
+const addFeature = async function( app ){
+
+    let userEditCreateModal = userGroupCreateEditWindowFeature( app )
+
+    app.ui.addFeature({
+        label: 'userGroupModal', 
+        method: (event, formType) => userEditCreateModal.showUserGroupModal(event, formType)
+    })
+
+    app.ui.addUiTrigger({
+        triggerID   : 'newGroupFromMain', 
+        action      : event => app.ui.userGroupModal(event, "new")
+    })
+
+    app.ui.addUiTrigger({
+        triggerID: 'manageUsersBtn', 
+        action: app.ui.userGroupModal
+    })
+    return app
+}
+
+module.exports = {
+    addFeature
+}
+
+},{}],10:[function(require,module,exports){
+/*******************************************************************************
+ * Franck Binard, ISED
+ * Canadian Gov. API Store middleware
+ * -------------------------------------
+ *
+ * User Group Structure 
+ ******************************************************************************/
+"use strict"
+/*****************************************************************************/
+
+const createNewUserGroup = function( groupDefinition ){
+    debugger
+    $.post('/userGroups', groupDefinition)
+    .done(x => {
+        debugger
+    })
+    .fail(x => {
+        alert('error')
+    })
+
+}
+
+const editUserGroup = function( groupDefinition ){
+
+}
+
+const deleteUserGroup = function( id ){
+    $.ajax({
+        method: "DELETE",
+        url: '/userGroups',
+        data: {
+           id 
+        }
+    })
+    .done(function(msg) {
+        location.reload(true)
+    })
+    .fail(x => {
+        alert('failed')
+    })  
+}
+
+const loadUserGroupMembers = function( groupID ){
+//    document.getElementById('userGroupsModal').style.display = 'none'
+    //dataExchangeStatus.setLoading()
+    //fetches and shows user daya associated with this user group
+    debugger
+    let group = {
+        group: groupID
+    }
+    $.get('/userGroups/users', group, function(data) {
+        debugger
+     //   dataExchangeStatus.setInactive()
+      //  dataTableHandle.clear().draw()
+       // keyCloakUsers.showUsers(data)
+//        ui.scrollToSection("userTableSection")
+    })
+}
+
+
+const displayGroupUsers  = function(groupID) {
+}
+
+const userGroupFeatureConfigure = async function( app ){
+
+    app.userGroupManagement.groupRegister = new Map()
+
+    app.userGroupManagement.getGroupDefinition = function(groupID){
+        return new Promise((resolve, reject) => {
+            $.ajax({
+                method: "GET",
+                url: '/userGroups',
+                data: {
+                    id:groupID 
+                }
+            })
+            .done(function( data ) {
+                return resolve(data)
+            })
+            .fail( err => {
+               return reject(err) 
+            })  
+        })
+    }
+
+    app.userGroupManagement.fetchGroupData = function(){
+        return new Promise((resolve, reject) => {
+            app.fetchServerData('userGroups')
+            .then( result => {
+                    app.userGroupManagement.groupRegister.clear()
+                    result.forEach(group => {
+                        app.userGroupManagement.groupRegister.set(group.ID, group.name)
+                    })
+                    return resolve(result)
+            })
+         })
+      }
+    return app.userGroupManagement.fetchGroupData()
+}
+
+const addUserGroupFeature = function( clientApp ){
+
+    userGroupFeatureConfigure( clientApp )
+
+    .then( userGroupInfo => {
+
+        clientApp.userGroupManagement.addFeature({
+            label: 'createNewUserGroup', 
+            description: 'creates a new user group', 
+            method: createNewUserGroup
+        })
+
+        clientApp.userGroupManagement.addFeature({
+            label: 'editUserGroup', 
+            method:  editUserGroup
+        })
+
+        clientApp.userGroupManagement.addFeature({
+            label: 'deleteUserGroup', 
+            method: deleteUserGroup 
+        })
+
+        clientApp.userGroupManagement.addFeature({
+            label: 'loadUserGroupMembers',
+            description: "loads the users that fit the group's definition" , 
+            method: loadUserGroupMembers
+        })
+
+      return clientApp
+    })
+
+    .then( clientApp => {
+      require('./newUserGroupForm').addFeature( clientApp )
+      return clientApp
+    })
+
+    .then( clientApp =>{
+      require('./mainPageUserGroupDisplay.js').addFeature( clientApp )
+      return clientApp 
+   })
+}
+
+module.exports = {
+    addUserGroupFeature
+}
+
+},{"./mainPageUserGroupDisplay.js":8,"./newUserGroupForm":9}],11:[function(require,module,exports){
+/*******************************************************************************
+ * Franck Binard, ISED (FranckEinstein90)
+ *
+ * APICan application - 2020
+ * -------------------------------------
+ *  Canadian Gov. API Store middleware - client side
+ *
+ *  main.js: entry point 
+ *
+ ******************************************************************************/
+"use strict"
+
+/******************************************************************************/
+const timer = require('./timer.js').timer
+/*const APICan = require('./APICan').APICan
+const storeUsers = require('./storeUsers').storeUsers
+const userActions = require('./userActions').userActions
+/******************************************************************************/
+
+
+$(function() {
+    let socket = null
+    socket = io()
+
+    let apiCanClient = {
+        tenants     : null, 
+        adminTools  : null,
+        handleError : null, 
+        server      : {
+
+        }, 
+        ui                  : null
+      
+    }
+
+    require('../clientServerCommon/features').addFeatureSystem( apiCanClient )
+
+    require('./tenants/tenants').addTenantCollection({
+        clientApp: apiCanClient, 
+        containerID: 'tenantCards'
+    })
+
+    .then( app => {
+
+        app.addComponent({label: 'userGroupManagement'})
+        require('./ui').ui( app )
+        require('./errors/errors').addErrorHandling(  app )
+        require('./data/data').addServerComFeature(  app )
+        require('./adminTools').addAdminTools( app )
+	
+        timer.configure( app )
+        timer.eachMinute()
+        setInterval(timer.eachMinute, 10000)
+
+        //service inspect feature
+        require('./storeServices').addServiceInspectFeature( app )
+        require('./groups/userGroups').addUserGroupFeature( app )
+
+
+    })    
+  
+
+})
+>>>>>>> 4bbb737f4a17ce543051925074dbfcfbfe65404c
 
 },{"../clientServerCommon/features":2,"./adminTools":4,"./data/data":5,"./errors/errors":7,"./groups/userGroups":10,"./storeServices":12,"./tenants/tenants":13,"./timer.js":14,"./ui":15}],12:[function(require,module,exports){
 /*******************************************************************************
@@ -5698,6 +6272,7 @@ module.exports = {
 }
 
 },{"./dialogs/appStatusDialog":6}],15:[function(require,module,exports){
+<<<<<<< HEAD
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
@@ -5796,6 +6371,128 @@ const ui = function(app) {
 module.exports = {
     ui
 }
+=======
+/*******************************************************************************
+ * Franck Binard, ISED (FranckEinstein90)
+ *
+ * APICan application - Feb 2020
+ * -------------------------------------
+ *  Canadian Gov. API Store middleware - client side
+ *
+ *  ui.js: entry point 
+ *
+ ******************************************************************************/
+"use strict"
+/******************************************************************************/
+/******************************************************************************/
+
+
+let _initStaticUI = function(){
+    $('#appStatus').click(function( event ) {
+        this.classList.toggle("active")
+        let statusDetailPaneHeight = $('#appStatusDetail').css('maxHeight')	
+        if( statusDetailPaneHeight === '0px' ){
+            let scrollHeight = $('#appStatusDetail').css('scrollHeight')
+            $('#appStatusDetail').css('maxHeight', '80px')
+        } else {
+            $('#appStatusDetail').css('maxHeight', '0px')
+        }
+    }) 
+}
+
+const uiFeature = function( app ){
+
+    let formInputField = function({
+            label, 
+            inputField
+        }){  //creates an input field
+             return [   
+                `<label class="groupCreationLabel"><b>${label}</b></label>`, 
+                inputField
+             ].join('')
+    }
+
+    return {
+
+
+        addUiTrigger: function({ triggerID, action}){
+		    $(`#${triggerID}`).click( action )
+        }, 
+
+        createForm: function( formContent ){
+             return [
+                `<form class="w3-container w3-left-align">`, 
+                  formContent, 
+                `</form>`].join('')
+        }, 
+
+		  hidden		: function({
+				htmlID, 
+				value
+		  }){
+				return `<input type='hidden' id="${htmlID}" name="${htmlID}" value="${value}">`
+		  },
+
+		  textArea  : function({
+				label, 
+				htmlID, 
+				value
+		  }){
+				let textAreaField = formInputField({
+				 	 label, 
+					 inputField: [ `<textarea rows='4' cols='50' class="w3-input w3-border" `, 
+						  				`id="${htmlID}"></textArea>`
+						  			 ].join('')
+				})
+				return textAreaField
+		  }, 
+
+        textField : function({
+            label, 
+            htmlID, 
+            value
+        }){
+            let textField = formInputField({ 
+                label, 
+                inputField: `<input class="w3-input w3-border" id="${htmlID}" value="${value || ''}" type="text">`
+           })
+            return textField
+        }
+    }
+}
+
+const ui = function(app) {
+
+    app.addComponent({label: 'ui', methods: uiFeature(app)})
+
+    _initStaticUI()
+
+    app.showVisibleAPITable = function(tenant, event) {
+       $('.tenantsVisibleAPI').hide()
+       let apiPaneID = tenant + 'VisibleAPI'
+       $('#' + apiPaneID).show()
+    }
+
+    require('./ui/modal').addModalFeature( app )
+    require('./ui/dataTables').addDataTableFeature( app )
+
+    return app
+    
+
+    /*scrollToSection: function(sectionID) {
+            let hash = $('#' + sectionID)
+            $('html, body').animate({
+                scrollTop: hash.offset().top
+            }, 800, _ => window.location.hash = hash)
+        },*/
+
+
+}
+
+module.exports = {
+    ui
+}
+>>>>>>> 4bbb737f4a17ce543051925074dbfcfbfe65404c
 
 },{"./ui/dataTables":16,"./ui/modal":17}],16:[function(require,module,exports){
 "use strict"
