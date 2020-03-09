@@ -20,11 +20,8 @@ const localDatabase = function( dbObject ){
             table, 
             where
         }){
-            let whereStatement = ''
-            if( where ) whereStatement = ` WHERE ${where}`
-
+            let whereStatement = where ? `WHERE ${where}` : ''
             return new Promise((resolve, reject) => {
-
                 let SQLStatement = `SELECT * FROM ${table} ${whereStatement};`
                 _db.all(SQLStatement, (err, rows)=>{
                     if(err){
@@ -35,21 +32,36 @@ const localDatabase = function( dbObject ){
                 })
             })
         }, 
-
+        removeFromTable: function({
+            table, 
+            where
+        }){ 
+            let whereStatement = where ? `WHERE ${where}` : ''
+            return new Promise((resolve, reject)=>{
+                let SQLStatement = `DELETE FROM ${table} ${whereStatement}`
+                _db.run(SQLStatement, function(err){
+                    if(err){
+                        return reject( err )
+                    } else {
+                        return resolve('Ok')
+                    }
+                })
+            })
+        }, 
         insertInTable: function({ 
-        table, 
-        values
-    }){
-        let fields = []
-        let fieldValues = []
-        let valArray = Object.entries(values)
-        valArray.forEach(field => {
-            fields.push( `'${field[0]}'` )
-            fieldValues.push( `'${field[1]}'` )
-        })
+            table, 
+            values
+        }){
+            let fields = []
+            let fieldValues = []
+            let valArray = Object.entries(values)
+            valArray.forEach(field => {
+                fields.push( `'${field[0]}'` )
+                fieldValues.push( `'${field[1]}'` )
+            })
         return new Promise((resolve, reject) => {
             let SQLStatement =  `INSERT INTO ${table} (${fields.join(',')}) VALUES (${fieldValues.join(',')});` 
-            db.run(SQLStatement, function( err ){
+            _db.run(SQLStatement, function( err ){
                 if( err ){
                     return reject(err)
                 } else {

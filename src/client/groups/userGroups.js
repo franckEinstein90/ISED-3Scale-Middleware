@@ -9,6 +9,14 @@
 /*****************************************************************************/
 
 const createNewUserGroup = function( groupDefinition ){
+    debugger
+    $.post('/userGroups', groupDefinition)
+    .done(x => {
+        debugger
+    })
+    .fail(x => {
+        alert('error')
+    })
 
 }
 
@@ -16,18 +24,31 @@ const editUserGroup = function( groupDefinition ){
 
 }
 
-const deleteUserGroup = function( groupID ){
-
+const deleteUserGroup = function( id ){
+    $.ajax({
+        method: "DELETE",
+        url: '/userGroups',
+        data: {
+           id 
+        }
+    })
+    .done(function(msg) {
+        location.reload(true)
+    })
+    .fail(x => {
+        alert('failed')
+    })  
 }
 
 const loadUserGroupMembers = function( groupID ){
 //    document.getElementById('userGroupsModal').style.display = 'none'
     //dataExchangeStatus.setLoading()
     //fetches and shows user daya associated with this user group
+    debugger
     let group = {
         group: groupID
     }
-    $.get('/GroupUsers', group, function(data) {
+    $.get('/userGroups/users', group, function(data) {
         debugger
      //   dataExchangeStatus.setInactive()
       //  dataTableHandle.clear().draw()
@@ -37,16 +58,33 @@ const loadUserGroupMembers = function( groupID ){
 }
 
 
-
 const displayGroupUsers  = function(groupID) {
 }
 
 const userGroupFeatureConfigure = async function( app ){
 
-      app.userGroupManagement.groupRegister = new Map()
+    app.userGroupManagement.groupRegister = new Map()
 
-      app.userGroupManagement.fetchGroupData = function(){
-         return new Promise((resolve, reject) => {
+    app.userGroupManagement.getGroupDefinition = function(groupID){
+        return new Promise((resolve, reject) => {
+            $.ajax({
+                method: "GET",
+                url: '/userGroups',
+                data: {
+                    id:groupID 
+                }
+            })
+            .done(function( data ) {
+                return resolve(data)
+            })
+            .fail( err => {
+               return reject(err) 
+            })  
+        })
+    }
+
+    app.userGroupManagement.fetchGroupData = function(){
+        return new Promise((resolve, reject) => {
             app.fetchServerData('userGroups')
             .then( result => {
                     app.userGroupManagement.groupRegister.clear()
@@ -57,8 +95,7 @@ const userGroupFeatureConfigure = async function( app ){
             })
          })
       }
-
-      return app.userGroupManagement.fetchGroupData()
+    return app.userGroupManagement.fetchGroupData()
 }
 
 const addUserGroupFeature = function( clientApp ){
@@ -84,7 +121,8 @@ const addUserGroupFeature = function( clientApp ){
         })
 
         clientApp.userGroupManagement.addFeature({
-            label: 'loadUserGroupMembers', 
+            label: 'loadUserGroupMembers',
+            description: "loads the users that fit the group's definition" , 
             method: loadUserGroupMembers
         })
 

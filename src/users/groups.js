@@ -12,6 +12,18 @@ const UserGroup         =  require('@clientServerCommon/userGroups').UserGroup
 const tenantsManager    = require('@tenants/tenantsManager').tenantsManager
 /*****************************************************************************/
 
+const _getAllGroupProperties = function(id, _db) {
+    return _db.getAllTableRows({
+        table: 'groups', 
+        where: `ID = ${id}`})
+
+    .then(result => {
+        if(Array.isArray(result) && result.length > 0){
+           return result[0]
+        }
+    })
+}
+
 const _getGroupDefinitions = function( _db ){
        
     return new Promise((resolve, reject) => { //gets the groups definitions and properties from database
@@ -40,6 +52,7 @@ const _getGroupMembers = function( group ){
         let t = tenantsManager.getTenantByName(tenantName)
     }))
 }
+
 const groups = function(db, gr){
     let _db = db
     let _groups = new Map()
@@ -130,119 +143,6 @@ const groupFeature = function(app) {
     })
 }
 
-//getGroupList = async function(req, res, next) {
- //   debugger
-/*    console.log(_app)
-    //returns list of defined user groups
-    let groupList = _app.userGroups.getGroupList()
-    res.send( groupList )*/
-
-/*
-
-
-
-postNewUserGroup =  async function(req, res, next) {
-    let groupName = req.body.name
-    let groupDescription = req.body.groupDescription
-    let groupUserProperties = req.body['userProperties[]']
-    let groupTenants = req.body['tenants[]']
-    let groupEmailPattern = req.body.groupEmailPattern
-    _app.userGroups.postNewUserGroup({
-            groupName,
-            groupDescription,
-            groupUserProperties,
-            groupTenants,
-            groupEmailPattern
-        })
-        .then(groupID => {
-            res.send(200)
-        })
-}*/
-
-/*const userGroupRoutes = function( app ) {
-
-    let _app = app
-
-    return {
-
-      
-        getGroupUsers: async function(req, res, next) {
-            //returns an array of user accounts
-            //meeting the property of the 
-            //group passed in as argument
-            let groupID = req.query.group
-            _app.userGroups.getGroupUserAccountInfo(groupID)
-                .then(userAccounts => {
-                    res.send(userAccounts)
-                })
-        },
-
-        findUsers: async function(req, res, next) {
-            let emailSearchString = req.query.search
-            let tenantsNames = req.query.tenants
-
-            let filter = {
-                providerAccountsFilter: req.query.userProperties.includes('providerAccount'),
-                hasKeyCloakAccountFilter: req.query.userProperties.includes('keyCloakAccount'),
-                otpNotEnabledFilter: req.query.userProperties.includes('otpNotEnabled')
-            }
-            return userListPromise({
-                    tenantsNames,
-                    filter
-                })
-                .then(userArrays => {
-                    messages.emitRefreshBottomStatusBar(`Obtained ${userArrays.length} groups of users`)
-                    let returnArray = []
-                    userArrays.forEach(tenantUsers =>
-                        tenantUsers.forEach(user => {
-                            if (!returnArray.includes(user.user.email)) {
-                                returnArray.push(user.user.email)
-                            }
-                        }))
-                    return returnArray
-                })
-                .then(userEmails => {
-                    messages.emitRefreshBottomStatusBar(`Filtering through ${userEmails.length} total users`)
-                    if (appStatus.keyCloakEnabled()) {
-                        let keyCloakProfiles = userEmails.map(email => users.getUserList(email))
-                        return Promise.all(keyCloakProfiles)
-                    }
-                })
-                .then(results => {
-                    if (filter.hasKeyCloakAccountFilter) {
-                        results = results.filter(user => ('id' in user))
-                        messages.emitRefreshBottomStatusBar(`Filtering through ${results.length} keyCloak accounts`)
-                        if (filter.otpNotEnabledFilter) {
-                            results = results.filter(user => !(user.requiredActions.includes("CONFIGURE_TOTP") || (user.disableableCredentialTypes.includes('otp'))))
-                        }
-                    }
-                    res.send(results)
-                    messages.emitRefreshBottomStatusBar(`Matched ${results.length} users`)
-                })
-        },
-
-      
-
-        deleteUserGroup: async function(req, res, next) {
-            let groupName = req.body.groupName
-            userGroups.deleteGroup(groupName)
-                .then(resCode => {
-                    res.send(resCode)
-                })
-        }
-    }
-}
-
-
-
-const addUserGroupRoutes = function( app ){
-    if( 'routes' in app === false ){
-        app.routes = {}
-    }
-    app.routes.groups = userGroupRoutes( app )
-    return app
-}*/
-
 const addComponentMethods = function( app ){
     app.userGroups.groups = new Map()
     
@@ -252,29 +152,78 @@ const addComponentMethods = function( app ){
         method: x => _getGroupDefinitions(app.localDb)
     })
 
+    app.userGroups.addFeature({
+        label: 'getCompleteGroupDefinition', 
+        description: 'Gets the complete group definition', 
+        method: id => _getAllGroupProperties(id, app.localDb) 
+    })
+
+  
+
     app.userGroups.getGroupsInfo = (req, res, next)=>{
+        if('query' in req && 'id' in req.query){
+            app.userGroups.getCompleteGroupDefinition(req.query.id, app.localDb)
+            .then( result => {
+                res.send(result)
+            })
+            return 
+        }
+        console.log(req)
         app.userGroups.getGroupDefinitions()
         .then( groupData => {
             res.send(groupData)
         })
     }
     app.userGroups.createNewGroup = (req, res, next)=>{
-        
+        let selectedTenants = req.body['selectedTenants[]']
+        app.localDb.insertInTable({
+            table: 'groups', 
+            values: {
+                Description: req.body.Description, 
+                emailPattern: req.body.emailPattern, 
+                name: req.body.name  
+            }
+        })
+        .then( groupID => {
+            let tenantAssociationUpdates = selectedTenants.map(tenant => {
+                app.localDb.insertInTable({
+                    table: 'lnkGroupsTenants', 
+                    values: {
+                        group: groupID, 
+                        tenant
+                    }
+                })
+            })
+            return Promise.all( tenantAssociationUpdates )
+        })
+        .then( _ =>{ 
+           res.send( { status: 'OK'})
+        })
     }
     app.userGroups.getGroupUsers = (req, res, next)=>{
-        
+        let groupID = req.query.group
+        app.localDb.getAllTableRows({
+            table: 'lnkGroupsTenants', 
+            where: `[group] = ${groupID}`
+        })
+        .then( result => {
+            debugger
+        })
     }
     app.userGroups.deleteUserGroup  = (req, res, next)=>{
-        
+        let groupID = req.body.id
+        app.localDb.removeFromTable({
+            table: 'groups', 
+            where: `ID = ${groupID}`
+        })
+        .then( result => {
+            res.send('Ok')
+        })
     }
     app.userGroups.editGroup = (req, res, next)=>{
-        
+       debugger 
     }
 
-    app.userGroups.getGroupDefinitions()
-    .then(definitions => {
-        debugger
-    })
 }
 
 const configureUserGroupRouter = function (app ){

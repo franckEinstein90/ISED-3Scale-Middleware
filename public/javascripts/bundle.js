@@ -4617,9 +4617,19 @@ class Feature {
 
 }
 
-function AppComponent( component ){
+function AppComponent( componentDefinition ){
 
+    this.label = componentDefinition.label
     let _features = new Map()
+
+    if('methods' in componentDefinition) {
+        Object.keys(componentDefinition.methods).forEach(
+            (key, index)=>{
+                if(key === 'configure') return
+                _features[key] = true
+                this[key] = componentDefinition.methods[key]
+            })
+    }
 
     this.addFeature =  function(feature){
         if(!('label' in feature)) throw 'error in feature definition'
@@ -4663,10 +4673,10 @@ const featureSystem = function( app ){
             return false
         },
 
-        addComponent : function({label, component}){
-            let newComponent = new AppComponent( component )
-            _components.set(label, newComponent)
-            app[label] = newComponent 
+        addComponent : function( componentInfo ){
+            let newComponent = new AppComponent( componentInfo )
+            _components.set(newComponent.label, newComponent)
+            app[newComponent.label] = newComponent 
         }, 
 
         add : function( feature ){
@@ -4990,27 +5000,32 @@ const mainPageGroupDisplay = function( app ){
             groupName,
             `<i id="${groupName}UserListDisplay" class="fa fa-eye w3-large w3-text-black groupCmd"></i>`, 
             `<i id="${groupName}GroupEdit" class="fa fa-gears  w3-large w3-text-black groupCmd"></i>`, 
-            `<i class="fa fa-trash w3-large w3-text-black groupCmd"></i>`]
+            `<i id="groupDelete_${groupID}" class="fa fa-trash w3-large w3-text-black groupCmd"></i>`]
   
         return groupRow
     }
-
-
-    app.groups.forEach( group => {
-        _tableHandle.row.add( _userGroupRow(group.name, group.id) ).draw( false )
-        
-        $('#' + group.name + 'UserListDisplay').click(function(event) {
-            event.preventDefault()
-            displayGroupUsers(group.name, group.id)
-        })
-
-        app.ui.addUiTrigger({
-            triggerID: group.name + "GroupEdit", 
-            action: x => app.ui.userGroupModal({
-                editGroup: group.name
+    app.userGroupManagement.groupRegister.forEach( 
+       (name, id) => {
+            _tableHandle.row.add( _userGroupRow(name, id) ).draw( false )
+       
+            $(`#groupDelete_${id}`).click(function(event){
+                event.preventDefault()
+                app.userGroupManagement.deleteUserGroup(id)
             })
-        })
-    })
+
+            $('#' + name + 'UserListDisplay').click(function(event) {
+                event.preventDefault()
+                app.userGroupManagement.loadUserGroupMembers(id)
+            })
+
+            app.ui.addUiTrigger({
+                triggerID: name + "GroupEdit", 
+                action: event  => {
+                    app.userGroupManagement.getGroupDefinition(id)
+                    .then(groupInfo =>  app.ui.userGroupModal(event, groupInfo))
+               }
+            })
+       })
 
     return app
 }
@@ -5029,74 +5044,130 @@ module.exports = {
  * ***************************************************************************/
 "use strict"
 /*****************************************************************************/
-const tenantSelectionTable = function(options){
+
+const selectedTenants = new Map() 
+
+const tenantSelectionTable = function( ){
     return [
-        `<label class="groupCreationLabel"><b>Included tenants</b></label>`,
-        options.tenantSelection 
-        `<table>`,
-        `</table>`
+            `<label class="groupCreationLabel"><b>Included tenants</b></label>`,
+            `<br/> <button id="selectAllTenants">select all</button>`, 
+            `<button id="unselectAllTenants">unselect all</button><br/>`, 
+            `<table id="groupsTenantsSelectionTable" class="display" style="color:black">`,
+            `<thead> <tr> <th>Tenant</th> </tr> </thead>`, 
+            `<tbody> <tr><td>da</td></tr> </tbody>`, 
+            `</table>`
     ].join('')
 }
-/*
-  <br/>
-      <button id="selectAllTenants">select all</button>
-      <button id="unselectAllTenants">unselect all</button>
-  <br/>
-
- <table id="groupsTenantsSelectionTable" class="display" style="color:black">
-    <thead>
-      <tr>
-        <th>Name</th>
-      </tr>
-    </thead>  
-    <tbody>
-      <tr><td>da</td></tr>
-    </tbody> 
-</table>*/
 
 
-const formTemplate = function(options){
+const formTemplate = function( formContent, submitID ){
     return [
-        `<form class="w3-container w3-left-align">`, 
             `<div class="w3-row">`, 
                 `<div class='w3-col m5 l5 w3-left-align' style="margin-right:20px">`, 
-                    `left`, 
+                    formContent, 
                 `</div>`, 
                 `<div class='w3-col m5 l5 w3-right-align"'>`, 
-                  'right', //  `${tenantSelectionTable(options)}`, 
+                    tenantSelectionTable(),  
                 `</div>`, 
             `</div>`, 
             `<div class="w3-row" style='margin:15,15,15,15'>`, 
                 `<br/>`, 
                 `<button class="w3-btn w3-blue w3-block" id="createNewGroup" >`, 
-                    `${options.editGroup ? 'Save Changes':'Create New Group'}`, 
+                    'submit', 
                 `</button>`, 
                 ` <br/>`, 
-            ` </div>`, 
-        `</form>`].join('')
+            ` </div>`].join('')
 }
 
 const userGroupCreateEditWindowFeature = function( app ){
+
+    let groupNameInput = value => app.ui.textField({
+            label: 'Group Name',
+            value: value || null,  
+            htmlID: 'userGroupName'
+    })
+
+    let groupEmailPattern  = value => app.ui.textField({
+            label: 'Email Pattern',
+            value: value || null,  
+            htmlID: 'groupEmailPattern'
+    })
+    
+    let groupDescription = value => app.ui.textArea({
+            label: "Description", 
+            value: value || null, 
+            htmlID: 'userGroupDescription'
+    })
+
+    let hiddenIDInput = value => app.ui.hidden({
+            htmlID: 'groupID', 
+            value
+    })
+	
+    let groupPropertySubform = function({
+        id, 
+        groupName, 
+        emailPattern, 
+        description
+    }){
+        return [
+            `${id ? hiddenIDInput(id) : ""}`, 
+            `${groupNameInput(groupName)}`, 
+            `${groupEmailPattern(emailPattern)}`, 
+            `${groupDescription(description)}`
+        ].join('')
+    }
+
     return {
-        showUserGroupModal  : function(options){
+
+        showUserGroupModal  : function( event, options){
+            event.preventDefault()
+            let htmlID = null
+            selectedTenants.clear()
+            if(options.ID){
+            }
+            else {
+                  htmlID = 'createNewGroup'
+            }
+            let formContent = app.ui.createForm(formTemplate(
+                    groupPropertySubform({
+                        id          : options.ID|| null,
+                        groupName   : options.name|| null, 
+                        emailPattern: options.emailPattern || null, 
+                        description : options.Description || null
+                    })))
             app.showModal({
-                title: (options.editGroup ? `Edit group: ${options.editGroup}` : "New User Group"), 
-                content: formTemplate( options )
+                title: options.ID? `Editing group: ${options.ID}` : "New User Group", 
+                content: formContent
+            })
+            tenantDomainTable( app )
+            app.ui.addUiTrigger({
+                triggerID: htmlID,  
+                action: x => {
+                    let groupFormValues = getGroupFormInputs()
+                    app.userGroupManagement.createNewUserGroup( groupFormValues )
+                } 
             })
         }
     }
 }
 
 const getGroupFormInputs = function() {
+   let tenants = []
+   selectedTenants.forEach((_, tenant)=>tenants.push(tenant))
+   return {
+                name: $('#userGroupName').val(), 
+                emailPattern : $('#groupEmailPattern').val(),
+                Description : $('#userGroupDescription').val(), 
+                selectedTenants : tenants
+   }
+        //
     //gets the parameters from a new group creation
 
-    let userProperties = []
-    let groupDescription = $('#userGroupDescription').val()
-    let newGroupName = $('#userGroupName').val()
-    let groupEmailPattern = $('#groupEmailPattern').val()
+   /* let userProperties = []*/
+//    let groupDescription = $('#userGroupDescription').val()
 
-    
-    if ($('#providerAccountSearchSelect').is(":checked")) {
+   /* if ($('#providerAccountSearchSelect').is(":checked")) {
         userProperties.push('providerAccount')
     }
     if ($('#keyCloakAccountSelect').is(":checked")) {
@@ -5110,11 +5181,11 @@ const getGroupFormInputs = function() {
         name: newGroupName,
         groupDescription,
         groupEmailPattern
-    }
+    }*/
 }
 
 const tenantDomainTable = function( app ){
-   let selectedTenants = new Map()
+
 
    let _groupTenantDomainsUI = $('#groupsTenantsSelectionTable').DataTable({
         'info': true, 
@@ -5138,41 +5209,35 @@ const tenantDomainTable = function( app ){
             $(this).addClass('selected')
         }
     })
-
-    $('#createNewGroup').click(function(){
-        debugger
-        let formInput = getGroupFormInputs()
-        let groupTenants = []
-        selectedTenants.forEach((_, name) => groupTenants.push(name))
-        formInput['tenants[]'] = groupTenants 
-        $.post('/newUserGroup', formInput)
-            .done(x => {
-                debugger
-            })
-            .fail(x => {
-                alert('error')
-            })
-    })
 }
 
+
+
 const addFeature = async function( app ){
+
     let userEditCreateModal = userGroupCreateEditWindowFeature( app )
-    app.ui.addFeature({label: 'userGroupModal', method: userEditCreateModal.showUserGroupModal})
-    app.ui.addUiTrigger({
-        triggerID: 'newGroupFromMain', 
-        action: app.ui.userGroupModal
+
+    app.ui.addFeature({
+        label: 'userGroupModal', 
+        method: (event, formType) => userEditCreateModal.showUserGroupModal(event, formType)
     })
+
+    app.ui.addUiTrigger({
+        triggerID   : 'newGroupFromMain', 
+        action      : event => app.ui.userGroupModal(event, "new")
+    })
+
     app.ui.addUiTrigger({
         triggerID: 'manageUsersBtn', 
         action: app.ui.userGroupModal
     })
     return app
-//    let _dataTableHandle = $('#userFormGroupList').DataTable()
-//    return configureNewGroupModalWindow( app )
 }
+
 module.exports = {
     addFeature
 }
+
 },{}],10:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED
@@ -5184,15 +5249,47 @@ module.exports = {
 "use strict"
 /*****************************************************************************/
 
+const createNewUserGroup = function( groupDefinition ){
+    debugger
+    $.post('/userGroups', groupDefinition)
+    .done(x => {
+        debugger
+    })
+    .fail(x => {
+        alert('error')
+    })
 
-const displayGroupUsers  = function(groupID) {
+}
+
+const editUserGroup = function( groupDefinition ){
+
+}
+
+const deleteUserGroup = function( id ){
+    $.ajax({
+        method: "DELETE",
+        url: '/userGroups',
+        data: {
+           id 
+        }
+    })
+    .done(function(msg) {
+        location.reload(true)
+    })
+    .fail(x => {
+        alert('failed')
+    })  
+}
+
+const loadUserGroupMembers = function( groupID ){
 //    document.getElementById('userGroupsModal').style.display = 'none'
     //dataExchangeStatus.setLoading()
     //fetches and shows user daya associated with this user group
+    debugger
     let group = {
         group: groupID
     }
-    $.get('/GroupUsers', group, function(data) {
+    $.get('/userGroups/users', group, function(data) {
         debugger
      //   dataExchangeStatus.setInactive()
       //  dataTableHandle.clear().draw()
@@ -5201,61 +5298,87 @@ const displayGroupUsers  = function(groupID) {
     })
 }
 
+
+const displayGroupUsers  = function(groupID) {
+}
+
 const userGroupFeatureConfigure = async function( app ){
 
-      let _groups = new Map()
+    app.userGroupManagement.groupRegister = new Map()
 
-      let _fetchGroupData = function(){
-         return new Promise((resolve, reject) => {
-            app.fetchServerData('Groups')
+    app.userGroupManagement.getGroupDefinition = function(groupID){
+        return new Promise((resolve, reject) => {
+            $.ajax({
+                method: "GET",
+                url: '/userGroups',
+                data: {
+                    id:groupID 
+                }
+            })
+            .done(function( data ) {
+                return resolve(data)
+            })
+            .fail( err => {
+               return reject(err) 
+            })  
+        })
+    }
+
+    app.userGroupManagement.fetchGroupData = function(){
+        return new Promise((resolve, reject) => {
+            app.fetchServerData('userGroups')
             .then( result => {
-
-                    _groups.clear()
+                    app.userGroupManagement.groupRegister.clear()
                     result.forEach(group => {
-                        _groups.set(group.ID, group.name)
+                        app.userGroupManagement.groupRegister.set(group.ID, group.name)
                     })
                     return resolve(result)
             })
          })
       }
-
-      return _fetchGroupData( )
-       .then (_ =>{
-         return {
-
-            get groups() {
-               let groupList = []
-               _groups.forEach((name, id) => groupList.push({id, name}))
-               return groupList
-            }
-       
-         }
-      })
+    return app.userGroupManagement.fetchGroupData()
 }
 
 const addUserGroupFeature = function( clientApp ){
 
-   userGroupFeatureConfigure( clientApp )
-   .then( userGroupFeature => {
-      clientApp.addFeature({label: 'userGroups', implemented: true})
-      Object.defineProperty( clientApp, 'groups',  {get: function(){return userGroupFeature.groups}})
-      clientApp.ui.groupTenantSelectionTable = group => {
-         return [
-            '<table>', 
-            '<tr><td>hello</td></tr>', 
-            '</table>'].join('')
-      }
+    userGroupFeatureConfigure( clientApp )
+
+    .then( userGroupInfo => {
+
+        clientApp.userGroupManagement.addFeature({
+            label: 'createNewUserGroup', 
+            description: 'creates a new user group', 
+            method: createNewUserGroup
+        })
+
+        clientApp.userGroupManagement.addFeature({
+            label: 'editUserGroup', 
+            method:  editUserGroup
+        })
+
+        clientApp.userGroupManagement.addFeature({
+            label: 'deleteUserGroup', 
+            method: deleteUserGroup 
+        })
+
+        clientApp.userGroupManagement.addFeature({
+            label: 'loadUserGroupMembers',
+            description: "loads the users that fit the group's definition" , 
+            method: loadUserGroupMembers
+        })
+
       return clientApp
-   })
-   .then( clientApp => {
-      return require('./newUserGroupForm').addFeature( clientApp )
+    })
+
+    .then( clientApp => {
+      require('./newUserGroupForm').addFeature( clientApp )
       return clientApp
-   })
-   .then( clientApp =>{
+    })
+
+    .then( clientApp =>{
       require('./mainPageUserGroupDisplay.js').addFeature( clientApp )
       return clientApp 
    })
-
 }
 
 module.exports = {
@@ -5306,18 +5429,20 @@ $(function() {
     })
 
     .then( app => {
+
+        app.addComponent({label: 'userGroupManagement'})
         require('./ui').ui( app )
-        require('./errors/errors').addErrorHandling( apiCanClient)
-        require('./data/data').addServerComFeature( apiCanClient)
-        require('./adminTools').addAdminTools( apiCanClient)
+        require('./errors/errors').addErrorHandling(  app )
+        require('./data/data').addServerComFeature(  app )
+        require('./adminTools').addAdminTools( app )
 	
-        timer.configure( apiCanClient )
+        timer.configure( app )
         timer.eachMinute()
         setInterval(timer.eachMinute, 10000)
 
         //service inspect feature
-        require('./storeServices').addServiceInspectFeature( apiCanClient )
-        require('./groups/userGroups').addUserGroupFeature( apiCanClient )
+        require('./storeServices').addServiceInspectFeature( app )
+        require('./groups/userGroups').addUserGroupFeature( app )
 
 
     })    
@@ -5639,8 +5764,6 @@ module.exports = {
 
 
 let _initStaticUI = function(){
-
-  
     $('#appStatus').click(function( event ) {
         this.classList.toggle("active")
         let statusDetailPaneHeight = $('#appStatusDetail').css('maxHeight')	
@@ -5654,25 +5777,76 @@ let _initStaticUI = function(){
 }
 
 const uiFeature = function( app ){
-    app.ui = {}
+
+    let formInputField = function({
+            label, 
+            inputField
+        }){  //creates an input field
+             return [   
+                `<label class="groupCreationLabel"><b>${label}</b></label>`, 
+                inputField
+             ].join('')
+    }
+
     return {
+
 
         addUiTrigger: function({ triggerID, action}){
 		    $(`#${triggerID}`).click( action )
-        }
+        }, 
 
+        createForm: function( formContent ){
+             return [
+                `<form class="w3-container w3-left-align">`, 
+                  formContent, 
+                `</form>`].join('')
+        }, 
+
+		  hidden		: function({
+				htmlID, 
+				value
+		  }){
+				return `<input type='hidden' id="${htmlID}" name="${htmlID}" value="${value}">`
+		  },
+
+		  textArea  : function({
+				label, 
+				htmlID, 
+				value
+		  }){
+				let textAreaField = formInputField({
+				 	 label, 
+					 inputField: [ `<textarea rows='4' cols='50' class="w3-input w3-border" `, 
+						  				`id="${htmlID}"></textArea>`
+						  			 ].join('')
+				})
+				return textAreaField
+		  }, 
+
+        textField : function({
+            label, 
+            htmlID, 
+            value
+        }){
+            let textField = formInputField({ 
+                label, 
+                inputField: `<input class="w3-input w3-border" id="${htmlID}" value="${value || ''}" type="text">`
+           })
+            return textField
+        }
     }
 }
+
 const ui = function(app) {
-    let ui = uiFeature(app)
-    app.addComponent({label: 'ui', component: {}})
-    app.ui.addFeature({label: 'addUiTrigger', method: ui.addUiTrigger})
+
+    app.addComponent({label: 'ui', methods: uiFeature(app)})
+
     _initStaticUI()
+
     app.showVisibleAPITable = function(tenant, event) {
        $('.tenantsVisibleAPI').hide()
        let apiPaneID = tenant + 'VisibleAPI'
        $('#' + apiPaneID).show()
-
     }
 
     require('./ui/modal').addModalFeature( app )

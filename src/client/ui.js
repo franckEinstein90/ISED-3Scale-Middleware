@@ -31,14 +31,15 @@ const uiFeature = function( app ){
     let formInputField = function({
             label, 
             inputField
-        }){
+        }){  //creates an input field
              return [   
-                    `<label class="groupCreationLabel"><b>${label}</b></label>`, 
-                    inputField
-                ].join('')
+                `<label class="groupCreationLabel"><b>${label}</b></label>`, 
+                inputField
+             ].join('')
     }
 
     return {
+
 
         addUiTrigger: function({ triggerID, action}){
 		    $(`#${triggerID}`).click( action )
@@ -51,6 +52,27 @@ const uiFeature = function( app ){
                 `</form>`].join('')
         }, 
 
+		  hidden		: function({
+				htmlID, 
+				value
+		  }){
+				return `<input type='hidden' id="${htmlID}" name="${htmlID}" value="${value}">`
+		  },
+
+		  textArea  : function({
+				label, 
+				htmlID, 
+				value
+		  }){
+				let textAreaField = formInputField({
+				 	 label, 
+					 inputField: [ `<textarea rows='4' cols='50' class="w3-input w3-border" `, 
+						  				`id="${htmlID}"></textArea>`
+						  			 ].join('')
+				})
+				return textAreaField
+		  }, 
+
         textField : function({
             label, 
             htmlID, 
@@ -59,7 +81,7 @@ const uiFeature = function( app ){
             let textField = formInputField({ 
                 label, 
                 inputField: `<input class="w3-input w3-border" id="${htmlID}" value="${value || ''}" type="text">`
-            })
+           })
             return textField
         }
     }

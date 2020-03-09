@@ -28,9 +28,6 @@ const routingSystem = function( apiCan ) {
     let _apiCan = apiCan
     let router = express.Router()
     let expressStack = apiCan.expressStack
-
-
-    
     expressStack.use('/userGroups', apiCan.userGroups.router)
     expressStack.use('/', router)
     router.get('/', appRoot.render)

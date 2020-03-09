@@ -3,30 +3,20 @@
  * ***************************************************************************/
 "use strict"
 /*****************************************************************************/
-const tenantSelectionTable = function(options){
+
+const selectedTenants = new Map() 
+
+const tenantSelectionTable = function( ){
     return [
-        `<label class="groupCreationLabel"><b>Included tenants</b></label>`,
-        options.tenantSelection 
-        `<table>`,
-        `</table>`
+            `<label class="groupCreationLabel"><b>Included tenants</b></label>`,
+            `<br/> <button id="selectAllTenants">select all</button>`, 
+            `<button id="unselectAllTenants">unselect all</button><br/>`, 
+            `<table id="groupsTenantsSelectionTable" class="display" style="color:black">`,
+            `<thead> <tr> <th>Tenant</th> </tr> </thead>`, 
+            `<tbody> <tr><td>da</td></tr> </tbody>`, 
+            `</table>`
     ].join('')
 }
-/*
-  <br/>
-      <button id="selectAllTenants">select all</button>
-      <button id="unselectAllTenants">unselect all</button>
-  <br/>
-
- <table id="groupsTenantsSelectionTable" class="display" style="color:black">
-    <thead>
-      <tr>
-        <th>Name</th>
-      </tr>
-    </thead>  
-    <tbody>
-      <tr><td>da</td></tr>
-    </tbody> 
-</table>*/
 
 
 const formTemplate = function( formContent, submitID ){
@@ -36,7 +26,7 @@ const formTemplate = function( formContent, submitID ){
                     formContent, 
                 `</div>`, 
                 `<div class='w3-col m5 l5 w3-right-align"'>`, 
-                    'left',  
+                    tenantSelectionTable(),  
                 `</div>`, 
             `</div>`, 
             `<div class="w3-row" style='margin:15,15,15,15'>`, 
@@ -54,22 +44,36 @@ const userGroupCreateEditWindowFeature = function( app ){
             label: 'Group Name',
             value: value || null,  
             htmlID: 'userGroupName'
-        })
+    })
 
     let groupEmailPattern  = value => app.ui.textField({
             label: 'Email Pattern',
             value: value || null,  
             htmlID: 'groupEmailPattern'
     })
- 
+    
+    let groupDescription = value => app.ui.textArea({
+            label: "Description", 
+            value: value || null, 
+            htmlID: 'userGroupDescription'
+    })
 
+    let hiddenIDInput = value => app.ui.hidden({
+            htmlID: 'groupID', 
+            value
+    })
+	
     let groupPropertySubform = function({
+        id, 
         groupName, 
-        emailPattern
+        emailPattern, 
+        description
     }){
         return [
+            `${id ? hiddenIDInput(id) : ""}`, 
             `${groupNameInput(groupName)}`, 
             `${groupEmailPattern(emailPattern)}`, 
+            `${groupDescription(description)}`
         ].join('')
     }
 
@@ -77,29 +81,52 @@ const userGroupCreateEditWindowFeature = function( app ){
 
         showUserGroupModal  : function( event, options){
             event.preventDefault()
-            app.showModal({
-                title: "group form", //(options.editGroup ? `Edit group: ${options.editGroup}` : "New User Group"), 
-                content: app.ui.createForm(formTemplate(
+            let htmlID = null
+            selectedTenants.clear()
+            if(options.ID){
+            }
+            else {
+                  htmlID = 'createNewGroup'
+            }
+            let formContent = app.ui.createForm(formTemplate(
                     groupPropertySubform({
-                        groupName: options.groupName || null, 
+                        id          : options.ID|| null,
+                        groupName   : options.name|| null, 
                         emailPattern: options.emailPattern || null, 
-                        submit: x => alert('fdsa')
+                        description : options.Description || null
                     })))
+            app.showModal({
+                title: options.ID? `Editing group: ${options.ID}` : "New User Group", 
+                content: formContent
+            })
+            tenantDomainTable( app )
+            app.ui.addUiTrigger({
+                triggerID: htmlID,  
+                action: x => {
+                    let groupFormValues = getGroupFormInputs()
+                    app.userGroupManagement.createNewUserGroup( groupFormValues )
+                } 
             })
         }
     }
 }
 
 const getGroupFormInputs = function() {
+   let tenants = []
+   selectedTenants.forEach((_, tenant)=>tenants.push(tenant))
+   return {
+                name: $('#userGroupName').val(), 
+                emailPattern : $('#groupEmailPattern').val(),
+                Description : $('#userGroupDescription').val(), 
+                selectedTenants : tenants
+   }
+        //
     //gets the parameters from a new group creation
 
-    let userProperties = []
-    let groupDescription = $('#userGroupDescription').val()
-    let newGroupName = $('#userGroupName').val()
-    let groupEmailPattern = $('#groupEmailPattern').val()
+   /* let userProperties = []*/
+//    let groupDescription = $('#userGroupDescription').val()
 
-    
-    if ($('#providerAccountSearchSelect').is(":checked")) {
+   /* if ($('#providerAccountSearchSelect').is(":checked")) {
         userProperties.push('providerAccount')
     }
     if ($('#keyCloakAccountSelect').is(":checked")) {
@@ -113,12 +140,11 @@ const getGroupFormInputs = function() {
         name: newGroupName,
         groupDescription,
         groupEmailPattern
-    }
+    }*/
 }
 
 const tenantDomainTable = function( app ){
 
-   let selectedTenants = new Map()
 
    let _groupTenantDomainsUI = $('#groupsTenantsSelectionTable').DataTable({
         'info': true, 
@@ -141,21 +167,6 @@ const tenantDomainTable = function( app ){
             selectedTenants.set(selectedTenant, 1)
             $(this).addClass('selected')
         }
-    })
-
-    $('#createNewGroup').click(function(){
-        debugger
-        let formInput = getGroupFormInputs()
-        let groupTenants = []
-        selectedTenants.forEach((_, name) => groupTenants.push(name))
-        formInput['tenants[]'] = groupTenants 
-        $.post('/newUserGroup', formInput)
-            .done(x => {
-                debugger
-            })
-            .fail(x => {
-                alert('error')
-            })
     })
 }
 
