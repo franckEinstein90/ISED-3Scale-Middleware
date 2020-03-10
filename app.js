@@ -19,20 +19,18 @@
 /*****************************************************************************/
 require('module-alias/register')
 /*****************************************************************************/
-const tenantsManager    = require('@tenants/tenantsManager').tenantsManager
-
 const appStatus         = require('@server/routes/appStatus').appStatus
 const path              = require('path')
 /*****************************************************************************/
 let run = (apiCan) => {
     apiCan.say('*********************************')
     apiCan.say(`apiCan ${apiCan.features.versioning ? apiCan.versionTag : ""} booting`)
-    tenantsManager.updateTenantInformation()
+    apiCan.tenants.updateTenantInformation()
     .then(_ => {
         if (apiCan.clock) apiCan.clock.start()
         apiCan.server.start()  
         let messages = require('@server/messages').messages
-        messages.init(apiCan.io)
+        messages.init(apiCan)
         apiCan.state = "running"
     })
 }
@@ -51,7 +49,9 @@ const APICan = {    //this is the app
 
 
 require('@clientServerCommon/features').addFeatureSystem( APICan )
+require('@clientServerCommon/viewModel').addComponent( APICan )
 require('@src/APICanData').getAppData( APICan )
+
 .then(APICan => {
     require('@server/expressStack').expressConfig( APICan )
     require('@src/process/stats').addProcessStatsFeature( APICan )
@@ -61,9 +61,10 @@ require('@src/APICanData').getAppData( APICan )
 })
 .then( require('@src/APICanVersion').addVersioningFeature ) //versioning support
 .then( apiCan => {                                          //tenant manager configuration
-    tenantsManager.configure( apiCan ) 
+    require('@tenants/tenantsManager').addTenantManagementModule( apiCan ) 
+
     if(apiCan.implements('recurring-events')){
-        apiCan.addNewEvent( "refresh tenant information", 7, tenantsManager.updateTenantInformation)
+        apiCan.addNewEvent( "refresh tenant information", 7, apiCan.tenants.updateTenantInformation)
     }
     return apiCan
 })
@@ -80,7 +81,8 @@ require('@src/APICanData').getAppData( APICan )
 })
 
 .then( apiCan => {
- //   require('@server/routes/userGroupRoutes').addUserGroupRoutes( apiCan )
+
+    require('@server/routes/services').addServiceModule( apiCan )
     require('@server/routingSystem').routingSystem( apiCan )
     appStatus.configure(apiCan)
 

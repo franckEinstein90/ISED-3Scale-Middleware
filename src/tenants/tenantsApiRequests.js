@@ -171,7 +171,7 @@ tenants.Tenant.prototype.getAccountList = function() {
     })
 }
 
-tenants.Tenant.prototype.getAccountUsers = function(accountID) {
+tenants.Tenant.prototype.getAccountUsers = function(accountID, returnMap) {
     let apiCall = [`https://${this.adminDomain}/admin/api/`,
         `accounts/${accountID}/users.json?access_token=${this.accessToken}`
     ].join('')
@@ -180,6 +180,10 @@ tenants.Tenant.prototype.getAccountUsers = function(accountID) {
     let processGoodResponse = function(body) {
         if (validator.isJSON(body)) {
             let users = JSON.parse(body)
+            users.users.forEach(usr => {
+                let user = usr.user
+                if(!returnMap.has(user.email)) returnMap.set(user.email, user)
+            })
             return users
         }
         return bad //couldn't parse response
@@ -209,16 +213,14 @@ tenants.Tenant.prototype.getProviderAccountUsers = function() {
     })
 }
 
-tenants.Tenant.prototype.getUsers = function() {
-    this.getAccountList()
+tenants.Tenant.prototype.getUsers = function(returnStructure) {
+    return this.getAccountList()
         .then(x => {
-            debugger
             let accountIDs = x.map(obj => obj.account.id)
-            return Promise.all(accountIDs.map(accID => this.getAccountUsers(accID)))
+            return Promise.all(accountIDs.map(
+                accID => this.getAccountUsers(accID, returnStructure)))
         })
-        .then(x => {
-            debugger
-        })
+        .then(x => x) 
 }
 
 

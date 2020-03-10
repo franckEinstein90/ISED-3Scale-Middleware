@@ -68,7 +68,7 @@ let openServiceInspectDialog = function({
     document.getElementById('serviceInspectModal').style.display = 'block'
     $('#serviceModalTenantName').text(tenant)
     $('#serviceModalID').text(serviceID)
-    $.get('/serviceInspect', {
+    $.get('/services', {
             tenant,
             service: serviceID
         }, function(apiInfo) {

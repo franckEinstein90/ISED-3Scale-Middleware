@@ -18,8 +18,7 @@ const Tenant = require('@src/responses').tenants.Tenant
 /**********************************************************************************/
 
 const tenantsManager = (function() {
-
-    let _tenants = []
+    let _app = null
     let _updateRegister = new Map()
 
     return {  
@@ -38,16 +37,11 @@ const tenantsManager = (function() {
         }, 
         
         configure: function( apiCan ) {
-            return new Promise((resolve, reject) => {
-                apiCan.data.tenants.forEach((tenantInfo, tenantName) => {
-                    if (tenantInfo.visible) {
-                        _tenants.push(new Tenant(tenantInfo, apiCan.env))
-                        apiCan.say(`Added ${tenantName} to tenant register`)
-                    }
-                })
-                return resolve(apiCan)
+            _app = apiCan
+            apiCan.tenants.list.forEach( t => {
+                apiCan.tenants.register.set(t.name, new Tenant(t, apiCan.data.env.env))
             })
-        },
+        },            
 
         updateTenantInformation: async function(listToUpdate = null) {
             /********************************************************
@@ -55,6 +49,7 @@ const tenantsManager = (function() {
              * memory. If listToUpdate specified, tenant manager 
              * only updates specified tenants
              * *****************************************************/
+            let _tenants = _app.tenants.list
             let tenantsToUpdate = listToUpdate 
                     ? listToUpdate.map(tName => _tenants.find(t => t.name === tName))
                     : /*all*/ _tenants
@@ -80,6 +75,11 @@ const tenantsManager = (function() {
     }
 })()
 
+
+const addTenantManagementModule = function( app ){
+    tenantsManager.configure(app)
+    app.tenants.updateTenantInformation = tenantsManager.updateTenantInformation
+}
 module.exports = {
-    tenantsManager
+   addTenantManagementModule 
 }

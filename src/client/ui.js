@@ -98,21 +98,22 @@ const ui = function(app) {
        let apiPaneID = tenant + 'VisibleAPI'
        $('#' + apiPaneID).show()
     }
-
+    require('./ui/dataExchangeStatus').addDEStatusFeature(app)
     require('./ui/modal').addModalFeature( app )
+    require('./ui/userList').addUserListFeature( app )
     require('./ui/dataTables').addDataTableFeature( app )
 
-    return app
     
 
-    /*scrollToSection: function(sectionID) {
+    app.ui.scrollToSection = function(sectionID) {
             let hash = $('#' + sectionID)
             $('html, body').animate({
                 scrollTop: hash.offset().top
             }, 800, _ => window.location.hash = hash)
-        },*/
+        }
 
 
+    return app
 }
 
 module.exports = {

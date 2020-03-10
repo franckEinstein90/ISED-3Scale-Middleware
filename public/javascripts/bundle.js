@@ -4775,7 +4775,8 @@ const viewModel = function( app ){
     
     return {
 
-        groups : { 
+        groups : {
+            route       : '/userGroups' , 
             ID          : primaryKey, 
             name        : property, 
             Description : property, 
@@ -5348,26 +5349,22 @@ const deleteUserGroup = function( id ){
     })  
 }
 
-const loadUserGroupMembers = function( groupID ){
+const loadUserGroupMembers = function( app, groupID ){
 //    document.getElementById('userGroupsModal').style.display = 'none'
-    //dataExchangeStatus.setLoading()
-    //fetches and shows user daya associated with this user group
-    debugger
-    let group = {
-        group: groupID
-    }
+    app.ui.setLoading()
+    let group = { group: groupID }
     $.get('/userGroups/users', group, function(data) {
-        debugger
-     //   dataExchangeStatus.setInactive()
-      //  dataTableHandle.clear().draw()
+        app.ui.setInactive() 
+        app.ui.userDisplayUI.dataTable.clear().draw()
+        data.forEach( member => {
+            app.ui.userDisplayUI.addRow(member)
+        })
        // keyCloakUsers.showUsers(data)
-//        ui.scrollToSection("userTableSection")
+        app.ui.scrollToSection("userTableSection")
     })
 }
 
 
-const displayGroupUsers  = function(groupID) {
-}
 
 const userGroupFeatureConfigure = async function( app ){
 
@@ -5431,7 +5428,7 @@ const addUserGroupFeature = function( clientApp ){
         clientApp.userGroupManagement.addFeature({
             label: 'loadUserGroupMembers',
             description: "loads the users that fit the group's definition" , 
-            method: loadUserGroupMembers
+            method: groupID => loadUserGroupMembers(clientApp, groupID)
         })
 
       return clientApp
@@ -5490,7 +5487,6 @@ $(function() {
 
     require('../clientServerCommon/features').addFeatureSystem( apiCanClient )
     require('../clientServerCommon/viewModel').addComponent( apiCanClient )
-    debugger
     require('./tenants/tenants').addTenantCollection({
         clientApp: apiCanClient, 
         containerID: 'tenantCards'
@@ -5589,7 +5585,7 @@ let openServiceInspectDialog = function({
     document.getElementById('serviceInspectModal').style.display = 'block'
     $('#serviceModalTenantName').text(tenant)
     $('#serviceModalID').text(serviceID)
-    $.get('/serviceInspect', {
+    $.get('/services', {
             tenant,
             service: serviceID
         }, function(apiInfo) {
@@ -5916,28 +5912,53 @@ const ui = function(app) {
        let apiPaneID = tenant + 'VisibleAPI'
        $('#' + apiPaneID).show()
     }
-
+    require('./ui/dataExchangeStatus').addDEStatusFeature(app)
     require('./ui/modal').addModalFeature( app )
+    require('./ui/userList').addUserListFeature( app )
     require('./ui/dataTables').addDataTableFeature( app )
 
-    return app
     
 
-    /*scrollToSection: function(sectionID) {
+    app.ui.scrollToSection = function(sectionID) {
             let hash = $('#' + sectionID)
             $('html, body').animate({
                 scrollTop: hash.offset().top
             }, 800, _ => window.location.hash = hash)
-        },*/
+        }
 
 
+    return app
 }
 
 module.exports = {
     ui
 }
 
-},{"./ui/dataTables":17,"./ui/modal":18}],17:[function(require,module,exports){
+},{"./ui/dataExchangeStatus":17,"./ui/dataTables":18,"./ui/modal":19,"./ui/userList":20}],17:[function(require,module,exports){
+"use strict"
+
+
+const dataExchangeStatus = (function() {
+    let dataLoading = false
+    return {
+        setLoading: function() {
+            dataLoading = true
+            document.getElementById('loadingIndicator').style.display = 'block'
+        },
+        setInactive: function() {
+            dataLoading = false
+            document.getElementById('loadingIndicator').style.display = 'none'
+        }
+    }
+})()
+const addDEStatusFeature = function( app ){
+    app.ui.setLoading = dataExchangeStatus.setLoading
+    app.ui.setInactive = dataExchangeStatus.setInactive
+}
+module.exports = {
+    addDEStatusFeature
+}
+},{}],18:[function(require,module,exports){
 "use strict"
 
 const dataTables = function( app ){
@@ -5958,7 +5979,7 @@ const addDataTableFeature = function( app ){
 module.exports = {
     addDataTableFeature
 }
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 "use strict"
 
 
@@ -5983,4 +6004,26 @@ module.exports = {
     addModalFeature
 }
 
+},{}],20:[function(require,module,exports){
+"use strict"
+
+
+const addUserListFeature = function( app ){
+    app.ui.userDisplayUI = { 
+        dataTable : $('#selectedUsersList').DataTable()
+    }
+
+    app.ui.userDisplayUI.addRow = function(user){
+
+        app.ui.userDisplayUI.dataTable.row.add([
+            (user.username|| '???'),
+            (user.email || '???'),
+            (user.created_at || '???'),
+            (user.keyCloakAccount || '???')
+        ]).draw(false)
+    }
+}
+module.exports = {
+    addUserListFeature
+}
 },{}]},{},[12]);

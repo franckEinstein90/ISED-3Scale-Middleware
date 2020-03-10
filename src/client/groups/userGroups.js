@@ -40,26 +40,22 @@ const deleteUserGroup = function( id ){
     })  
 }
 
-const loadUserGroupMembers = function( groupID ){
+const loadUserGroupMembers = function( app, groupID ){
 //    document.getElementById('userGroupsModal').style.display = 'none'
-    //dataExchangeStatus.setLoading()
-    //fetches and shows user daya associated with this user group
-    debugger
-    let group = {
-        group: groupID
-    }
+    app.ui.setLoading()
+    let group = { group: groupID }
     $.get('/userGroups/users', group, function(data) {
-        debugger
-     //   dataExchangeStatus.setInactive()
-      //  dataTableHandle.clear().draw()
+        app.ui.setInactive() 
+        app.ui.userDisplayUI.dataTable.clear().draw()
+        data.forEach( member => {
+            app.ui.userDisplayUI.addRow(member)
+        })
        // keyCloakUsers.showUsers(data)
-//        ui.scrollToSection("userTableSection")
+        app.ui.scrollToSection("userTableSection")
     })
 }
 
 
-const displayGroupUsers  = function(groupID) {
-}
 
 const userGroupFeatureConfigure = async function( app ){
 
@@ -123,7 +119,7 @@ const addUserGroupFeature = function( clientApp ){
         clientApp.userGroupManagement.addFeature({
             label: 'loadUserGroupMembers',
             description: "loads the users that fit the group's definition" , 
-            method: loadUserGroupMembers
+            method: groupID => loadUserGroupMembers(clientApp, groupID)
         })
 
       return clientApp

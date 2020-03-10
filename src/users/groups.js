@@ -176,6 +176,7 @@ const addComponentMethods = function( app ){
     }
     app.userGroups.createNewGroup = (req, res, next)=>{
         let selectedTenants = req.body['selectedTenants[]']
+        if(!Array.isArray(selectedTenants)) selectedTenants = [selectedTenants]
         app.localDb.insertInTable({
             table: 'groups', 
             values: {
@@ -200,16 +201,26 @@ const addComponentMethods = function( app ){
            res.send( { status: 'OK'})
         })
     }
+
+    
     app.userGroups.getGroupUsers = (req, res, next)=>{
         let groupID = req.query.group
+        let userStore = new Map()
         app.localDb.getAllTableRows({
             table: 'lnkGroupsTenants', 
             where: `[group] = ${groupID}`
         })
         .then( result => {
-            debugger
+            let tenantDomain = result.map(t => app.tenants.register.get(t.tenant))
+            return Promise.all(tenantDomain.map(t => t.getUsers(userStore))) 
+        })
+        .then( _ => {
+            let resultArray = []
+            userStore.forEach(user => resultArray.push(user))
+            res.send(resultArray)
         })
     }
+
     app.userGroups.deleteUserGroup  = (req, res, next)=>{
         let groupID = req.body.id
         app.localDb.removeFromTable({

@@ -8,20 +8,17 @@
  *  routes definition for service information
  ******************************************************************************/
 "use strict"
-
 /*****************************************************************************/
-const tenantsManager = require('@tenants/tenantsManager').tenantsManager
-/*****************************************************************************/
-const serviceInspectRoutes = (function() {
+const serviceInspectRoutes = function( app ) {
 
     return {
         
-        getServiceInfo: async function(req, res, next) {
-
+        list: async function(req, res, next) {
+            console.log(app)
             let tenantName  = req.query.tenant
             let serviceID   = req.query.service
 
-            let tenant = tenantsManager.getTenantByName(tenantName)
+            let tenant = app.tenants.register.get(tenantName)
             let service = tenant.services.register.get(Number(serviceID))
             let documentation = []
             service.documentation.forEach((docSet, docName) => {
@@ -54,11 +51,21 @@ const serviceInspectRoutes = (function() {
             }
         }
     }
-})()
+}
 
-
+const addServiceModule = function( app ){
+    app.addComponent({
+        label: "services", 
+        methods: serviceInspectRoutes(app)
+    })
+    
+    let serviceRouter = require('express').Router()
+    serviceRouter.get('/', app.services.list)
+    app.services.router = serviceRouter
+    return app
+}
 module.exports = {
-    serviceInspectRoutes
+    addServiceModule
 }
 
 

@@ -14,7 +14,10 @@ const dataExchangeStatus = (function() {
         }
     }
 })()
-
+const addDEStatusFeature = function( app ){
+    app.ui.setLoading = dataExchangeStatus.setLoading
+    app.ui.setInactive = dataExchangeStatus.setInactive
+}
 module.exports = {
-    dataExchangeStatus
+    addDEStatusFeature
 }

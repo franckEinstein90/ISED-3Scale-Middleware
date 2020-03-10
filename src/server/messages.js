@@ -9,18 +9,18 @@
 "use strict"
 
 /******************************************************************************/
-const tenantsManager = require('@tenants/tenantsManager').tenantsManager
 /******************************************************************************/
 
 const messages = (function() {
 
     let _io = null
+    let _app = null
 
     return {
 
         tenantInfo: function() {
             //information on tenants passed to the front end
-            return tenantsManager.tenants().map(t => {
+            return _app.tenants.list.map(t => {
                 let totalServiceCount     = t.services.length()
                 let bilingualServiceCount = t.services.length({
                     bilingual : true
@@ -40,8 +40,9 @@ const messages = (function() {
             })
         },
 
-        init: function(io) {
-            _io = io
+        init: function( app ) {
+            _app = app
+            _io = app.io
             _io.on('connection', function(socket) {
                 console.log('user connected')
             })

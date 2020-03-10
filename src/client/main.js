@@ -35,7 +35,6 @@ $(function() {
 
     require('../clientServerCommon/features').addFeatureSystem( apiCanClient )
     require('../clientServerCommon/viewModel').addComponent( apiCanClient )
-    debugger
     require('./tenants/tenants').addTenantCollection({
         clientApp: apiCanClient, 
         containerID: 'tenantCards'

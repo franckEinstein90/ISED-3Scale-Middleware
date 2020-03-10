@@ -44,9 +44,13 @@ const getKeycloakCredentials = function(env) {
 }
 
 const APICanData = function( app ) {
-
+    //processes the configuration data stored in 
+    //the default.json file
+    app.tenants.register = new Map()
     let _appConfigurationData = getMasterConfigInfo()
-    let _tenantsConfigurationData = new Map()
+    _appConfigurationData.tenants.forEach(t => {
+        if(t.visible) app.tenants.register.set(t.name, t)
+    })
     let _configurationEnv = _appConfigurationData.env
 
     let _jiraAuthCredentials = null 
@@ -69,11 +73,9 @@ const APICanData = function( app ) {
         _APIStoreUserName = null
     }
 
-    _appConfigurationData.tenants.forEach(t => {
-        _tenantsConfigurationData.set(t.name, t)
-    })
-
+   
     return {
+
         port: normalizePort( process.env.PORT || 3000 ), 
 
         env: _appConfigurationData,
@@ -84,22 +86,24 @@ const APICanData = function( app ) {
 
         keycloakCredentials: _keycloakCredentials,
 
-        tenants: {
-            count: _tenantsConfigurationData.size,
-            forEach: function(callback) {
-                _tenantsConfigurationData.forEach(callback)
-            }
-        }
     }
 
 }
 
 const getAppData = function( app ){
+    app.addComponent({
+        label: 'tenants'
+    })
     return new Promise((resolve)=> {
         app.addComponent({
             label: 'data', 
             methods: APICanData(app)
         })
+        Object.defineProperty(app.tenants, 'list', { get: function() {
+            let tenantObjects = []
+            app.tenants.register.forEach(val => tenantObjects.push(val))
+            return tenantObjects
+        }})
         return resolve(app)
     })
 }

@@ -225,15 +225,9 @@ tenants.Tenant.prototype.getAllUsers = function(options) {
                 return userArray
             }))
             .then(users => users.map(user => user.user))
-            .then(x => {
-                debugger
-            })
+            .then(x => x) 
     })
-    return [{
-        firstName: 'paul',
-        lastName: 'Dewar',
-        email: 'dfa@da.ca'
-    }]
+  
 }
 
 tenants.Tenant.prototype.updateServiceDefinitions = async function({
