@@ -19,6 +19,7 @@ const userActions = require('./userActions').userActions
 
 
 $(function() {
+    
     let socket = null
     socket = io()
 

@@ -43,7 +43,9 @@ const deleteUserGroup = function( id ){
 const loadUserGroupMembers = function( app, groupID ){
 //    document.getElementById('userGroupsModal').style.display = 'none'
     app.ui.setLoading()
-    let group = { group: groupID }
+    let group = { 
+        group: groupID 
+    }
     $.get('/userGroups/users', group, function(data) {
         app.ui.setInactive() 
         app.ui.userDisplayUI.dataTable.clear().draw()
@@ -54,8 +56,6 @@ const loadUserGroupMembers = function( app, groupID ){
         app.ui.scrollToSection("userTableSection")
     })
 }
-
-
 
 const userGroupFeatureConfigure = async function( app ){
 

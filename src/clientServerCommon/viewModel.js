@@ -27,24 +27,30 @@ const viewModel = function( app ){
             Description : property, 
             emailPattern: property  
         }, 
+
         groupProperties: {
             name        : primaryKey
         }, 
+
         lnkGroupsProperties: {
             group       : foreignKey('groups'), 
             property    : foreignKey('groupProperties')
         }, 
+
         tenants : {
             tenantCode : primaryKey
         }, 
+
         lnkGroupsTenants : {
             group   : foreignKey('groups'), 
             tenant  : foreignKey('tenants')
         },
+
         actions : {
             label       : primaryKey, 
             description : property 
         },  
+
         groupActionEvents : {
             frequency   : property, 
             group       : foreignKey('groups'), 

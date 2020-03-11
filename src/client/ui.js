@@ -52,14 +52,14 @@ const uiFeature = function( app ){
                 `</form>`].join('')
         }, 
 
-		  hidden		: function({
+		hidden : function({
 				htmlID, 
 				value
 		  }){
 				return `<input type='hidden' id="${htmlID}" name="${htmlID}" value="${value}">`
 		  },
 
-		  textArea  : function({
+		textArea  : function({
 				label, 
 				htmlID, 
 				value
@@ -67,7 +67,7 @@ const uiFeature = function( app ){
 				let textAreaField = formInputField({
 				 	 label, 
 					 inputField: [ `<textarea rows='4' cols='50' class="w3-input w3-border" `, 
-						  				`id="${htmlID}"></textArea>`
+						  			`id="${htmlID}">${value}</textArea>`
 						  			 ].join('')
 				})
 				return textAreaField
@@ -83,8 +83,20 @@ const uiFeature = function( app ){
                 inputField: `<input class="w3-input w3-border" id="${htmlID}" value="${value || ''}" type="text">`
            })
             return textField
+        }, 
+
+        checkBox: function({
+            label, 
+            htmlID, 
+            checked
+        }){
+            return [
+                `<input class="w3-check" id='${htmlID}' type="checkbox" `, 
+                `${checked?'checked="${checked}"':''}>`, 
+                `<label class="groupCreationLabel">${label}</label>`
+            ].join('')
         }
-    }
+   }
 }
 
 const ui = function(app) {

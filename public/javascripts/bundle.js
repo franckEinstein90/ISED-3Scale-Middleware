@@ -4782,24 +4782,30 @@ const viewModel = function( app ){
             Description : property, 
             emailPattern: property  
         }, 
+
         groupProperties: {
             name        : primaryKey
         }, 
+
         lnkGroupsProperties: {
             group       : foreignKey('groups'), 
             property    : foreignKey('groupProperties')
         }, 
+
         tenants : {
             tenantCode : primaryKey
         }, 
+
         lnkGroupsTenants : {
             group   : foreignKey('groups'), 
             tenant  : foreignKey('tenants')
         },
+
         actions : {
             label       : primaryKey, 
             description : property 
         },  
+
         groupActionEvents : {
             frequency   : property, 
             group       : foreignKey('groups'), 
@@ -5171,55 +5177,98 @@ const userGroupCreateEditWindowFeature = function( app ){
             htmlID: 'groupID', 
             value
     })
-	
-    let groupPropertySubform = function({
-        id, 
-        groupName, 
-        emailPattern, 
-        description
-    }){
-        return [
-            `${id ? hiddenIDInput(id) : ""}`, 
-            `${groupNameInput(groupName)}`, 
-            `${groupEmailPattern(emailPattern)}`, 
-            `${groupDescription(description)}`
-        ].join('')
+    
+    let propertyCheck = ( label, htmlID, propertyName, propertyList )  =>{
+        return app.ui.checkBox({
+            label, 
+            htmlID, 
+            checked: propertyList !== undefined && propertyList.includes(propertyName)?'checked': ""
+        })
+    }
+    let groupPropertySubform = function(group){
+        let providerAccountCheck = propertyCheck( 
+            'Provider Accounts Only', 
+            'providerAccountSearchSelect', 
+            'providerAccount', 
+            group !== undefined ? group.properties : [])
+
+        let keyCloakCheck = propertyCheck( 
+            'Has keycloak account only', 
+            'keyCloakAccountSelect', 
+            'keyCloakAccount', 
+            group !== undefined ? group.properties : [])
+
+        let OTPNotEnabledCheck = propertyCheck( 
+            'OTP Not Enabled Only', 
+            'otpNotEnabledSelect', 
+            'otpNotEnabled', 
+            group !== undefined ? group.properties : [])
+
+        if( group !== undefined ){ 
+            return [
+                `${hiddenIDInput(group.ID)}`,  
+                `${groupNameInput(group.name)}`, 
+                `${groupEmailPattern(group.emailPattern)}`, 
+                `${groupDescription(group.Description)}`, 
+                `${providerAccountCheck}<P>${keyCloakCheck}<P>${OTPNotEnabledCheck}`
+            ].join('')
+        } else {
+           return [
+                `${hiddenIDInput()}`,  
+                `${groupNameInput()}`, 
+                `${groupEmailPattern()}`, 
+                `${groupDescription("")}`, 
+                `${keyCloakCheck}${OTPNotEnabledCheck}${providerAccountCheck}`
+            ].join('')
+        }
     }
 
-    return {
-
-        showUserGroupModal  : function( event, options){
-            event.preventDefault()
-            let htmlID = null
-            selectedTenants.clear()
-            if(options.ID){
-            }
-            else {
-                  htmlID = 'createNewGroup'
-            }
-            let formContent = app.ui.createForm(formTemplate(
-                    groupPropertySubform({
-                        id          : options.ID|| null,
-                        groupName   : options.name|| null, 
-                        emailPattern: options.emailPattern || null, 
-                        description : options.Description || null
-                    })))
-            app.showModal({
-                title: options.ID? `Editing group: ${options.ID}` : "New User Group", 
+    let editForm = function( group ){
+        let htmlID = 'editExistingGroup'
+        let groupProperties =  groupPropertySubform(group)
+        selectedTenants.clear()
+        let formContent = app.ui.createForm(formTemplate(groupProperties))
+        app.showModal({
+                title: `Editing group: ${group.ID}`,  
                 content: formContent
-            })
-            tenantDomainTable( app )
-            app.ui.addUiTrigger({
-                triggerID: htmlID,  
-                action: x => {
+        })
+        tenantDomainTable( app )
+        app.ui.addUiTrigger({
+            triggerID: htmlID,  
+            action: x => {
                     let groupFormValues = getGroupFormInputs()
                     app.userGroupManagement.createNewUserGroup( groupFormValues )
-                } 
-            })
+                }})
+    }
+    return {
+
+        showUserGroupModal  : function( event, group){
+            debugger
+            event.preventDefault()
+            selectedTenants.clear()
+            if( group !== undefined ){  //editing an existing group
+                editForm(group)
+            }
+            else {
+                let htmlID = 'createNewGroup'
+                let groupProperties = groupPropertySubform()
+                let formContent = app.ui.createForm(formTemplate(groupProperties))
+                app.showModal({
+                    title: "New User Group", 
+                    content: formContent
+                })
+                tenantDomainTable( app )
+                app.ui.addUiTrigger({
+                    triggerID: htmlID,  
+                    action: x => {
+                        let groupFormValues = getGroupFormInputs()
+                        app.userGroupManagement.createNewUserGroup( groupFormValues )
+                    }
+                })
+            }
         }
     }
 }
-
 const getGroupFormInputs = function() {
    let tenants = []
    selectedTenants.forEach((_, tenant)=>tenants.push(tenant))
@@ -5292,7 +5341,7 @@ const addFeature = async function( app ){
 
     app.ui.addUiTrigger({
         triggerID   : 'newGroupFromMain', 
-        action      : event => app.ui.userGroupModal(event, "new")
+        action      : event => app.ui.userGroupModal( event )
     })
 
     app.ui.addUiTrigger({
@@ -5352,7 +5401,9 @@ const deleteUserGroup = function( id ){
 const loadUserGroupMembers = function( app, groupID ){
 //    document.getElementById('userGroupsModal').style.display = 'none'
     app.ui.setLoading()
-    let group = { group: groupID }
+    let group = { 
+        group: groupID 
+    }
     $.get('/userGroups/users', group, function(data) {
         app.ui.setInactive() 
         app.ui.userDisplayUI.dataTable.clear().draw()
@@ -5363,8 +5414,6 @@ const loadUserGroupMembers = function( app, groupID ){
         app.ui.scrollToSection("userTableSection")
     })
 }
-
-
 
 const userGroupFeatureConfigure = async function( app ){
 
@@ -5471,6 +5520,7 @@ const userActions = require('./userActions').userActions
 
 
 $(function() {
+    
     let socket = null
     socket = io()
 
@@ -5866,14 +5916,14 @@ const uiFeature = function( app ){
                 `</form>`].join('')
         }, 
 
-		  hidden		: function({
+		hidden : function({
 				htmlID, 
 				value
 		  }){
 				return `<input type='hidden' id="${htmlID}" name="${htmlID}" value="${value}">`
 		  },
 
-		  textArea  : function({
+		textArea  : function({
 				label, 
 				htmlID, 
 				value
@@ -5881,7 +5931,7 @@ const uiFeature = function( app ){
 				let textAreaField = formInputField({
 				 	 label, 
 					 inputField: [ `<textarea rows='4' cols='50' class="w3-input w3-border" `, 
-						  				`id="${htmlID}"></textArea>`
+						  			`id="${htmlID}">${value}</textArea>`
 						  			 ].join('')
 				})
 				return textAreaField
@@ -5897,8 +5947,20 @@ const uiFeature = function( app ){
                 inputField: `<input class="w3-input w3-border" id="${htmlID}" value="${value || ''}" type="text">`
            })
             return textField
+        }, 
+
+        checkBox: function({
+            label, 
+            htmlID, 
+            checked
+        }){
+            return [
+                `<input class="w3-check" id='${htmlID}' type="checkbox" `, 
+                `${checked?'checked="${checked}"':''}>`, 
+                `<label class="groupCreationLabel">${label}</label>`
+            ].join('')
         }
-    }
+   }
 }
 
 const ui = function(app) {

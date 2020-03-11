@@ -1,6 +1,7 @@
 "use strict"
 
 class UserGroup {
+
     constructor({
         id, 
         name, 
@@ -11,12 +12,10 @@ class UserGroup {
         this.name           = name
         this.description    = description
         this.emailPattern   = emailPattern
+        this.properties     = []
         this.tenants        = []
     }
-
-    addTenantAssociation(tenantName){
-        this.tenants.push(tenantName)
-    }
+  
 }
 
 module.exports = {

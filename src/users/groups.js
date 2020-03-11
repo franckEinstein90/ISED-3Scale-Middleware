@@ -8,21 +8,7 @@
  ******************************************************************************/
 "use strict"
 /*****************************************************************************/
-const UserGroup         =  require('@clientServerCommon/userGroups').UserGroup
-const tenantsManager    = require('@tenants/tenantsManager').tenantsManager
 /*****************************************************************************/
-
-const _getAllGroupProperties = function(id, _db) {
-    return _db.getAllTableRows({
-        table: 'groups', 
-        where: `ID = ${id}`})
-
-    .then(result => {
-        if(Array.isArray(result) && result.length > 0){
-           return result[0]
-        }
-    })
-}
 
 const _getGroupDefinitions = function( _db ){
        
@@ -152,16 +138,15 @@ const addComponentMethods = function( app ){
         method: x => _getGroupDefinitions(app.localDb)
     })
 
+    let getCompleteGroupDefinition = require("@users/dbConnection").getCompleteGroupDefinition
     app.userGroups.addFeature({
         label: 'getCompleteGroupDefinition', 
         description: 'Gets the complete group definition', 
-        method: id => _getAllGroupProperties(id, app.localDb) 
+        method: id => getCompleteGroupDefinition(id, app.localDb) 
     })
 
-  
-
     app.userGroups.getGroupsInfo = (req, res, next)=>{
-        if('query' in req && 'id' in req.query){
+        if('query' in req && 'id' in req.query){ //return a complete groupDefinition
             app.userGroups.getCompleteGroupDefinition(req.query.id, app.localDb)
             .then( result => {
                 res.send(result)
@@ -170,10 +155,9 @@ const addComponentMethods = function( app ){
         }
         console.log(req)
         app.userGroups.getGroupDefinitions()
-        .then( groupData => {
-            res.send(groupData)
-        })
-    }
+        .then( result => res.send(result) )
+    } 
+
     app.userGroups.createNewGroup = (req, res, next)=>{
         let selectedTenants = req.body['selectedTenants[]']
         if(!Array.isArray(selectedTenants)) selectedTenants = [selectedTenants]
@@ -202,8 +186,8 @@ const addComponentMethods = function( app ){
         })
     }
 
-    
     app.userGroups.getGroupUsers = (req, res, next)=>{
+        
         let groupID = req.query.group
         let userStore = new Map()
         app.localDb.getAllTableRows({
@@ -245,10 +229,12 @@ const configureUserGroupRouter = function (app ){
     groupRouter.get('/users', app.userGroups.getGroupUsers)
     groupRouter.delete('/', app.userGroups.deleteUserGroup )
     groupRouter.post('/edit', app.userGroups.editGroup)
-
     app.userGroups.router = groupRouter
+
 }
+
 const addUserGroupFeature = function( app ){
+
     app.addComponent({
         label: 'userGroups'
     })
