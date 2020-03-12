@@ -8,20 +8,10 @@
  ******************************************************************************/
 "use strict"
 /*****************************************************************************/
+const _ = require('underscore')
 /*****************************************************************************/
 
-const _getGroupDefinitions = function( _db ){
-       
-    return new Promise((resolve, reject) => { //gets the groups definitions and properties from database
-        _db.getAllTableRows({
-            table: 'groups', 
-            where: null
-        })
-        .then( groupData => {
-           return resolve( groupData ) 
-        })
-    })
-}
+
 const _getGroupTenants = function( _db, groupArray ){
     let ids = groupArray.map( group => `[group] = ${group.ID}`).join(' OR ')
     return new Promise((resolve, reject) => {
@@ -32,6 +22,7 @@ const _getGroupTenants = function( _db, groupArray ){
         .then( groupData => resolve(groupData) )
     })
 }
+
 const _getGroupMembers = function( group ){
 
     return Promise.all( group.tenants.map( tenantName => {
@@ -111,31 +102,17 @@ const groups = function(db, gr){
                 debugger
             })
         }, 
-
-
     }
 }
 
-const groupFeature = function(app) {
-    let _db  = app.localDatabase
-
-    return _getGroupDefinitions( _db )
-    .then( gr => {              //get group info from database
-           app.userGroups =  groups(_db, gr)
-           return app
-        })
-    .then( app => {
-        return app.userGroups.getGroupTenants()
-    })
-}
-
 const addComponentMethods = function( app ){
+
     app.userGroups.groups = new Map()
     
     app.userGroups.addFeature({
         label: 'getGroupDefinitions', 
         description: 'Gets group list from local database', 
-        method: x => _getGroupDefinitions(app.localDb)
+        method: x => require('@users/dbConnection').getGroupDefinitions( app.localDb )
     })
 
     let getCompleteGroupDefinition = require("@users/dbConnection").getCompleteGroupDefinition
@@ -147,16 +124,17 @@ const addComponentMethods = function( app ){
 
     app.userGroups.getGroupsInfo = (req, res, next)=>{
         if('query' in req && 'id' in req.query){ //return a complete groupDefinition
-            app.userGroups.getCompleteGroupDefinition(req.query.id, app.localDb)
+            return app.userGroups.getCompleteGroupDefinition(req.query.id, app.localDb)
             .then( result => {
-                res.send(result)
+                    result.tenants = _.intersection(
+                        result.tenants, 
+                        app.tenants.list.map(tenant => tenant.name))
+                    res.send(result)
             })
-            return 
         }
-        console.log(req)
-        app.userGroups.getGroupDefinitions()
+        return app.userGroups.getGroupDefinitions()
         .then( result => res.send(result) )
-    } 
+    }    
 
     app.userGroups.createNewGroup = (req, res, next)=>{
         let selectedTenants = req.body['selectedTenants[]']
@@ -182,7 +160,7 @@ const addComponentMethods = function( app ){
             return Promise.all( tenantAssociationUpdates )
         })
         .then( _ =>{ 
-           res.send( { status: 'OK'})
+           res.send( { status: 'OK'} )
         })
     }
 
@@ -195,7 +173,10 @@ const addComponentMethods = function( app ){
             where: `[group] = ${groupID}`
         })
         .then( result => {
-            let tenantDomain = result.map(t => app.tenants.register.get(t.tenant))
+            let tenantNames = _.intersection(
+                    result.map(t => t.tenant), 
+                    app.tenants.list.map(t => t.name))
+            let tenantDomain = tenantNames.map(tName => app.tenants.register.get(tName))
             return Promise.all(tenantDomain.map(t => t.getUsers(userStore))) 
         })
         .then( _ => {
@@ -242,6 +223,7 @@ const addUserGroupFeature = function( app ){
     configureUserGroupRouter( app )
     return app 
 }
+
 
 module.exports = {
     addUserGroupFeature 

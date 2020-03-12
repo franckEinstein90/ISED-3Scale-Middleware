@@ -69,11 +69,9 @@ require('@src/APICanData').getAppData( APICan )
     return apiCan
 })
 
-.then( require('@users/users').addUserModule )
-
-.then( require('@users/groups').addUserGroupFeature )
-
-.then(require('@users/groupActions').addGroupActionsFeatures)
+.then( require('@users/users').addUserModule                 )
+.then( require('@users/groups').addUserGroupFeature          )
+.then( require('@users/groupActions').addGroupActionsFeatures)
 
 .then( apiCan => {
     apiCan.newClock()
@@ -85,12 +83,10 @@ require('@src/APICanData').getAppData( APICan )
     require('@server/routes/services').addServiceModule( apiCan )
     require('@server/routingSystem').routingSystem( apiCan )
     appStatus.configure(apiCan)
-
     let appRoot = require('@routes/appRoot').appRoot
     appRoot.configure(apiCan)
-
     require('@server/httpServer').httpServer( apiCan ) 
- 
     run(apiCan)
+
 })
 

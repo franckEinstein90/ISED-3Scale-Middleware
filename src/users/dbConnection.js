@@ -35,6 +35,20 @@ const getCompleteGroupDefinition = function(id, _db) {
     })
 }
 
+const getGroupDefinitions = function( _db ){
+       
+    return new Promise((resolve, reject) => { //gets the groups definitions and properties from database
+        _db.getAllTableRows({
+            table: 'groups', 
+            where: null
+        })
+        .then( groupData => {
+           return resolve( groupData ) 
+        })
+    })
+}
+
 module.exports = {
-   getCompleteGroupDefinition
+   getCompleteGroupDefinition,
+   getGroupDefinitions
 }

@@ -5128,7 +5128,7 @@ const tenantSelectionTable = function( ){
             `<button id="unselectAllTenants">unselect all</button><br/>`, 
             `<table id="groupsTenantsSelectionTable" class="display" style="color:black">`,
             `<thead> <tr> <th>Tenant</th> </tr> </thead>`, 
-            `<tbody> <tr><td>da</td></tr> </tbody>`, 
+            `<tbody> </tbody>`, 
             `</table>`
     ].join('')
 }
@@ -5146,7 +5146,7 @@ const formTemplate = function( formContent, submitID ){
             `</div>`, 
             `<div class="w3-row" style='margin:15,15,15,15'>`, 
                 `<br/>`, 
-                `<button class="w3-btn w3-blue w3-block" id="createNewGroup" >`, 
+                `<button class="w3-btn w3-blue w3-block" id="${submitID}" >`, 
                     'submit', 
                 `</button>`, 
                 ` <br/>`, 
@@ -5218,7 +5218,7 @@ const userGroupCreateEditWindowFeature = function( app ){
                 `${groupNameInput()}`, 
                 `${groupEmailPattern()}`, 
                 `${groupDescription("")}`, 
-                `${keyCloakCheck}${OTPNotEnabledCheck}${providerAccountCheck}`
+                `${keyCloakCheck}<P>${OTPNotEnabledCheck}<P>${providerAccountCheck}`
             ].join('')
         }
     }
@@ -5226,8 +5226,7 @@ const userGroupCreateEditWindowFeature = function( app ){
     let editForm = function( group ){
         let htmlID = 'editExistingGroup'
         let groupProperties =  groupPropertySubform(group)
-        selectedTenants.clear()
-        let formContent = app.ui.createForm(formTemplate(groupProperties))
+        let formContent = app.ui.createForm(formTemplate(groupProperties, htmlID))
         app.showModal({
                 title: `Editing group: ${group.ID}`,  
                 content: formContent
@@ -5237,27 +5236,29 @@ const userGroupCreateEditWindowFeature = function( app ){
             triggerID: htmlID,  
             action: x => {
                     let groupFormValues = getGroupFormInputs()
-                    app.userGroupManagement.createNewUserGroup( groupFormValues )
+                    app.userGroupManagement.editUserGroup( groupFormValues )
                 }})
     }
     return {
 
         showUserGroupModal  : function( event, group){
-            debugger
             event.preventDefault()
-            selectedTenants.clear()
             if( group !== undefined ){  //editing an existing group
+            	selectedTenants.clear()
+		        group.tenants.forEach( tenant => selectedTenants.set(tenant, 1) )
                 editForm(group)
             }
             else {
                 let htmlID = 'createNewGroup'
                 let groupProperties = groupPropertySubform()
                 let formContent = app.ui.createForm(formTemplate(groupProperties))
+                selectedTenants.clear()
                 app.showModal({
                     title: "New User Group", 
                     content: formContent
                 })
                 tenantDomainTable( app )
+
                 app.ui.addUiTrigger({
                     triggerID: htmlID,  
                     action: x => {
@@ -5273,10 +5274,10 @@ const getGroupFormInputs = function() {
    let tenants = []
    selectedTenants.forEach((_, tenant)=>tenants.push(tenant))
    return {
-                name: $('#userGroupName').val(), 
-                emailPattern : $('#groupEmailPattern').val(),
-                Description : $('#userGroupDescription').val(), 
-                selectedTenants : tenants
+        name: $('#userGroupName').val(), 
+        emailPattern : $('#groupEmailPattern').val(),
+        Description : $('#userGroupDescription').val(), 
+        selectedTenants : tenants
    }
         //
     //gets the parameters from a new group creation
@@ -5303,20 +5304,27 @@ const getGroupFormInputs = function() {
 
 const tenantDomainTable = function( app ){
 
-
    let _groupTenantDomainsUI = $('#groupsTenantsSelectionTable').DataTable({
         'info': true, 
-        'searching': false, 
+        'searching': false,
+        'paging' : false, 
         'lengthChange':false
     })
 
-    app.tenants.forEach(tenant => {
+    app.tenants.forEach( tenant => {
         _groupTenantDomainsUI.row.add([tenant]).draw(false)
     })
 
     let selectedTenantTableRow = dataRow =>  (_groupTenantDomainsUI.row(dataRow).data())[0]
+    $('#groupsTenantsSelectionTable tbody tr').each(function(){
+	    let selectedTenant = selectedTenantTableRow( this )
+	    if(selectedTenants.has( selectedTenant )){
+		    $(this).addClass('selected')
+	    }
+    })
        
     $('#groupsTenantsSelectionTable tbody').on( 'click', 'tr', function () {
+		
         let selectedTenant = selectedTenantTableRow(this)
         if ($(this).hasClass('selected')){
             selectedTenants.delete( selectedTenant )
@@ -5379,7 +5387,14 @@ const createNewUserGroup = function( groupDefinition ){
 }
 
 const editUserGroup = function( groupDefinition ){
-
+    debugger
+    $.post('/userGroups', groupDefinition)
+    .done( x=> {
+        debugger
+    })
+    .fail(x =>{
+        debugger
+    })
 }
 
 const deleteUserGroup = function( id ){

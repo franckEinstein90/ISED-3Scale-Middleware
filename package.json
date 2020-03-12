@@ -8,7 +8,7 @@
   },
   "_moduleAliases": {
     "@clientServerCommon": "src/clientServerCommon",
-    "@cron": "src/cron", 
+    "@cron": "src/cron",
     "@src": "src",
     "@routes": "src/server/routes",
     "@tenants": "src/tenants",
@@ -46,6 +46,7 @@
     "request-promise": "^4.2.4",
     "socket.io": "^2.3.0",
     "sqlite3": "^4.1.1",
+    "underscore": "^1.9.2",
     "unirest": "^0.6.0",
     "validator": "^11.1.0",
     "winston": "^3.2.1",

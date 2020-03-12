@@ -21,7 +21,14 @@ const createNewUserGroup = function( groupDefinition ){
 }
 
 const editUserGroup = function( groupDefinition ){
-
+    debugger
+    $.post('/userGroups', groupDefinition)
+    .done( x=> {
+        debugger
+    })
+    .fail(x =>{
+        debugger
+    })
 }
 
 const deleteUserGroup = function( id ){
