@@ -28,7 +28,7 @@ const appRoot = (function() {
             let pageData = {
                 title: "APICan",
                 state: 'initializing',
-                tenants: messages.tenantInfo()
+                tenants: _app.clientMessages.tenantInfo()
             }
             res.render('index', pageData)
         }

@@ -5236,6 +5236,7 @@ const userGroupCreateEditWindowFeature = function( app ){
             triggerID: htmlID,  
             action: x => {
                     let groupFormValues = getGroupFormInputs()
+                    groupFormValues.groupID = group.ID
                     app.userGroupManagement.editUserGroup( groupFormValues )
                 }})
     }
@@ -5243,6 +5244,7 @@ const userGroupCreateEditWindowFeature = function( app ){
 
         showUserGroupModal  : function( event, group){
             event.preventDefault()
+            debugger
             if( group !== undefined ){  //editing an existing group
             	selectedTenants.clear()
 		        group.tenants.forEach( tenant => selectedTenants.set(tenant, 1) )
@@ -5251,7 +5253,7 @@ const userGroupCreateEditWindowFeature = function( app ){
             else {
                 let htmlID = 'createNewGroup'
                 let groupProperties = groupPropertySubform()
-                let formContent = app.ui.createForm(formTemplate(groupProperties))
+                let formContent = app.ui.createForm(formTemplate(groupProperties, htmlID))
                 selectedTenants.clear()
                 app.showModal({
                     title: "New User Group", 
@@ -5264,42 +5266,40 @@ const userGroupCreateEditWindowFeature = function( app ){
                     action: x => {
                         let groupFormValues = getGroupFormInputs()
                         app.userGroupManagement.createNewUserGroup( groupFormValues )
+                        .then( opResult => {
+                           app.ui.userInfo(opResult) 
+                        })
                     }
                 })
             }
         }
     }
 }
+
 const getGroupFormInputs = function() {
    let tenants = []
    selectedTenants.forEach((_, tenant)=>tenants.push(tenant))
+
+   let userProperties = []
+
+   if ($('#providerAccountSearchSelect').is(":checked")) {
+        userProperties.push('providerAccount')
+   }
+   if ($('#keyCloakAccountSelect').is(":checked")) {
+        userProperties.push('keyCloakAccount')
+   }
+   if ($('#otpNotEnabledSelect').is(":checked")) {
+        userProperties.push('otpNotEnabled')
+   }
+
+    
    return {
         name: $('#userGroupName').val(), 
         emailPattern : $('#groupEmailPattern').val(),
         Description : $('#userGroupDescription').val(), 
-        selectedTenants : tenants
+        selectedTenants : tenants,
+        groupUsers  : userProperties
    }
-        //
-    //gets the parameters from a new group creation
-
-   /* let userProperties = []*/
-//    let groupDescription = $('#userGroupDescription').val()
-
-   /* if ($('#providerAccountSearchSelect').is(":checked")) {
-        userProperties.push('providerAccount')
-    }
-    if ($('#keyCloakAccountSelect').is(":checked")) {
-        userProperties.push('keyCloakAccount')
-    }
-    if ($('#otpNotEnabledSelect').is(":checked")) {
-        userProperties.push('otpNotEnabled')
-    }
-    return {
-        'userProperties[]': userProperties,
-        name: newGroupName,
-        groupDescription,
-        groupEmailPattern
-    }*/
 }
 
 const tenantDomainTable = function( app ){
@@ -5375,15 +5375,15 @@ module.exports = {
 /*****************************************************************************/
 
 const createNewUserGroup = function( groupDefinition ){
-    debugger
-    $.post('/userGroups', groupDefinition)
-    .done(x => {
-        debugger
+    return new Promise((resolve, reject)=> {
+        $.post('/userGroups', groupDefinition)
+        .done( postOpResult => {
+            return resolve(postOpResult)
+        })
+        .fail(err  => {
+          return resolve(err)
+        })
     })
-    .fail(x => {
-        alert('error')
-    })
-
 }
 
 const editUserGroup = function( groupDefinition ){
@@ -5528,17 +5528,11 @@ module.exports = {
 
 /******************************************************************************/
 const timer = require('./timer.js').timer
-/*const APICan = require('./APICan').APICan
-const storeUsers = require('./storeUsers').storeUsers
-const userActions = require('./userActions').userActions
 /******************************************************************************/
 
 
 $(function() {
     
-    let socket = null
-    socket = io()
-
     let apiCanClient = {
         tenants     : null, 
         adminTools  : null,
@@ -5550,6 +5544,7 @@ $(function() {
       
     }
 
+    apiCanClient.socket = io()
     require('../clientServerCommon/features').addFeatureSystem( apiCanClient )
     require('../clientServerCommon/viewModel').addComponent( apiCanClient )
     require('./tenants/tenants').addTenantCollection({
@@ -5854,6 +5849,7 @@ const timer = (function() {
 		},
 
         eachMinute: function() {
+
             /* update the app status to see if there's been any changes */
             $.get('/appStatus', {}, function( appStatus ) {
 
@@ -5989,12 +5985,12 @@ const ui = function(app) {
        let apiPaneID = tenant + 'VisibleAPI'
        $('#' + apiPaneID).show()
     }
+
     require('./ui/dataExchangeStatus').addDEStatusFeature(app)
     require('./ui/modal').addModalFeature( app )
     require('./ui/userList').addUserListFeature( app )
     require('./ui/dataTables').addDataTableFeature( app )
-
-    
+    require('./ui/bottomStatusBar').addFeature( app )
 
     app.ui.scrollToSection = function(sectionID) {
             let hash = $('#' + sectionID)
@@ -6011,7 +6007,38 @@ module.exports = {
     ui
 }
 
-},{"./ui/dataExchangeStatus":17,"./ui/dataTables":18,"./ui/modal":19,"./ui/userList":20}],17:[function(require,module,exports){
+},{"./ui/bottomStatusBar":17,"./ui/dataExchangeStatus":18,"./ui/dataTables":19,"./ui/modal":20,"./ui/userList":21}],17:[function(require,module,exports){
+/*******************************************************************************
+ * Franck Binard, ISED (FranckEinstein90)
+ *
+ * APICan application - Feb 2020
+ * -------------------------------------
+ *  Canadian Gov. API Store middleware - client side
+ *
+ *  ui feature
+ *
+ ******************************************************************************/
+"use strict"
+/******************************************************************************/
+
+/******************************************************************************/
+
+
+const addFeature = function( app ){
+    app.socket.on('updateBottomStatusInfo', function(data) {
+        debugger
+        $('#bottomStatusBar').text(data.message)
+    })
+    return app 
+}
+
+module.exports = {
+    addFeature
+}
+
+
+
+},{}],18:[function(require,module,exports){
 "use strict"
 
 
@@ -6035,7 +6062,7 @@ const addDEStatusFeature = function( app ){
 module.exports = {
     addDEStatusFeature
 }
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 "use strict"
 
 const dataTables = function( app ){
@@ -6056,7 +6083,7 @@ const addDataTableFeature = function( app ){
 module.exports = {
     addDataTableFeature
 }
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 "use strict"
 
 
@@ -6072,8 +6099,17 @@ const showModal = ({
     document.getElementById('modalWindow').style.display = 'block'
 }
 
+const userInfo = msg => {
+     $('#userInfo').html( msg )
+     document.getElementById('userInfoModal').style.display = 'block'
+}    
+
+
 const addModalFeature = function( app ){
+
     app.addFeature({label : 'showModal', method: showModal})
+    app.ui.addFeature({label : 'userInfo',  method: userInfo})
+
     return app
 }
 
@@ -6081,7 +6117,7 @@ module.exports = {
     addModalFeature
 }
 
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 "use strict"
 
 

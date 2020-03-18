@@ -24,6 +24,7 @@ const timer = (function() {
 		},
 
         eachMinute: function() {
+
             /* update the app status to see if there's been any changes */
             $.get('/appStatus', {}, function( appStatus ) {
 

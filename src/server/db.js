@@ -14,7 +14,16 @@ const sqlite3 = require('sqlite3').verbose();
 
 const localDatabase = function( dbObject ){
     let _db = dbObject
-
+    let valuesToSQL = values =>{
+        let fields      = []
+        let fieldValues = []
+        let valArray    = Object.entries(values)
+        valArray.forEach(field => {
+            fields.push(`'${field[0]}'`)
+            fieldValues.push(`'${field[1]}'`)
+        })
+        return fieldValues.join(',')
+    }
     return {
         getAllTableRows: function({
             table, 
@@ -48,10 +57,7 @@ const localDatabase = function( dbObject ){
                 })
             })
         }, 
-        insertInTable: function({ 
-            table, 
-            values
-        }){
+        insertInTable: function({ table, values }){
             let fields = []
             let fieldValues = []
             let valArray = Object.entries(values)
@@ -59,17 +65,30 @@ const localDatabase = function( dbObject ){
                 fields.push( `'${field[0]}'` )
                 fieldValues.push( `'${field[1]}'` )
             })
-        return new Promise((resolve, reject) => {
-            let SQLStatement =  `INSERT INTO ${table} (${fields.join(',')}) VALUES (${fieldValues.join(',')});` 
-            _db.run(SQLStatement, function( err ){
-                if( err ){
-                    return reject(err)
-                } else {
+            return new Promise((resolve, reject) => {
+             let SQLStatement =  `INSERT INTO ${table} (${fields.join(',')}) VALUES (${fieldValues.join(',')});` 
+                _db.run(SQLStatement, function( err ){
+                    if( err ){
+                        return reject(err)
+                    } else {
                     return resolve( this.lastID )
-                }
+                    }
+                })
             })
-        })
-        } 
+        },
+
+        updateTable: function({table, values, where}){
+            return new Promise((resolve, reject) => {
+                let SQLStatement = `UPDATE ${table} set ${values} WHERE ${where};`
+                _db.run( SQLStatement, function( err ){
+                    if( err ){
+                        return reject( err )
+                    } else {
+                        return resolve( this.lastID)
+                    }
+                })
+            })
+        }
     }
 }
 

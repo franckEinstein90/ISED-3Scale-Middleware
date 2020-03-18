@@ -12,17 +12,11 @@
 
 /******************************************************************************/
 const timer = require('./timer.js').timer
-/*const APICan = require('./APICan').APICan
-const storeUsers = require('./storeUsers').storeUsers
-const userActions = require('./userActions').userActions
 /******************************************************************************/
 
 
 $(function() {
     
-    let socket = null
-    socket = io()
-
     let apiCanClient = {
         tenants     : null, 
         adminTools  : null,
@@ -34,6 +28,7 @@ $(function() {
       
     }
 
+    apiCanClient.socket = io()
     require('../clientServerCommon/features').addFeatureSystem( apiCanClient )
     require('../clientServerCommon/viewModel').addComponent( apiCanClient )
     require('./tenants/tenants').addTenantCollection({

@@ -121,6 +121,7 @@ const userGroupCreateEditWindowFeature = function( app ){
             triggerID: htmlID,  
             action: x => {
                     let groupFormValues = getGroupFormInputs()
+                    groupFormValues.groupID = group.ID
                     app.userGroupManagement.editUserGroup( groupFormValues )
                 }})
     }
@@ -128,6 +129,7 @@ const userGroupCreateEditWindowFeature = function( app ){
 
         showUserGroupModal  : function( event, group){
             event.preventDefault()
+            debugger
             if( group !== undefined ){  //editing an existing group
             	selectedTenants.clear()
 		        group.tenants.forEach( tenant => selectedTenants.set(tenant, 1) )
@@ -136,7 +138,7 @@ const userGroupCreateEditWindowFeature = function( app ){
             else {
                 let htmlID = 'createNewGroup'
                 let groupProperties = groupPropertySubform()
-                let formContent = app.ui.createForm(formTemplate(groupProperties))
+                let formContent = app.ui.createForm(formTemplate(groupProperties, htmlID))
                 selectedTenants.clear()
                 app.showModal({
                     title: "New User Group", 
@@ -149,42 +151,40 @@ const userGroupCreateEditWindowFeature = function( app ){
                     action: x => {
                         let groupFormValues = getGroupFormInputs()
                         app.userGroupManagement.createNewUserGroup( groupFormValues )
+                        .then( opResult => {
+                           app.ui.userInfo(opResult) 
+                        })
                     }
                 })
             }
         }
     }
 }
+
 const getGroupFormInputs = function() {
    let tenants = []
    selectedTenants.forEach((_, tenant)=>tenants.push(tenant))
+
+   let userProperties = []
+
+   if ($('#providerAccountSearchSelect').is(":checked")) {
+        userProperties.push('providerAccount')
+   }
+   if ($('#keyCloakAccountSelect').is(":checked")) {
+        userProperties.push('keyCloakAccount')
+   }
+   if ($('#otpNotEnabledSelect').is(":checked")) {
+        userProperties.push('otpNotEnabled')
+   }
+
+    
    return {
         name: $('#userGroupName').val(), 
         emailPattern : $('#groupEmailPattern').val(),
         Description : $('#userGroupDescription').val(), 
-        selectedTenants : tenants
+        selectedTenants : tenants,
+        groupUsers  : userProperties
    }
-        //
-    //gets the parameters from a new group creation
-
-   /* let userProperties = []*/
-//    let groupDescription = $('#userGroupDescription').val()
-
-   /* if ($('#providerAccountSearchSelect').is(":checked")) {
-        userProperties.push('providerAccount')
-    }
-    if ($('#keyCloakAccountSelect').is(":checked")) {
-        userProperties.push('keyCloakAccount')
-    }
-    if ($('#otpNotEnabledSelect').is(":checked")) {
-        userProperties.push('otpNotEnabled')
-    }
-    return {
-        'userProperties[]': userProperties,
-        name: newGroupName,
-        groupDescription,
-        groupEmailPattern
-    }*/
 }
 
 const tenantDomainTable = function( app ){

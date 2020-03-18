@@ -29,8 +29,8 @@ let run = (apiCan) => {
     .then(_ => {
         if (apiCan.clock) apiCan.clock.start()
         apiCan.server.start()  
-        let messages = require('@server/messages').messages
-        messages.init(apiCan)
+        require('@server/messages').addClientMessages( apiCan )
+        apiCan.clientMessages.emitRefreshBottomStatus('app is running')
         apiCan.state = "running"
     })
 }

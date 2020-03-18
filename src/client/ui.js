@@ -110,12 +110,12 @@ const ui = function(app) {
        let apiPaneID = tenant + 'VisibleAPI'
        $('#' + apiPaneID).show()
     }
+
     require('./ui/dataExchangeStatus').addDEStatusFeature(app)
     require('./ui/modal').addModalFeature( app )
     require('./ui/userList').addUserListFeature( app )
     require('./ui/dataTables').addDataTableFeature( app )
-
-    
+    require('./ui/bottomStatusBar').addFeature( app )
 
     app.ui.scrollToSection = function(sectionID) {
             let hash = $('#' + sectionID)

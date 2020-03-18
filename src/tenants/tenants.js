@@ -190,15 +190,27 @@ tenants.Tenant.prototype.getAccounts = function() {
     })
 }
 
-tenants.Tenant.prototype.getProviderAccountUserList = function() {
-    return new Promise((resolve, reject) => {
-        this.getProviderAccountUsers()
-            .then(x => {
-                if (x === null) {
-                    return resolve('invalid response')
-                }
-                return resolve(x.users)
-            })
+tenants.Tenant.prototype.getProviderAccounts = function( returnStructure ) {
+    let apiCall = [`https://${this.adminDomain}/admin/api/`,
+                  `users.json?access_token=${this.accessToken}`].join('')
+    let bad = null
+    let good = function(body) {
+        if (validator.isJSON(body)) {
+            let users = JSON.parse(body)
+            return users
+        }
+        return bad
+    }
+    return alwaysResolve(apiCall, { good, bad })
+    .then( fetchResult =>{
+        let groupMembers = fetchResult.users
+        groupMembers.forEach(userObj => {
+            let member = userObj.user
+            if(!returnStructure.has(member.email)){
+                returnStructure.set(member.email, member)
+            }
+        })
+        return "ok"
     })
 }
 

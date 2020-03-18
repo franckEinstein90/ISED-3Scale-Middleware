@@ -9,15 +9,15 @@
 /*****************************************************************************/
 
 const createNewUserGroup = function( groupDefinition ){
-    debugger
-    $.post('/userGroups', groupDefinition)
-    .done(x => {
-        debugger
+    return new Promise((resolve, reject)=> {
+        $.post('/userGroups', groupDefinition)
+        .done( postOpResult => {
+            return resolve(postOpResult)
+        })
+        .fail(err  => {
+          return resolve(err)
+        })
     })
-    .fail(x => {
-        alert('error')
-    })
-
 }
 
 const editUserGroup = function( groupDefinition ){
