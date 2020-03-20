@@ -113,8 +113,9 @@ const ui = function(app) {
 
     require('./ui/dataExchangeStatus').addDEStatusFeature(app)
     require('./ui/modal').addModalFeature( app )
-    require('./ui/userList').addUserListFeature( app )
     require('./ui/dataTables').addDataTableFeature( app )
+
+    require('./ui/userList').addUserListFeature( app )
     require('./ui/bottomStatusBar').addFeature( app )
 
     app.ui.scrollToSection = function(sectionID) {

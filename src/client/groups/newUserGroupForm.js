@@ -9,11 +9,7 @@ const selectedTenants = new Map()
 const tenantSelectionTable = function( ){
     return [
             `<label class="groupCreationLabel"><b>Included tenants</b></label>`,
-            `<br/> <button id="selectAllTenants">select all</button>`, 
-            `<button id="unselectAllTenants">unselect all</button><br/>`, 
             `<table id="groupsTenantsSelectionTable" class="display" style="color:black">`,
-            `<thead> <tr> <th>Tenant</th> </tr> </thead>`, 
-            `<tbody> </tbody>`, 
             `</table>`
     ].join('')
 }
@@ -129,7 +125,6 @@ const userGroupCreateEditWindowFeature = function( app ){
 
         showUserGroupModal  : function( event, group){
             event.preventDefault()
-            debugger
             if( group !== undefined ){  //editing an existing group
             	selectedTenants.clear()
 		        group.tenants.forEach( tenant => selectedTenants.set(tenant, 1) )
@@ -189,18 +184,30 @@ const getGroupFormInputs = function() {
 
 const tenantDomainTable = function( app ){
 
-   let _groupTenantDomainsUI = $('#groupsTenantsSelectionTable').DataTable({
-        'info': true, 
-        'searching': false,
-        'paging' : false, 
-        'lengthChange':false
+   let tableID = app.ui.dataTables.newTable({
+       htmlID : 'groupsTenantsSelectionTable', 
+       fields: [{id: 'tenant', label:'Tenant'}],
+       options: {
+            'info': true, 
+            'searching': false,
+            'paging' : false, 
+            'lengthChange':false
+        }
     })
 
     app.tenants.forEach( tenant => {
-        _groupTenantDomainsUI.row.add([tenant]).draw(false)
+        app.ui.dataTables.addRow({
+            tableID, info: { tenant } })
     })
 
-    let selectedTenantTableRow = dataRow =>  (_groupTenantDomainsUI.row(dataRow).data())[0]
+    let selectedTenantTableRow = dataRow =>  {
+        let rowData = app.ui.dataTables.getRowData({
+            tableID, 
+            dataRow
+        })
+        return rowData[0]
+    }
+
     $('#groupsTenantsSelectionTable tbody tr').each(function(){
 	    let selectedTenant = selectedTenantTableRow( this )
 	    if(selectedTenants.has( selectedTenant )){

@@ -2,18 +2,28 @@
 
 
 const addUserListFeature = function( app ){
+
+    let tableID = app.ui.dataTables.newTable({
+            htmlID: 'groupMembersTable', 
+            fields: [
+                { id: 'username', label: 'User' }, 
+                { id: 'email', label: 'email'  },
+                { id: 'created_at', label: 'Creation Date'}, 
+                { id: 'keyCloackAccount', label: 'keyCloak'}, 
+                { id: 'twoFactorAuth', label: 'twoFactorAuth'}
+            ],
+            options: {}
+    })
+
     app.ui.userDisplayUI = { 
-        dataTable : $('#selectedUsersList').DataTable()
+        empty : _ => app.ui.dataTables.empty( tableID )
     }
 
     app.ui.userDisplayUI.addRow = function(user){
-
-        app.ui.userDisplayUI.dataTable.row.add([
-            (user.username|| '???'),
-            (user.email || '???'),
-            (user.created_at || '???'),
-            (user.keyCloakAccount || '???')
-        ]).draw(false)
+        app.ui.dataTables.addRow({
+            tableID, 
+            info: user
+        })
     }
 }
 module.exports = {

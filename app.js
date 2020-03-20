@@ -30,7 +30,7 @@ let run = (apiCan) => {
         if (apiCan.clock) apiCan.clock.start()
         apiCan.server.start()  
         require('@server/messages').addClientMessages( apiCan )
-        apiCan.clientMessages.emitRefreshBottomStatus('app is running')
+        apiCan.clientMessages.emitRefreshBottomStatus( 'app is running' )
         apiCan.state = "running"
     })
 }
@@ -62,7 +62,6 @@ require('@src/APICanData').getAppData( APICan )
 .then( require('@src/APICanVersion').addVersioningFeature ) //versioning support
 .then( apiCan => {                                          //tenant manager configuration
     require('@tenants/tenantsManager').addTenantManagementModule( apiCan ) 
-
     if(apiCan.implements('recurring-events')){
         apiCan.addNewEvent( "refresh tenant information", 7, apiCan.tenants.updateTenantInformation)
     }

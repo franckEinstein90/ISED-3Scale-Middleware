@@ -5124,11 +5124,7 @@ const selectedTenants = new Map()
 const tenantSelectionTable = function( ){
     return [
             `<label class="groupCreationLabel"><b>Included tenants</b></label>`,
-            `<br/> <button id="selectAllTenants">select all</button>`, 
-            `<button id="unselectAllTenants">unselect all</button><br/>`, 
             `<table id="groupsTenantsSelectionTable" class="display" style="color:black">`,
-            `<thead> <tr> <th>Tenant</th> </tr> </thead>`, 
-            `<tbody> </tbody>`, 
             `</table>`
     ].join('')
 }
@@ -5244,7 +5240,6 @@ const userGroupCreateEditWindowFeature = function( app ){
 
         showUserGroupModal  : function( event, group){
             event.preventDefault()
-            debugger
             if( group !== undefined ){  //editing an existing group
             	selectedTenants.clear()
 		        group.tenants.forEach( tenant => selectedTenants.set(tenant, 1) )
@@ -5304,18 +5299,30 @@ const getGroupFormInputs = function() {
 
 const tenantDomainTable = function( app ){
 
-   let _groupTenantDomainsUI = $('#groupsTenantsSelectionTable').DataTable({
-        'info': true, 
-        'searching': false,
-        'paging' : false, 
-        'lengthChange':false
+   let tableID = app.ui.dataTables.newTable({
+       htmlID : 'groupsTenantsSelectionTable', 
+       fields: [{id: 'tenant', label:'Tenant'}],
+       options: {
+            'info': true, 
+            'searching': false,
+            'paging' : false, 
+            'lengthChange':false
+        }
     })
 
     app.tenants.forEach( tenant => {
-        _groupTenantDomainsUI.row.add([tenant]).draw(false)
+        app.ui.dataTables.addRow({
+            tableID, info: { tenant } })
     })
 
-    let selectedTenantTableRow = dataRow =>  (_groupTenantDomainsUI.row(dataRow).data())[0]
+    let selectedTenantTableRow = dataRow =>  {
+        let rowData = app.ui.dataTables.getRowData({
+            tableID, 
+            dataRow
+        })
+        return rowData[0]
+    }
+
     $('#groupsTenantsSelectionTable tbody tr').each(function(){
 	    let selectedTenant = selectedTenantTableRow( this )
 	    if(selectedTenants.has( selectedTenant )){
@@ -5387,7 +5394,6 @@ const createNewUserGroup = function( groupDefinition ){
 }
 
 const editUserGroup = function( groupDefinition ){
-    debugger
     $.post('/userGroups', groupDefinition)
     .done( x=> {
         debugger
@@ -5421,7 +5427,7 @@ const loadUserGroupMembers = function( app, groupID ){
     }
     $.get('/userGroups/users', group, function(data) {
         app.ui.setInactive() 
-        app.ui.userDisplayUI.dataTable.clear().draw()
+        app.ui.userDisplayUI.empty()
         data.forEach( member => {
             app.ui.userDisplayUI.addRow(member)
         })
@@ -5988,8 +5994,9 @@ const ui = function(app) {
 
     require('./ui/dataExchangeStatus').addDEStatusFeature(app)
     require('./ui/modal').addModalFeature( app )
-    require('./ui/userList').addUserListFeature( app )
     require('./ui/dataTables').addDataTableFeature( app )
+
+    require('./ui/userList').addUserListFeature( app )
     require('./ui/bottomStatusBar').addFeature( app )
 
     app.ui.scrollToSection = function(sectionID) {
@@ -6026,7 +6033,6 @@ module.exports = {
 
 const addFeature = function( app ){
     app.socket.on('updateBottomStatusInfo', function(data) {
-        debugger
         $('#bottomStatusBar').text(data.message)
     })
     return app 
@@ -6066,23 +6072,62 @@ module.exports = {
 "use strict"
 
 const dataTables = function( app ){
+      
+   let _dataTables = new Map()  
+   let _tableID = 0
 
-    return {
+   let _buildTable = (htmlID, fields) => {
+      let bodyHtmlId = htmlID + 'content'
+         $(`#${htmlID}`).append([
+            '<thead><tr><th>', 
+            fields.map(field => field.label).join('</th><th>'), 
+            '</th></tr></thead>', 
+            `<tbody id='${bodyHtmlId}'> </tbody>`].join(''))
+   } 
 
-        newTable : function(htmlID){
-            
-        }
+   return {
 
-    }
+      newTable : function({ htmlID, fields, options}){
+            _buildTable(htmlID, fields)
+            let dt = $(`#${htmlID}`).DataTable(options)
+            _tableID += 1
+            _dataTables.set(_tableID , {
+               htmlID,
+               dtObject: dt,
+               fields
+            })
+            return _tableID 
+      }, 
+
+      empty : function( tableID ) {
+         let dt = _dataTables.get(tableID).dtObject
+         dt.clear().draw()
+      }, 
+      
+      getRowData : function({ tableID, dataRow }){
+         let table = _dataTables.get(tableID).dtObject
+         return table.row(dataRow).data()
+      },  
+
+      addRow : function({tableID, info}){
+         let table    = _dataTables.get(tableID)
+         let tableRow = table.fields.map( field => {
+            return (field.id in info) ? info[field.id] : 'N/A'
+         })
+         table.dtObject.row.add(tableRow).draw(false)
+      }
+   }
 }
 
 
 const addDataTableFeature = function( app ){
-    app.dataTables = dataTables(app)
+   app.ui.dataTables = dataTables(app)
+   return app
 }
 module.exports = {
     addDataTableFeature
 }
+
 },{}],20:[function(require,module,exports){
 "use strict"
 
@@ -6122,18 +6167,28 @@ module.exports = {
 
 
 const addUserListFeature = function( app ){
+
+    let tableID = app.ui.dataTables.newTable({
+            htmlID: 'groupMembersTable', 
+            fields: [
+                { id: 'username', label: 'User' }, 
+                { id: 'email', label: 'email'  },
+                { id: 'created_at', label: 'Creation Date'}, 
+                { id: 'keyCloackAccount', label: 'keyCloak'}, 
+                { id: 'twoFactorAuth', label: 'twoFactorAuth'}
+            ],
+            options: {}
+    })
+
     app.ui.userDisplayUI = { 
-        dataTable : $('#selectedUsersList').DataTable()
+        empty : _ => app.ui.dataTables.empty( tableID )
     }
 
     app.ui.userDisplayUI.addRow = function(user){
-
-        app.ui.userDisplayUI.dataTable.row.add([
-            (user.username|| '???'),
-            (user.email || '???'),
-            (user.created_at || '???'),
-            (user.keyCloakAccount || '???')
-        ]).draw(false)
+        app.ui.dataTables.addRow({
+            tableID, 
+            info: user
+        })
     }
 }
 module.exports = {

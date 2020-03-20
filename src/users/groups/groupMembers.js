@@ -4,7 +4,7 @@ const _ = require('underscore')
 /***********************************************************/
 
 const getTenantGroupMembers = function( app, tenantName, userStore, group ){
-   let tenant     = app.tenants.register.get(tenantName)
+   let tenant     = app.tenants.register.get( tenantName )
    return group.memberProperties.includes('providerAccount')
           ? tenant.getProviderAccounts(userStore)
           : tenant.getUsers(userStore)
@@ -50,8 +50,20 @@ const getGroupMembers = app => {
          )) 
       })
       .then( _ => {
+
          let resultArray = []
-         userStore.forEach(user => resultArray.push(user))
+         let emailReg    = null 
+         if( groupDefinition.emailPattern !== "" ){
+            emailReg = new RegExp(groupDefinition.emailPattern)            
+         }
+         userStore.forEach((user, userEmail) => {
+            if(emailReg) {
+               if (emailReg.test(userEmail)) resultArray.push(user)
+            } else {
+               resultArray.push(user)
+            } 
+            
+         })
          res.send(resultArray)
       })
    }

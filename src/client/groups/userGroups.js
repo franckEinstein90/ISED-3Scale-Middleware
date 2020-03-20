@@ -21,7 +21,6 @@ const createNewUserGroup = function( groupDefinition ){
 }
 
 const editUserGroup = function( groupDefinition ){
-    debugger
     $.post('/userGroups', groupDefinition)
     .done( x=> {
         debugger
@@ -55,7 +54,7 @@ const loadUserGroupMembers = function( app, groupID ){
     }
     $.get('/userGroups/users', group, function(data) {
         app.ui.setInactive() 
-        app.ui.userDisplayUI.dataTable.clear().draw()
+        app.ui.userDisplayUI.empty()
         data.forEach( member => {
             app.ui.userDisplayUI.addRow(member)
         })
