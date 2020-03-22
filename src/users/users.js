@@ -32,6 +32,7 @@ const users = (function() {
     return {
 
         configure: function( app ) {
+            
             if(app.data.jiraAuthCredentials){
                 jiraInterface.configure( app.data.jiraAuthCredentials )
             }

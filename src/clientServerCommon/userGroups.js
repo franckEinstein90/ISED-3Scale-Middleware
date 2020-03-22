@@ -1,6 +1,6 @@
 "use strict"
 
-class UserGroup {
+class UserType {
 
     constructor({
         id, 

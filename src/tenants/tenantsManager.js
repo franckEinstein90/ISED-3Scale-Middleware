@@ -12,36 +12,35 @@
 
 /**********************************************************************************/
 const moment = require('moment')
-const errors = require('@src/errors').errors
 /**********************************************************************************/
-const Tenant = require('@src/responses').tenants.Tenant
+const errors = require('@src/errors').errors
+const newTenant = require('@src/tenants/tenants').newTenant
 /**********************************************************************************/
 
 const tenantsManager = (function() {
+
+
     let _app = null
     let _updateRegister = new Map()
 
-    return {  
-
-        getTenantByName: tenantName => _tenants.find(t => t.name === tenantName),
+    return {
 
         tenants: _ => _tenants,
 
-        lastUpdate  : tenant => {
-            if(_updateRegister.has(tenant)) {
+        lastUpdate: tenant => {
+            if (_updateRegister.has(tenant)) {
                 return _updateRegister.get(tenant)
-            }
-            else{ 
+            } else {
                 return "Not Updated"
             }
-        }, 
-        
-        configure: function( apiCan ) {
+        },
+
+        configure: function(apiCan) {
             _app = apiCan
-            apiCan.tenants.list.forEach( t => {
-                apiCan.tenants.register.set(t.name, new Tenant(t, apiCan.data.env.env))
+            apiCan.tenants.list.forEach(t => {
+                apiCan.tenants.register.set(t.name, newTenant(t, apiCan.data.env.env))
             })
-        },            
+        },
 
         updateTenantInformation: async function(listToUpdate = null) {
             /********************************************************
@@ -50,9 +49,9 @@ const tenantsManager = (function() {
              * only updates specified tenants
              * *****************************************************/
             let _tenants = _app.tenants.list
-            let tenantsToUpdate = listToUpdate 
-                    ? listToUpdate.map(tName => _tenants.find(t => t.name === tName))
-                    : /*all*/ _tenants
+            let tenantsToUpdate = listToUpdate ?
+                listToUpdate.map(tName => _tenants.find(t => t.name === tName)) :
+                /*all*/ _tenants
 
             let registerUpdatedTenants = tenantsUpdateReport => {
                 tenantsUpdateReport.forEach(updateReport => {
@@ -75,11 +74,10 @@ const tenantsManager = (function() {
     }
 })()
 
-
-const addTenantManagementModule = function( app ){
+const addTenantManagementModule = function(app) {
     tenantsManager.configure(app)
     app.tenants.updateTenantInformation = tenantsManager.updateTenantInformation
 }
 module.exports = {
-   addTenantManagementModule 
+    addTenantManagementModule
 }

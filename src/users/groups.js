@@ -23,8 +23,6 @@ const _getGroupTenants = function( _db, groupArray ){
     })
 }
 
-
-
 const addComponentMethods = function( app ){
 
     app.userGroups.groups = new Map()

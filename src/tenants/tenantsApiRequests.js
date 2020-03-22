@@ -15,7 +15,7 @@ const validator = require('validator')
 const parseXML = require('xml2js').parseString
 /*****************************************************************/
 const errors = require('@errors').errors
-const tenants = require('@tenants/tenants').tenants
+const tenants = require('@tenants/tenantsFirst').tenants
 const alwaysResolve = require('@utils/alwaysResolve').alwaysResolve
 const Application = require('@src/applications/applications').applications.Application
 
@@ -147,29 +147,6 @@ tenants.Tenant.prototype.getTenantPlanFeatures = function(planID) {
     })
 }
 
-tenants.Tenant.prototype.getAccountList = function() {
-    //returns array all accounts for that tenant
-    let apiCall = [`https://${this.adminDomain}/admin/api/`,
-        `accounts.json?access_token=${this.accessToken}`
-    ].join('')
-
-    let bad = null
-    let processGoodResponse = function(body) {
-        if (validator.isJSON(body)) {
-            let accounts = JSON.parse(body)
-            if ('accounts' in accounts) accounts = accounts.accounts
-            if (accounts !== undefined) return accounts
-            return body
-            //.accounts.map(obj => obj.account)
-        }
-        return bad //couldn't parse response
-    }
-
-    return alwaysResolve(apiCall, {
-        good: processGoodResponse,
-        bad
-    })
-}
 
 tenants.Tenant.prototype.getAccountUsers = function(accountID, returnMap) {
     let apiCall = [`https://${this.adminDomain}/admin/api/`,
@@ -182,7 +159,7 @@ tenants.Tenant.prototype.getAccountUsers = function(accountID, returnMap) {
             let users = JSON.parse(body)
             users.users.forEach(usr => {
                 let user = usr.user
-                if(!returnMap.has(user.email)) returnMap.set(user.email, user)
+                if (!returnMap.has(user.email)) returnMap.set(user.email, user)
             })
             return users
         }
@@ -220,11 +197,11 @@ tenants.Tenant.prototype.getUsers = function(returnStructure) {
             return Promise.all(accountIDs.map(
                 accID => this.getAccountUsers(accID, returnStructure)))
         })
-        .then(x => x) 
+        .then(x => x)
 }
 
 
-tenants.Tenant.prototype.getApplicationPlanFeatures = function( planID ) {
+tenants.Tenant.prototype.getApplicationPlanFeatures = function(planID) {
     let apiCall = [
         `https://${this.adminDomain}/admin/api/`,
         `application_plans/${planID}/features.json?`,
@@ -235,12 +212,12 @@ tenants.Tenant.prototype.getApplicationPlanFeatures = function( planID ) {
     let processGoodResponse = function(body) {
         let result = JSON.parse(body)
         if ('features' in result) {
-            if(Array.isArray(result.features)){
-                if(result.features.length > 0){
+            if (Array.isArray(result.features)) {
+                if (result.features.length > 0) {
                     return result.features
                 }
             }
-        } 
+        }
         return null
     }
 
@@ -250,7 +227,7 @@ tenants.Tenant.prototype.getApplicationPlanFeatures = function( planID ) {
     })
 }
 
-tenants.Tenant.prototype.getServicePlanFeatures = function( planID ){
+tenants.Tenant.prototype.getServicePlanFeatures = function(planID) {
     let apiCall = [
         `https://${this.adminDomain}/admin/api/`,
         `service_plans/${planID}/features.json?`,
@@ -260,16 +237,19 @@ tenants.Tenant.prototype.getServicePlanFeatures = function( planID ){
     let bad = null
     let good = body => {
         let results = JSON.parse(body)
-        if('features' in results){
-            if(Array.isArray(results.features)){
-                if(results.features.length > 0 ){
+        if ('features' in results) {
+            if (Array.isArray(results.features)) {
+                if (results.features.length > 0) {
                     return results.features
                 }
             }
         }
         return null
     }
-    return alwaysResolve(apiCall, {good, bad})
+    return alwaysResolve(apiCall, {
+        good,
+        bad
+    })
 }
 
 module.exports = {

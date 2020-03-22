@@ -67,7 +67,7 @@ require('@src/APICanData').getAppData( APICan )
     }
     return apiCan
 })
-
+.then( require('@tenants/router').addTenantRouterFeature     )
 .then( require('@users/users').addUserModule                 )
 .then( require('@users/groups').addUserGroupFeature          )
 .then( require('@users/groupActions').addGroupActionsFeatures)

@@ -6,9 +6,7 @@
  *  tenantProto.js : prototype class for Tenant class
  *
  ******************************************************************************/
-
 "use strict"
-
 /*****************************************************************************/
 const validator = require('validator')
 const errors = require('@errors').errors
@@ -25,6 +23,9 @@ let planJsonObjectToserviceID = function(planInfo) {
         planID: planInfo.id
     }
 }
+
+
+
 
 class ServiceProvider {
     constructor({

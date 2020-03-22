@@ -13,10 +13,8 @@
 const express = require('express')
 const cors = require('cors')
 /*****************************************************************************/
-const tenantRoutes          = require('@server/routes/tenantRoutes').tenantRoutes
 const appRoot               = require('@server/routes/appRoot').appRoot
 const apiStoreUserRoutes    = require('@server/routes/apiStoreUsers').apiStoreUserRoutes
-const eventsRoutes          = require('@server/routes/eventRoutes').eventsRoutes
 /*****************************************************************************/
 const appStatus = require('@server/routes/appStatus').appStatus
 /*const scheduler = require('@src/cron/timer').scheduler
@@ -29,15 +27,10 @@ const routingSystem = function( apiCan ) {
     let expressStack = apiCan.expressStack
     expressStack.use('/userGroups', apiCan.userGroups.router)
     expressStack.use('/services', apiCan.services.router)
+    expressStack.use('/tenants', apiCan.tenants.router)
     expressStack.use('/', router)
     router.get('/', appRoot.render)
     
-    //tenant routes
-    router.get('/tenants',           tenantRoutes.getTenants)
-    router.get('/refreshTenants',    tenantRoutes.getRefreshTenants)
-    router.get('/getTenantAccounts', tenantRoutes.getTenantAccounts)
-    router.get('/servicesSummary',   tenantRoutes.getServiceSummary)
- 
     //events
     router.get('/events', _apiCan.clock.getEvents) 
     //router.get('/serviceInspect', serviceInspectRoutes.getServiceInfo)

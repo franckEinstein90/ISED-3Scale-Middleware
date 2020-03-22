@@ -46,7 +46,7 @@
 	}	
 
 	let getTenantAccounts = function(tenantName){
-	        $.get('/getTenantAccounts', {tenantName}, data => displayTenantAccounts(data, tenantName))
+	        $.get('/tenants/accounts', {tenantName}, data => displayTenantAccounts(data, tenantName))
 	}
 
 	let getTenantAdmins = function(tenantName){
