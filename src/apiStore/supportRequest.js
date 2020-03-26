@@ -37,7 +37,7 @@ let jiraRequestBody = (user, summary, email, description)=>{
     }`
   }
 
-const makeJiraRequest = options => {
+const makeJiraRequest = _ => {
   return new Promise((resolve, reject)=> {
     request(options, function (error, response, body) {
       if (error) {
@@ -52,8 +52,9 @@ const makeJiraRequest = options => {
 const jiraInterface = function( app ){
 
   let auth = app.data.jiraAuthCredentials
-
+  let _router = require('express').Router()
   return {
+    router  : _router,
 
     createSupportRequest: function({
         summary, 
@@ -61,11 +62,9 @@ const jiraInterface = function( app ){
         user, 
         email
       }){
-        let options = {
-          auth, 
-          body : jiraRequestBody(user, summary, email, description) 
-        }
-        return makeJiraRequest(options)    
+        options.auth = auth
+        options.body = jiraRequestBody(user, summary, email, description) 
+        return makeJiraRequest( )    
     }
   }
 }
@@ -75,10 +74,8 @@ const jiraInterface = function( app ){
 const addSupportRequestInterface = function( app ){
     return new Promise((resolve, reject)=>{
         let usm = jiraInterface(app)
-        .then(app => {
-          app.supportRequests = usm
-          return resolve(app)
-        })
+        app.supportRequests = usm
+        return resolve(app)
    })
 }
 
