@@ -54,10 +54,9 @@ const APICanData = function( app ) {
     let _configurationEnv = _appConfigurationData.env
 
     let _jiraAuthCredentials = null 
-    try{
+    try {
         _jiraAuthCredentials = getJiraAuthCredentials()
     } catch {
-
         _jiraAuthCredentials = null 
     }
     let _keycloakCredentials = null

@@ -59,7 +59,8 @@ require('@src/APICanData').getAppData( APICan )
     require('@cron/timer').addTimerFeature( APICan )
     return require('@src/APICan').APICanConfig( APICan )
 })
-.then( require('@src/APICanVersion').addVersioningFeature ) //versioning support
+.then( require('@src/APICanVersion').addVersioningFeature                   ) //versioning support
+.then( require('@src/apiStore/supportRequest').addSupportRequestInterface   )
 .then( apiCan => {                                          //tenant manager configuration
     require('@tenants/tenantsManager').addTenantManagementModule( apiCan ) 
     if(apiCan.implements('recurring-events')){

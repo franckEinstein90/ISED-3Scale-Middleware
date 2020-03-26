@@ -13,8 +13,6 @@
 const request 		= require('request')
 const validator 	= require('validator')
 /**********************************************************/
-const jiraInterface = require('@apiStore/supportRequest.js').jiraInterface
-/**********************************************************/
 
 
 const users = (function() {
@@ -33,10 +31,7 @@ const users = (function() {
 
         configure: function( app ) {
             
-            if(app.data.jiraAuthCredentials){
-                jiraInterface.configure( app.data.jiraAuthCredentials )
-            }
-            if(app.data.keycloakCredentials){
+           if(app.data.keycloakCredentials){
                 _keycloakCredentials = app.data.keycloakCredentials
 
                 return new Promise((resolve, reject) =>{

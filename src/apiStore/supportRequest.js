@@ -20,18 +20,40 @@ const options = {
   }
 }
 
-const jiraInterface = (function(){
-
-  let auth = {
-    username: null, 
-    password: null
+let jiraRequestBody = (user, summary, email, description)=>{
+  return `{
+    "update":{},
+    "fields":{
+      "project":{
+          "key":"GCAPIOPS",
+          "id":"11201"
+        },
+        "issuetype":{
+          "name":"Task" 
+        }, 
+        "summary": "${summary}", 
+        "description": "From user ${user} (${email}): ${description}"
+      }
+    }`
   }
-  return {
 
-    configure: function({username, password}){
-      auth.username = username
-      auth.password = password
-    },
+const makeJiraRequest = options => {
+  return new Promise((resolve, reject)=> {
+    request(options, function (error, response, body) {
+      if (error) {
+        console.log('error on jira task support request')
+        throw new Error(error)
+      }
+      return resolve( response )
+    })
+  })
+}
+
+const jiraInterface = function( app ){
+
+  let auth = app.data.jiraAuthCredentials
+
+  return {
 
     createSupportRequest: function({
         summary, 
@@ -39,40 +61,29 @@ const jiraInterface = (function(){
         user, 
         email
       }){
-
-      let body =`{
-        "update":{},
-
-        "fields":{
-     
-         "project":{
-            "key":"GCAPIOPS",
-            "id":"11201"
-          },
-          "issuetype":{
-              "name":"Task" 
-          }, 
-          "summary": "${summary}", 
-          "description": "From user ${user} (${email}): ${description}"
+        let options = {
+          auth, 
+          body : jiraRequestBody(user, summary, email, description) 
         }
-      }`
-      options.auth = auth
-      options.body = body
-      return new Promise((resolve, reject)=> {
-        request(options, function (error, response, body) {
-          if (error) {
-            console.log('error on jira task support request')
-            throw new Error(error)
-          }
-          return resolve( response )
-        })
-      })
+        return makeJiraRequest(options)    
     }
   }
+}
 
-})()
+
+
+const addSupportRequestInterface = function( app ){
+    return new Promise((resolve, reject)=>{
+        let usm = jiraInterface(app)
+        .then(app => {
+          app.supportRequests = usm
+          return resolve(app)
+        })
+   })
+}
 
 module.exports = {
+  addSupportRequestInterface,
   jiraInterface
 }
 
