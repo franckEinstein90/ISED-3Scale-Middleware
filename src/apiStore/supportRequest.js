@@ -44,7 +44,7 @@ const makeJiraRequest = _ => {
         console.log('error on jira task support request')
         throw new Error(error)
       }
-      return resolve( response )
+      return resolve( body )
     })
   })
 }
