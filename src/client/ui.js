@@ -41,15 +41,8 @@ const uiFeature = function( app ){
     return {
 
 
-        addUiTrigger: function({ triggerID, action}){
+        addUiTrigger: function({ triggerID, action }){
 		    $(`#${triggerID}`).click( action )
-        }, 
-
-        createForm: function( formContent ){
-             return [
-                `<form class="w3-container w3-left-align">`, 
-                  formContent, 
-                `</form>`].join('')
         }, 
 
 		hidden : function({
@@ -113,6 +106,7 @@ const ui = function(app) {
 
     require('./ui/dataExchangeStatus').addDEStatusFeature(app)
     require('./ui/modal').addModalFeature( app )
+    require('./ui/forms').addFormFeature( app )
     require('./ui/dataTables').addDataTableFeature( app )
 
     require('./ui/userList').addUserListFeature( app )

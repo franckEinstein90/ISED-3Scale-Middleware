@@ -11,7 +11,6 @@
 "use strict"
 
 /******************************************************************************/
-const timer = require('./timer.js').timer
 /******************************************************************************/
 
 
@@ -27,7 +26,6 @@ $(function() {
         ui                  : null
       
     }
-
     apiCanClient.socket = io()
     require('../clientServerCommon/features').addFeatureSystem( apiCanClient )
     require('../clientServerCommon/viewModel').addComponent( apiCanClient )
@@ -43,15 +41,13 @@ $(function() {
         require('./errors/errors').addErrorHandling(  app )
         require('./data/data').addServerComFeature(  app )
         require('./adminTools').addAdminTools( app )
-	
-        timer.configure( app )
-        timer.eachMinute()
-        setInterval(timer.eachMinute, 10000)
 
-        //service inspect feature
-        require('./storeServices').addServiceInspectFeature( app )
-        require('./groups/userGroups').addUserGroupFeature( app )
+        app.addComponent({label: 'timer'})	
+        require('./timer/main').configureTimerFeature( app )
 
+        require('./storeServices').addServiceInspectFeature( app  )
+        require('./groups/userGroups').addUserGroupFeature( app   )
+        require('./tests/jiraRequest').addFeature( app            )
 
     })    
   
