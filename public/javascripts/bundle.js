@@ -5573,6 +5573,7 @@ $(function() {
         //service inspect feature
         require('./storeServices').addServiceInspectFeature( app )
         require('./groups/userGroups').addUserGroupFeature( app )
+        require('./store/jiraRequestTestFeature').addJiraRequestTestFeature( app )
 
 
     })    
@@ -5580,7 +5581,7 @@ $(function() {
 
 })
 
-},{"../clientServerCommon/features":2,"../clientServerCommon/viewModel":4,"./adminTools":5,"./data/data":6,"./errors/errors":8,"./groups/userGroups":11,"./storeServices":13,"./tenants/tenants":14,"./timer.js":15,"./ui":16}],13:[function(require,module,exports){
+},{"../clientServerCommon/features":2,"../clientServerCommon/viewModel":4,"./adminTools":5,"./data/data":6,"./errors/errors":8,"./groups/userGroups":11,"./store/jiraRequestTestFeature":14,"./storeServices":13,"./tenants/tenants":15,"./timer.js":16,"./ui":17}],13:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
@@ -5736,6 +5737,18 @@ module.exports = {
 }
 
 },{"../clientServerCommon/plans":3}],14:[function(require,module,exports){
+"use strict"
+
+
+const addJiraRequestTestFeature = function( app ){
+    $('#jiraRequestTest').click(x => alert('d'))
+
+}
+
+module.exports = {
+    addJiraRequestTestFeature
+}
+},{}],15:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
@@ -5828,7 +5841,7 @@ const addTenantCollection = async function({
 module.exports = {
    addTenantCollection 
 }
-},{"moment":1}],15:[function(require,module,exports){
+},{"moment":1}],16:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
@@ -5878,7 +5891,7 @@ module.exports = {
     timer
 }
 
-},{"./dialogs/appStatusDialog":7}],16:[function(require,module,exports){
+},{"./dialogs/appStatusDialog":7}],17:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
@@ -6014,7 +6027,7 @@ module.exports = {
     ui
 }
 
-},{"./ui/bottomStatusBar":17,"./ui/dataExchangeStatus":18,"./ui/dataTables":19,"./ui/modal":20,"./ui/userList":21}],17:[function(require,module,exports){
+},{"./ui/bottomStatusBar":18,"./ui/dataExchangeStatus":19,"./ui/dataTables":20,"./ui/modal":21,"./ui/userList":22}],18:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
@@ -6044,7 +6057,7 @@ module.exports = {
 
 
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 "use strict"
 
 
@@ -6068,7 +6081,7 @@ const addDEStatusFeature = function( app ){
 module.exports = {
     addDEStatusFeature
 }
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 "use strict"
 
 const dataTables = function( app ){
@@ -6128,7 +6141,7 @@ module.exports = {
     addDataTableFeature
 }
 
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 "use strict"
 
 
@@ -6162,7 +6175,7 @@ module.exports = {
     addModalFeature
 }
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 "use strict"
 
 

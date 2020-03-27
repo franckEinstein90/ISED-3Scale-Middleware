@@ -51,6 +51,7 @@ $(function() {
         //service inspect feature
         require('./storeServices').addServiceInspectFeature( app )
         require('./groups/userGroups').addUserGroupFeature( app )
+        require('./store/jiraRequestTestFeature').addJiraRequestTestFeature( app )
 
 
     })    
