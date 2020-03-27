@@ -107,7 +107,7 @@ const userGroupCreateEditWindowFeature = function( app ){
     let editForm = function( group ){
         let htmlID = 'editExistingGroup'
         let groupProperties =  groupPropertySubform(group)
-        let formContent = app.ui.createForm(formTemplate(groupProperties, htmlID))
+        let formContent = app.ui.form(formTemplate(groupProperties, htmlID))
         app.showModal({
                 title: `Editing group: ${group.ID}`,  
                 content: formContent
@@ -133,7 +133,7 @@ const userGroupCreateEditWindowFeature = function( app ){
             else {
                 let htmlID = 'createNewGroup'
                 let groupProperties = groupPropertySubform()
-                let formContent = app.ui.createForm(formTemplate(groupProperties, htmlID))
+                let formContent = app.ui.form(formTemplate(groupProperties, htmlID))
                 selectedTenants.clear()
                 app.showModal({
                     title: "New User Group", 

@@ -5,23 +5,16 @@
  * -------------------------------------
  *  Canadian Gov. API Store middleware - client side
  *
- *  APICan.js: client app admin
+ *  timer feature init.js: client app admin
  *
  ******************************************************************************/
 "use strict"
 /*****************************************************************************/
-const appStatusDialog = require('./dialogs/appStatusDialog').appStatusDialog
-/*****************************************************************************/
 
-const timer = (function() {
+const timer = function( app ) {
 
-    let _app = null
 
     return {
-
-		configure	: function( app ){
-			_app = app
-		},
 
         eachMinute: function() {
 
@@ -37,12 +30,22 @@ const timer = (function() {
                     `(${appStatus.nextTenantRefresh} mins) `
                 )
 
-				_app.eventScheduler.update(appStatus.events)
+				app.eventScheduler.update(appStatus.events)
             })
         }
     }
-})()
+}
+
+
+const configureTimerFeature = function( app ){
+    
+    let timerFeature = timer(app)
+    app.timer.eachMinute = timerFeature.eachMinute
+    app.timer.eachMinute( )
+    setInterval( app.timer.eachMinute, 10000)
+    return app
+}
 
 module.exports = {
-    timer
+    configureTimerFeature
 }

@@ -21,7 +21,17 @@ const userInfo = msg => {
 
 const addModalFeature = function( app ){
 
-    app.addFeature({label : 'showModal', method: showModal})
+    app.addFeature({
+        label : 'showModal', 
+        method: showModal
+    })
+
+    app.ui.addFeature({
+        label: 'modal', 
+        method: showModal, 
+        description: 'displays a modal window'
+    })
+
     app.ui.addFeature({label : 'userInfo',  method: userInfo})
 
     return app
