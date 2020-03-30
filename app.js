@@ -71,6 +71,7 @@ require('@src/APICanData').getAppData( APICan )
 })
 .then( require('@src/APICanVersion').addVersioningFeature                   ) //versioning support
 .then( require('@src/apiStore/supportRequest').addSupportRequestInterface   )
+.then( require('@src/users/keycloak').addKeycloakInterface                  )
 .then( apiCan => {                                          //tenant manager configuration
     require('@tenants/tenantsManager').addTenantManagementModule( apiCan ) 
     if(apiCan.implements('recurring-events')){
@@ -79,7 +80,6 @@ require('@src/APICanData').getAppData( APICan )
     return apiCan
 })
 .then( require('@tenants/router').addTenantRouterFeature     )
-.then( require('@users/users').addUserModule                 )
 .then( require('@users/groups').addUserGroupFeature          )
 .then( require('@users/groupActions').addGroupActionsFeatures)
 
