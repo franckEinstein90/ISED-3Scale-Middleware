@@ -13,6 +13,10 @@ const getTenantGroupMembers = function( app, tenantName, userStore, group ){
    })
 }
 
+const getKeycloakGroupMembers = function(app, group){
+
+}
+
 const getGroupMembers = app => {
 
    return (req, res, next)=>{
