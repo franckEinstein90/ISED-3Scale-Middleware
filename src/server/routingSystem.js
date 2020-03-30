@@ -61,7 +61,7 @@ const routingSystem = function( apiCan ) {
 /*
     router.get('/userinfo.json', apiStoreUserRoutes.getUserInfo)
   */router.get('/api.json', apiStoreUserRoutes.getApiInfo)
-    router.post('/support', cors(corsOptions), apiStoreUserRoutes.postJiraRequest)
+    router.post('/support', cors(corsOptions), app.supportRequests.postJiraRequest)
 /*    router.post('/enforceOTP', apiStoreUserRoutes.postEnforceOTP)
 
 	*/

@@ -5186,7 +5186,7 @@ const userGroupCreateEditWindowFeature = function( app ){
                     let groupFormValues = getGroupFormInputs()
                     groupFormValues.groupID = group.ID
                     app.userGroupManagement.editUserGroup( groupFormValues )
-                    app.ui.hideModal()
+                    .then( _ => app.ui.hideModal())
                 }})
     }
 
@@ -5352,12 +5352,14 @@ const createNewUserGroup = function( groupDefinition ){
 }
 
 const editUserGroup = function( groupDefinition ){
-    $.post('/userGroups', groupDefinition)
-    .done( x=> {
-        debugger
-    })
-    .fail(x =>{
-        debugger
+    return new Promise((resolve, reject) => {
+        $.post('/userGroups', groupDefinition)
+        .done( editGroupRequestAnswer => {
+            return resolve( editGroupRequestAnswer ) 
+        })
+        .fail(err  =>{
+            return resolve( err ) 
+        })
     })
 }
 
