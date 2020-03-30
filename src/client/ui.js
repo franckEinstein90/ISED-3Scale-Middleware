@@ -42,7 +42,13 @@ const uiFeature = function( app ){
 
 
         addUiTrigger: function({ triggerID, action }){
-		    $(`#${triggerID}`).click( action )
+          let triggers = null
+          if(!Array.isArray(triggerID)){
+            triggers = [triggerID]
+          } else {
+            triggers = triggerID
+          }		    
+          triggers.forEach( triggerID => $(`#${triggerID}`).click( action ))
         }, 
 
 		hidden : function({

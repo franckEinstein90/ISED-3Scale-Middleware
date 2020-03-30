@@ -4,8 +4,8 @@
 const jiraRequestTestForm = app => {
 
     app.ui.modal({
-        title: 'fdsa', 
-        content: 'das'
+        title: 'Jira Support Requests Setup', 
+        content: app.ui.form('<P>fd</P>') 
     })
 
 }
@@ -13,10 +13,9 @@ const jiraRequestTestForm = app => {
 const addFeature = function( app ){
 
     app.ui.addUiTrigger({ 
-        triggerID   : "jiraRequestTest", 
+        triggerID   : ["jiraRequestTest", "jiraRequestTopNavCmd"], 
         action      : _ => jiraRequestTestForm(app)
     })
-
 }
 
 module.exports = {

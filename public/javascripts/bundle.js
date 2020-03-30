@@ -4982,53 +4982,6 @@ module.exports = {
  * -------------------------------------
  *  Canadian Gov. API Store middleware - client side
  *
- *  appStatusDialog.js: information and actions on app variables
- *
- ******************************************************************************/
-"use strict"
-/******************************************************************************/
-const appStatusDialog = (function(){
-
-	let _initUI = function(){
-		$('#btnRefreshTenants').click(function ( event ){
-			event.preventDefault()
-			$.get('/refreshTenants', {}, function(data) {
-				debugger	
-			})
-		})
-		$('#appStatus').click(function( event ) {
-			this.classList.toggle("active")
-			let statusDetailPaneHeight = $('#appStatusDetail').css('maxHeight')	
-			if( statusDetailPaneHeight === '0px' ){
-				let scrollHeight = $('#appStatusDetail').css('scrollHeight')
-				$('#appStatusDetail').css('maxHeight', '80px')
-			} else {
-				$('#appStatusDetail').css('maxHeight', '0px')
-			}
-		})
-	}
-	return {
-        ready: function(){
-				_initUI()
-		  }, 
-		  update: function(){
-
-		  }
-    }
-})()
-
-module.exports = {
-    appStatusDialog
-}
-
-},{}],8:[function(require,module,exports){
-/*******************************************************************************
- * Franck Binard, ISED (FranckEinstein90)
- *
- * APICan application - 2020
- * -------------------------------------
- *  Canadian Gov. API Store middleware - client side
- *
  *  errors.js: error handling 
  *
  ******************************************************************************/
@@ -5054,7 +5007,7 @@ module.exports = {
     addErrorHandling
 }
 
-},{}],9:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED
  * Canadian Gov. API Store middleware
@@ -5112,7 +5065,7 @@ module.exports = {
     addFeature
 }
 
-},{}],10:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 /***********************************************************
  * manages form to create or edit user groups
  * ***************************************************************************/
@@ -5130,7 +5083,7 @@ const tenantSelectionTable = function( ){
 }
 
 
-const formTemplate = function( formContent, submitID ){
+const formTemplate = function( formContent ){
     return [
             `<div class="w3-row">`, 
                 `<div class='w3-col m5 l5 w3-left-align' style="margin-right:20px">`, 
@@ -5139,14 +5092,7 @@ const formTemplate = function( formContent, submitID ){
                 `<div class='w3-col m5 l5 w3-right-align"'>`, 
                     tenantSelectionTable(),  
                 `</div>`, 
-            `</div>`, 
-            `<div class="w3-row" style='margin:15,15,15,15'>`, 
-                `<br/>`, 
-                `<button class="w3-btn w3-blue w3-block" id="${submitID}" >`, 
-                    'submit', 
-                `</button>`, 
-                ` <br/>`, 
-            ` </div>`].join('')
+            `</div>`].join('')
 }
 
 const userGroupCreateEditWindowFeature = function( app ){
@@ -5220,13 +5166,19 @@ const userGroupCreateEditWindowFeature = function( app ){
     }
 
     let editForm = function( group ){
+
         let htmlID = 'editExistingGroup'
         let groupProperties =  groupPropertySubform(group)
-        let formContent = app.ui.createForm(formTemplate(groupProperties, htmlID))
+        let formContent = app.ui.form(formTemplate(groupProperties), {
+            ID: htmlID, 
+            label: 'Edit Group'
+        })
+
         app.showModal({
                 title: `Editing group: ${group.ID}`,  
                 content: formContent
         })
+
         tenantDomainTable( app )
         app.ui.addUiTrigger({
             triggerID: htmlID,  
@@ -5234,8 +5186,10 @@ const userGroupCreateEditWindowFeature = function( app ){
                     let groupFormValues = getGroupFormInputs()
                     groupFormValues.groupID = group.ID
                     app.userGroupManagement.editUserGroup( groupFormValues )
+                    app.ui.hideModal()
                 }})
     }
+
     return {
 
         showUserGroupModal  : function( event, group){
@@ -5245,10 +5199,14 @@ const userGroupCreateEditWindowFeature = function( app ){
 		        group.tenants.forEach( tenant => selectedTenants.set(tenant, 1) )
                 editForm(group)
             }
+
             else {
                 let htmlID = 'createNewGroup'
                 let groupProperties = groupPropertySubform()
-                let formContent = app.ui.createForm(formTemplate(groupProperties, htmlID))
+                let formContent = app.ui.form(formTemplate(groupProperties), {
+                    ID: htmlID, 
+                    label: 'Create New Group'
+                })
                 selectedTenants.clear()
                 app.showModal({
                     title: "New User Group", 
@@ -5262,7 +5220,7 @@ const userGroupCreateEditWindowFeature = function( app ){
                         let groupFormValues = getGroupFormInputs()
                         app.userGroupManagement.createNewUserGroup( groupFormValues )
                         .then( opResult => {
-                           app.ui.userInfo(opResult) 
+                            app.ui.hideModal()
                         })
                     }
                 })
@@ -5370,7 +5328,7 @@ module.exports = {
     addFeature
 }
 
-},{}],11:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED
  * Canadian Gov. API Store middleware
@@ -5519,7 +5477,7 @@ module.exports = {
     addUserGroupFeature
 }
 
-},{"./mainPageUserGroupDisplay.js":9,"./newUserGroupForm":10}],12:[function(require,module,exports){
+},{"./mainPageUserGroupDisplay.js":8,"./newUserGroupForm":9}],11:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
@@ -5533,7 +5491,6 @@ module.exports = {
 "use strict"
 
 /******************************************************************************/
-const timer = require('./timer.js').timer
 /******************************************************************************/
 
 
@@ -5549,7 +5506,6 @@ $(function() {
         ui                  : null
       
     }
-
     apiCanClient.socket = io()
     require('../clientServerCommon/features').addFeatureSystem( apiCanClient )
     require('../clientServerCommon/viewModel').addComponent( apiCanClient )
@@ -5565,22 +5521,20 @@ $(function() {
         require('./errors/errors').addErrorHandling(  app )
         require('./data/data').addServerComFeature(  app )
         require('./adminTools').addAdminTools( app )
-	
-        timer.configure( app )
-        timer.eachMinute()
-        setInterval(timer.eachMinute, 10000)
 
-        //service inspect feature
-        require('./storeServices').addServiceInspectFeature( app )
-        require('./groups/userGroups').addUserGroupFeature( app )
+        app.addComponent({label: 'timer'})	
+        require('./timer/main').configureTimerFeature( app )
 
-
+        require('./storeServices').addServiceInspectFeature( app  )
+        require('./groups/userGroups').addUserGroupFeature( app   )
+        require('./tests/jiraRequest').addFeature( app            )
+//        require('./configs/keycloak').addFeature( app             )
     })    
   
 
 })
 
-},{"../clientServerCommon/features":2,"../clientServerCommon/viewModel":4,"./adminTools":5,"./data/data":6,"./errors/errors":8,"./groups/userGroups":11,"./storeServices":13,"./tenants/tenants":14,"./timer.js":15,"./ui":16}],13:[function(require,module,exports){
+},{"../clientServerCommon/features":2,"../clientServerCommon/viewModel":4,"./adminTools":5,"./data/data":6,"./errors/errors":7,"./groups/userGroups":10,"./storeServices":12,"./tenants/tenants":13,"./tests/jiraRequest":14,"./timer/main":15,"./ui":16}],12:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
@@ -5735,7 +5689,7 @@ module.exports = {
     addServiceInspectFeature
 }
 
-},{"../clientServerCommon/plans":3}],14:[function(require,module,exports){
+},{"../clientServerCommon/plans":3}],13:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
@@ -5828,7 +5782,32 @@ const addTenantCollection = async function({
 module.exports = {
    addTenantCollection 
 }
-},{"moment":1}],15:[function(require,module,exports){
+},{"moment":1}],14:[function(require,module,exports){
+"use strict"
+
+
+const jiraRequestTestForm = app => {
+
+    app.ui.modal({
+        title: 'Jira Support Requests Setup', 
+        content: app.ui.form('<P>fd</P>') 
+    })
+
+}
+
+const addFeature = function( app ){
+
+    app.ui.addUiTrigger({ 
+        triggerID   : ["jiraRequestTest", "jiraRequestTopNavCmd"], 
+        action      : _ => jiraRequestTestForm(app)
+    })
+}
+
+module.exports = {
+    addFeature
+}
+
+},{}],15:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
@@ -5836,23 +5815,16 @@ module.exports = {
  * -------------------------------------
  *  Canadian Gov. API Store middleware - client side
  *
- *  APICan.js: client app admin
+ *  timer feature init.js: client app admin
  *
  ******************************************************************************/
 "use strict"
 /*****************************************************************************/
-const appStatusDialog = require('./dialogs/appStatusDialog').appStatusDialog
-/*****************************************************************************/
 
-const timer = (function() {
+const timer = function( app ) {
 
-    let _app = null
 
     return {
-
-		configure	: function( app ){
-			_app = app
-		},
 
         eachMinute: function() {
 
@@ -5868,17 +5840,27 @@ const timer = (function() {
                     `(${appStatus.nextTenantRefresh} mins) `
                 )
 
-				_app.eventScheduler.update(appStatus.events)
+				app.eventScheduler.update(appStatus.events)
             })
         }
     }
-})()
-
-module.exports = {
-    timer
 }
 
-},{"./dialogs/appStatusDialog":7}],16:[function(require,module,exports){
+
+const configureTimerFeature = function( app ){
+    
+    let timerFeature = timer(app)
+    app.timer.eachMinute = timerFeature.eachMinute
+    app.timer.eachMinute( )
+    setInterval( app.timer.eachMinute, 10000)
+    return app
+}
+
+module.exports = {
+    configureTimerFeature
+}
+
+},{}],16:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
@@ -5922,15 +5904,14 @@ const uiFeature = function( app ){
     return {
 
 
-        addUiTrigger: function({ triggerID, action}){
-		    $(`#${triggerID}`).click( action )
-        }, 
-
-        createForm: function( formContent ){
-             return [
-                `<form class="w3-container w3-left-align">`, 
-                  formContent, 
-                `</form>`].join('')
+        addUiTrigger: function({ triggerID, action }){
+          let triggers = null
+          if(!Array.isArray(triggerID)){
+            triggers = [triggerID]
+          } else {
+            triggers = triggerID
+          }		    
+          triggers.forEach( triggerID => $(`#${triggerID}`).click( action ))
         }, 
 
 		hidden : function({
@@ -5994,6 +5975,7 @@ const ui = function(app) {
 
     require('./ui/dataExchangeStatus').addDEStatusFeature(app)
     require('./ui/modal').addModalFeature( app )
+    require('./ui/forms').addFormFeature( app )
     require('./ui/dataTables').addDataTableFeature( app )
 
     require('./ui/userList').addUserListFeature( app )
@@ -6014,7 +5996,7 @@ module.exports = {
     ui
 }
 
-},{"./ui/bottomStatusBar":17,"./ui/dataExchangeStatus":18,"./ui/dataTables":19,"./ui/modal":20,"./ui/userList":21}],17:[function(require,module,exports){
+},{"./ui/bottomStatusBar":17,"./ui/dataExchangeStatus":18,"./ui/dataTables":19,"./ui/forms":20,"./ui/modal":21,"./ui/userList":22}],17:[function(require,module,exports){
 /*******************************************************************************
  * Franck Binard, ISED (FranckEinstein90)
  *
@@ -6129,6 +6111,42 @@ module.exports = {
 }
 
 },{}],20:[function(require,module,exports){
+/*****************************************************************************/
+"use strict"
+/*****************************************************************************/
+
+const formFeature = function( app ){
+    
+    let formIDs = new Map()
+
+    return {
+
+      form : function( formContent, submit){
+        return [
+            `<form class="w3-container w3-left-align">`, 
+                formContent, 
+                `<div class="w3-row" style='margin:15,15,15,15'>`, 
+                    `<br/>`, 
+                    `<button class="w3-btn w3-blue w3-block" id="${submit.ID}" >`, 
+                        `${submit.label}`, 
+                    `</button>`, 
+                    `<br/>`, 
+                `</div>`,
+            `</form>`].join('')
+        }
+    }
+}
+
+const addFormFeature = function( app ){
+    let forms = formFeature( app ) 
+    app.ui.form = forms.form
+}
+
+module.exports = {
+    addFormFeature
+}
+
+},{}],21:[function(require,module,exports){
 "use strict"
 
 
@@ -6144,6 +6162,12 @@ const showModal = ({
     document.getElementById('modalWindow').style.display = 'block'
 }
 
+const hideModal = () =>{
+    $('#modalTitle').text( "" )
+    $('#modalContent').html( "" )
+    document.getElementById('modalWindow').style.display = 'hidden'
+}
+
 const userInfo = msg => {
      $('#userInfo').html( msg )
      document.getElementById('userInfoModal').style.display = 'block'
@@ -6152,7 +6176,23 @@ const userInfo = msg => {
 
 const addModalFeature = function( app ){
 
-    app.addFeature({label : 'showModal', method: showModal})
+    app.addFeature({
+        label : 'showModal', 
+        method: showModal
+    })
+
+    app.ui.addFeature({
+        label: 'modal', 
+        method: showModal, 
+        description: 'displays a modal window'
+    })
+
+    app.ui.addFeature({
+        label: 'hideModal', 
+        method: hideModal
+    })
+        
+
     app.ui.addFeature({label : 'userInfo',  method: userInfo})
 
     return app
@@ -6162,7 +6202,7 @@ module.exports = {
     addModalFeature
 }
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 "use strict"
 
 
@@ -6194,4 +6234,4 @@ const addUserListFeature = function( app ){
 module.exports = {
     addUserListFeature
 }
-},{}]},{},[12]);
+},{}]},{},[11]);

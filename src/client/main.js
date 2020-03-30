@@ -48,7 +48,7 @@ $(function() {
         require('./storeServices').addServiceInspectFeature( app  )
         require('./groups/userGroups').addUserGroupFeature( app   )
         require('./tests/jiraRequest').addFeature( app            )
-
+//        require('./configs/keycloak').addFeature( app             )
     })    
   
 

@@ -78,7 +78,9 @@ div.appContent {
   z-index: 4;
   background-color: var(--crackle);
 }
-
+#topNav button{
+    color: var(--pop) ;
+}
 .flex-container{
   display:flex;
   flex-wrap: wrap;  

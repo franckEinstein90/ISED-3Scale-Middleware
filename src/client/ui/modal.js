@@ -13,6 +13,12 @@ const showModal = ({
     document.getElementById('modalWindow').style.display = 'block'
 }
 
+const hideModal = () =>{
+    $('#modalTitle').text( "" )
+    $('#modalContent').html( "" )
+    document.getElementById('modalWindow').style.display = 'hidden'
+}
+
 const userInfo = msg => {
      $('#userInfo').html( msg )
      document.getElementById('userInfoModal').style.display = 'block'
@@ -31,6 +37,12 @@ const addModalFeature = function( app ){
         method: showModal, 
         description: 'displays a modal window'
     })
+
+    app.ui.addFeature({
+        label: 'hideModal', 
+        method: hideModal
+    })
+        
 
     app.ui.addFeature({label : 'userInfo',  method: userInfo})
 

@@ -15,7 +15,7 @@ const tenantSelectionTable = function( ){
 }
 
 
-const formTemplate = function( formContent, submitID ){
+const formTemplate = function( formContent ){
     return [
             `<div class="w3-row">`, 
                 `<div class='w3-col m5 l5 w3-left-align' style="margin-right:20px">`, 
@@ -24,14 +24,7 @@ const formTemplate = function( formContent, submitID ){
                 `<div class='w3-col m5 l5 w3-right-align"'>`, 
                     tenantSelectionTable(),  
                 `</div>`, 
-            `</div>`, 
-            `<div class="w3-row" style='margin:15,15,15,15'>`, 
-                `<br/>`, 
-                `<button class="w3-btn w3-blue w3-block" id="${submitID}" >`, 
-                    'submit', 
-                `</button>`, 
-                ` <br/>`, 
-            ` </div>`].join('')
+            `</div>`].join('')
 }
 
 const userGroupCreateEditWindowFeature = function( app ){
@@ -105,13 +98,19 @@ const userGroupCreateEditWindowFeature = function( app ){
     }
 
     let editForm = function( group ){
+
         let htmlID = 'editExistingGroup'
         let groupProperties =  groupPropertySubform(group)
-        let formContent = app.ui.form(formTemplate(groupProperties, htmlID))
+        let formContent = app.ui.form(formTemplate(groupProperties), {
+            ID: htmlID, 
+            label: 'Edit Group'
+        })
+
         app.showModal({
                 title: `Editing group: ${group.ID}`,  
                 content: formContent
         })
+
         tenantDomainTable( app )
         app.ui.addUiTrigger({
             triggerID: htmlID,  
@@ -119,8 +118,10 @@ const userGroupCreateEditWindowFeature = function( app ){
                     let groupFormValues = getGroupFormInputs()
                     groupFormValues.groupID = group.ID
                     app.userGroupManagement.editUserGroup( groupFormValues )
+                    app.ui.hideModal()
                 }})
     }
+
     return {
 
         showUserGroupModal  : function( event, group){
@@ -130,10 +131,14 @@ const userGroupCreateEditWindowFeature = function( app ){
 		        group.tenants.forEach( tenant => selectedTenants.set(tenant, 1) )
                 editForm(group)
             }
+
             else {
                 let htmlID = 'createNewGroup'
                 let groupProperties = groupPropertySubform()
-                let formContent = app.ui.form(formTemplate(groupProperties, htmlID))
+                let formContent = app.ui.form(formTemplate(groupProperties), {
+                    ID: htmlID, 
+                    label: 'Create New Group'
+                })
                 selectedTenants.clear()
                 app.showModal({
                     title: "New User Group", 
@@ -147,7 +152,7 @@ const userGroupCreateEditWindowFeature = function( app ){
                         let groupFormValues = getGroupFormInputs()
                         app.userGroupManagement.createNewUserGroup( groupFormValues )
                         .then( opResult => {
-                           app.ui.userInfo(opResult) 
+                            app.ui.hideModal()
                         })
                     }
                 })
