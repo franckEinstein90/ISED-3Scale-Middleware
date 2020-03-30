@@ -85,13 +85,7 @@ const featureSystem = function( app ){
 
 const addFeatureSystem = function( app ){
 
-    let features = featureSystem( app )
-    Object.defineProperty( app, 'features', {get: () => features.list})
-    app.addRequirement = features.addRequirement        
-    app.addComponent   = features.addComponent
-    app.Feature = Feature
-    app.addFeature = features.add
-    app.implements = features.implements
+    app.featureSystem = featureSystem( app )
     return app
 }
 

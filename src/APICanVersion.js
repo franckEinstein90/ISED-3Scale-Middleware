@@ -27,7 +27,6 @@ const APICanVersion = function( apiCan ) {
                     `(v ${apiCan.version.major}:`, 
                     `${apiCan.version.minor}:`, 
                     `${apiCan.version.patch})`].join('')
-                apiCan.features.versioning = true
                 return resolve(apiCan)
             }
         })
@@ -38,7 +37,7 @@ const APICanVersion = function( apiCan ) {
 const addVersioningFeature = function( app ){
     return APICanVersion(app)
     .then( app => {
-        app.addFeature({
+        app.featureSystem.add({
             label: "versioning", 
             state: "implemented"
         })

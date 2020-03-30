@@ -90,11 +90,11 @@ const APICanData = function( app ) {
 }
 
 const getAppData = function( app ){
-    app.addComponent({
+    app.featureSystem.addComponent({
         label: 'tenants'
     })
     return new Promise((resolve)=> {
-        app.addComponent({
+        app.featureSystem.addComponent({
             label: 'data', 
             methods: APICanData(app)
         })

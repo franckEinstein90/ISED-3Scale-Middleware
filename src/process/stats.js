@@ -39,7 +39,7 @@ const APICanStats = function( APICan ){
 
 const addProcessStatsFeature = function( app ){
 	APICanStats( app )
-	app.addFeature({
+	app.featureSystem.add({
 		label: 'process-stats', 
 		description: 'returns information on the process carrying this app', 
 		state: 'implemented'

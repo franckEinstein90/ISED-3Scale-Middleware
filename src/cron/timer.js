@@ -100,7 +100,7 @@ const addRecurringEventsFeature = function( app ){
   app.addNewEvent = (name, frequency, run) => {
     app.recurringEvents.push(new Event({name, frequency, run}))
   }
-  app.addFeature({
+  app.featureSystem.add({
       label: 'recurring-events', 
       state: 'implemented'
     })
@@ -114,7 +114,7 @@ const addTimerFeature = function( app ){
       events: app.recurringEvents
     })
   }
-  app.addFeature({
+  app.featureSystem.add({
     label: 'createClock', 
     description: `creates a new app timer that handles the app's recurring events`, 
     state: 'implemented'

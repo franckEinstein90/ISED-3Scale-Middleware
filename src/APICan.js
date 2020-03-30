@@ -64,14 +64,14 @@ const APICanConfig = function( appSkeleton ) {
             let dbStatus = status[0]
             _appLogger.info(`database access = ${dbStatus}`)
 		    appSkeleton.state 	= 'initializing'
-		    appSkeleton.addFeature({
+		    appSkeleton.featureSystem.add({
                 label: 'sqliteDB', 
                 state: 'implemented'
             })
 		    appSkeleton.say	= msg => {
 			    _appLogger.info(msg)
             }
-            appSkeleton.addFeature({
+            appSkeleton.featureSystem.add({
                 label: 'say', 
                 state: 'implemented'
             })

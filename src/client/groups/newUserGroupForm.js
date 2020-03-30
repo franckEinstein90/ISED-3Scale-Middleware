@@ -118,7 +118,7 @@ const userGroupCreateEditWindowFeature = function( app ){
                     let groupFormValues = getGroupFormInputs()
                     groupFormValues.groupID = group.ID
                     app.userGroupManagement.editUserGroup( groupFormValues )
-                    app.ui.hideModal()
+                    .then( _ => app.ui.hideModal())
                 }})
     }
 

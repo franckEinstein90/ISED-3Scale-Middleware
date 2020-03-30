@@ -61,10 +61,11 @@ const viewModel = function( app ){
 
 
 const addComponent = function( app ){
-    app.addComponent({
+    app.featureSystem.addComponent({
             label: 'dataModel', 
             methods: viewModel(app)
     })
+    return app
 }
 
 module.exports = {

@@ -24,19 +24,19 @@ const path              = require('path')
 /*****************************************************************************/
 
 let healthChecks = [
-    {
+  /*  {
         label: 'jiraSupport', 
         runCheck: require('@src/process/healthChecks.js').checkJiraSupport,
         run: true 
-    }
+    }*/
 ]
 
 let run = (apiCan) => {
     apiCan.say('*********************************')
     apiCan.say(`apiCan ${apiCan.features.versioning ? apiCan.versionTag : ""} booting`)
     Promise.all(healthChecks.map(check=>check.runCheck( apiCan )))
-    .then( _ => apiCan.tenants.updateTenantInformation())
-    .then(_ => {
+    .then(  _ => apiCan.tenants.updateTenantInformation())
+    .then(  _ => {
         if (apiCan.clock) apiCan.clock.start()
         apiCan.server.start()  
         require('@server/messages').addClientMessages( apiCan )
