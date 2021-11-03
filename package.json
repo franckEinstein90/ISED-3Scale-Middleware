@@ -49,7 +49,7 @@
     "sqlite3": "^4.1.1",
     "underscore": "^1.9.2",
     "unirest": "^0.6.0",
-    "validator": "^11.1.0",
+    "validator": "^13.7.0",
     "winston": "^3.2.1",
     "xml2js": "^0.4.22"
   },
