@@ -16,19 +16,31 @@
  ******************************************************************************/
 "use strict"
 
-/*****************************************************************************/
-require('module-alias/register')
-/*****************************************************************************/
-const appStatus         = require('@server/routes/appStatus').appStatus
-const path              = require('path')
-/*****************************************************************************/
+const express = require('express');
+const app = express();
 
+app.get('/', (req, res) => {
+  const name = process.env.NAME || 'World';
+  res.send(`Hello ${name}!`);
+});
+
+const port = parseInt(process.env.PORT) || 8080;
+app.listen(port, () => {
+  console.log(`helloworld: listening on port ${port}`);
+});
+/*****************************************************************************/
+//require('module-alias/register')
+/*****************************************************************************/
+//const appStatus         = require('@server/routes/appStatus').appStatus
+//const path              = require('path')
+/*****************************************************************************/
+/*
 let healthChecks = [
   /*  {
         label: 'jiraSupport', 
         runCheck: require('@src/process/healthChecks.js').checkJiraSupport,
         run: true 
-    }*/
+    }
 ]
 
 let run = (apiCan) => {
@@ -56,19 +68,23 @@ const APICan = {    //this is the app
     staticFolder    : path.join(__dirname, 'public'),
     expressStack    : require('express')(), 
 }
-
-
 require('@clientServerCommon/features').addFeatureSystem( APICan )
 require('@clientServerCommon/viewModel').addComponent( APICan )
-require('@src/APICanData').getAppData( APICan )
+const p = require('@src/APICanData').getAppData( APICan )
 
-.then(APICan => {
-    require('@server/expressStack').expressConfig( APICan )
-    require('@src/process/stats').addProcessStatsFeature( APICan )
-    require('@cron/timer').addRecurringEventsFeature( APICan )
-    require('@cron/timer').addTimerFeature( APICan )
-    return require('@src/APICan').APICanConfig( APICan )
-})
+const f = async ()=>{
+await p; 
+require('@server/expressStack').expressConfig( APICan )
+require('@src/process/stats').addProcessStatsFeature( APICan )
+require('@cron/timer').addRecurringEventsFeature( APICan )
+require('@cron/timer').addTimerFeature( APICan )
+require('@src/APICan').APICanConfig( APICan )
+
+}
+
+await f(); */
+
+/*
 .then( require('@src/APICanVersion').addVersioningFeature                   ) //versioning support
 .then( require('@src/apiStore/supportRequest').addSupportRequestInterface   )
 .then( require('@src/users/keycloak').addKeycloakInterface                  )
@@ -80,10 +96,9 @@ require('@src/APICanData').getAppData( APICan )
     return apiCan
 })
 .then( require('@tenants/router').addTenantRouterFeature     )
-.then( require('@users/groups').addUserGroupFeature          )
 .then( require('@users/groupActions').addGroupActionsFeatures)
-
-.then( apiCan => {
+*/
+/*.then( apiCan => {
     apiCan.newClock()
     return apiCan
 })
@@ -98,5 +113,5 @@ require('@src/APICanData').getAppData( APICan )
     require('@server/httpServer').httpServer( apiCan ) 
     run(apiCan)
 
-})
+})*/
 

@@ -35,14 +35,6 @@ const getJiraAuthCredentials = function() {
     }
 }
 
-const getKeycloakCredentials = function(env) {
-    return {
-        keycloakURL: config.get('DeVssoHostUrl'),
-        keycloakClient: config.get('keyCloakClientId'),
-        keycloakSecret: config.get('keyCloakClientSecret')
-    }
-}
-
 const APICanData = function( app ) {
     //processes the configuration data stored in 
     //the default.json file
@@ -58,12 +50,6 @@ const APICanData = function( app ) {
         _jiraAuthCredentials = getJiraAuthCredentials()
     } catch {
         _jiraAuthCredentials = null 
-    }
-    let _keycloakCredentials = null
-    try { 
-        _keycloakCredentials = getKeycloakCredentials(_configurationEnv)
-    } catch {
-        _keycloakCredentials = null
     }
     let _APIStoreUserName = null
     try { 
@@ -83,7 +69,6 @@ const APICanData = function( app ) {
 
         jiraAuthCredentials: _jiraAuthCredentials,
 
-        keycloakCredentials: _keycloakCredentials,
 
     }
 
