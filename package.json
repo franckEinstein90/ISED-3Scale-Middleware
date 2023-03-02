@@ -36,7 +36,7 @@
     "hbs": "^4.0.6",
     "http-errors": "~1.6.3",
     "jade": "~1.11.0",
-    "keycloak-connect": "^8.0.1",
+    "keycloak-connect": "^21.0.1",
     "memory-cache": "^0.2.0",
     "module-alias": "^2.2.2",
     "moment": "^2.24.0",
